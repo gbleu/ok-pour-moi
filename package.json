@@ -1,0 +1,19 @@
+{
+  "name": "ok-pour-moi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "ok pour moi": "bun src/index.ts"
+  },
+  "dependencies": {
+    "pdf-lib": "1.17.1",
+    "playwright": "1.57.0",
+    "zod": "4.3.2"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.5",
+    "typescript": "5.9.3"
+  }
+}
