@@ -1,14 +1,21 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, unlinkSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Locator, Page } from "playwright";
 import { config } from "../config.js";
+import { escapeCssValue } from "../lib/css.js";
 import {
   extractLastname,
   generateAttachmentName,
   getSignatureFormat,
-  signPdf,
   type SignatureFormat,
+  signPdf,
 } from "../lib/pdf.js";
 import {
   createOutlookSession,
@@ -39,10 +46,6 @@ export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 
 const ok = <T>(value: T): Result<T> => ({ ok: true, value });
 const err = <T>(error: string): Result<T> => ({ ok: false, error });
-
-function escapeCssValue(value: string): string {
-  return value.replace(/["\\]/g, "\\$&");
-}
 
 // XPath Selectors Documentation:
 // These selectors are tightly coupled to Outlook Web's DOM structure.
@@ -130,7 +133,10 @@ export async function downloadAndSignPdfs(
 
     await option.click({ button: "right" });
     const downloadMenuItem = page.getByRole("menuitem", { name: /download/i });
-    await downloadMenuItem.waitFor({ state: "visible", timeout: TIMING.DOWNLOAD_MENU });
+    await downloadMenuItem.waitFor({
+      state: "visible",
+      timeout: TIMING.DOWNLOAD_MENU,
+    });
 
     const [download] = await Promise.all([
       page.waitForEvent("download"),
@@ -145,7 +151,12 @@ export async function downloadAndSignPdfs(
       continue;
     }
 
-    const signedPdf = await signPdf(pdfBytes, sigBytes, sigFormat, config.signature);
+    const signedPdf = await signPdf(
+      pdfBytes,
+      sigBytes,
+      sigFormat,
+      config.signature,
+    );
     items.push({ conversationId, subject, senderLastname, signedPdf });
     console.log(`    ${originalFilename} - signed`);
   }
@@ -178,7 +189,10 @@ async function collectSignedPdfs(
     const subjectEl = page
       .locator('[role="main"] [role="heading"][aria-level="2"]')
       .first();
-    await subjectEl.waitFor({ state: "visible", timeout: TIMING.ELEMENT_VISIBLE });
+    await subjectEl.waitFor({
+      state: "visible",
+      timeout: TIMING.ELEMENT_VISIBLE,
+    });
     const subject = ((await subjectEl.textContent()) ?? "Unknown")
       .trim()
       .replace(/Summarize$/, "")
@@ -268,7 +282,9 @@ async function openReplyForEmail(
   page: Page,
   conversationId: string,
 ): Promise<Result<Locator>> {
-  const emailItem = page.locator(`[data-convid="${escapeCssValue(conversationId)}"]`);
+  const emailItem = page.locator(
+    `[data-convid="${escapeCssValue(conversationId)}"]`,
+  );
   if ((await emailItem.count()) === 0) {
     return err("Email not found in list");
   }
@@ -277,21 +293,33 @@ async function openReplyForEmail(
 
   try {
     const replyBtn = page.getByRole("button", { name: "Reply" }).first();
-    await replyBtn.waitFor({ state: "visible", timeout: TIMING.ELEMENT_VISIBLE });
+    await replyBtn.waitFor({
+      state: "visible",
+      timeout: TIMING.ELEMENT_VISIBLE,
+    });
     await replyBtn.click();
   } catch {
     return err("Reply button not found");
   }
 
-  const composeBody = page
-    .locator('div[role="textbox"][contenteditable="true"]')
-    .first();
-  await composeBody.waitFor({ state: "visible", timeout: TIMING.ELEMENT_VISIBLE });
-
-  return ok(composeBody);
+  try {
+    const composeBody = page
+      .locator('div[role="textbox"][contenteditable="true"]')
+      .first();
+    await composeBody.waitFor({
+      state: "visible",
+      timeout: TIMING.ELEMENT_VISIBLE,
+    });
+    return ok(composeBody);
+  } catch {
+    return err("Compose body not found");
+  }
 }
 
-async function addCcRecipients(page: Page, emails: string[]): Promise<Result<void>> {
+async function addCcRecipients(
+  page: Page,
+  emails: string[],
+): Promise<Result<void>> {
   if (emails.length === 0) return ok(undefined);
 
   const ccList = emails.join("; ");
@@ -301,7 +329,10 @@ async function addCcRecipients(page: Page, emails: string[]): Promise<Result<voi
     await page.waitForTimeout(TIMING.MENU_ANIMATION);
 
     const showCcCheckbox = page.getByRole("checkbox", { name: "Show Cc" });
-    await showCcCheckbox.waitFor({ state: "visible", timeout: TIMING.CC_CHECKBOX });
+    await showCcCheckbox.waitFor({
+      state: "visible",
+      timeout: TIMING.CC_CHECKBOX,
+    });
     if (!(await showCcCheckbox.isChecked())) {
       await showCcCheckbox.click();
       await page.waitForTimeout(TIMING.UI_SETTLE);
@@ -323,22 +354,32 @@ async function addCcRecipients(page: Page, emails: string[]): Promise<Result<voi
   }
 }
 
-async function attachSignedPdf(page: Page, tmpPath: string): Promise<Result<void>> {
+async function attachSignedPdf(
+  page: Page,
+  tmpPath: string,
+): Promise<Result<void>> {
   try {
     const attachBtn = page.getByRole("button", { name: "Attach file" });
-    await attachBtn.waitFor({ state: "visible", timeout: TIMING.DOWNLOAD_MENU });
+    await attachBtn.waitFor({
+      state: "visible",
+      timeout: TIMING.DOWNLOAD_MENU,
+    });
 
     const [fileChooser] = await Promise.all([
       page.waitForEvent("filechooser", { timeout: TIMING.FILE_CHOOSER }),
-      attachBtn.click().then(() =>
-        page.getByRole("menuitem", { name: /browse this computer/i }).click(),
-      ),
+      attachBtn
+        .click()
+        .then(() =>
+          page.getByRole("menuitem", { name: /browse this computer/i }).click(),
+        ),
     ]);
     await fileChooser.setFiles(tmpPath);
 
     await page.waitForTimeout(TIMING.UPLOAD_COMPLETE);
 
-    const closePromptBtn = page.locator('[role="button"][aria-label="Close"]').last();
+    const closePromptBtn = page
+      .locator('[role="button"][aria-label="Close"]')
+      .last();
     if ((await closePromptBtn.count()) > 0) {
       await closePromptBtn.click().catch(() => {});
       await page.waitForTimeout(TIMING.UI_SETTLE);
@@ -350,7 +391,11 @@ async function attachSignedPdf(page: Page, tmpPath: string): Promise<Result<void
   }
 }
 
-async function saveDraftAndClose(page: Page, composeBody: Locator, message: string): Promise<void> {
+async function saveDraftAndClose(
+  page: Page,
+  composeBody: Locator,
+  message: string,
+): Promise<void> {
   await composeBody.click();
   await composeBody.pressSequentially(message, { delay: 20 });
 
@@ -378,7 +423,10 @@ async function saveDraftAndClose(page: Page, composeBody: Locator, message: stri
   }
 }
 
-async function moveEmailToInbox(page: Page, conversationId: string): Promise<Result<void>> {
+async function moveEmailToInbox(
+  page: Page,
+  conversationId: string,
+): Promise<Result<void>> {
   const emailInList = page
     .locator(`[data-convid="${escapeCssValue(conversationId)}"]`)
     .first();
@@ -386,7 +434,10 @@ async function moveEmailToInbox(page: Page, conversationId: string): Promise<Res
 
   try {
     const moveButton = page.getByRole("button", { name: "Move to" });
-    await moveButton.waitFor({ state: "visible", timeout: TIMING.ELEMENT_VISIBLE });
+    await moveButton.waitFor({
+      state: "visible",
+      timeout: TIMING.ELEMENT_VISIBLE,
+    });
     await moveButton.click();
     const inboxItem = page.getByRole("menuitem", { name: "Inbox" });
     await inboxItem.waitFor({ state: "visible", timeout: TIMING.MOVE_MENU });
@@ -409,8 +460,13 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(TIMING.MENU_ANIMATION);
 
-      const attachmentName = generateAttachmentName(item.senderLastname, new Date());
-      console.log(`\n[${idx + 1}/${items.length}] "${item.subject}" -> ${attachmentName}`);
+      const attachmentName = generateAttachmentName(
+        item.senderLastname,
+        new Date(),
+      );
+      console.log(
+        `\n[${idx + 1}/${items.length}] "${item.subject}" -> ${attachmentName}`,
+      );
 
       console.log(`  Opening reply...`);
       const replyResult = await openReplyForEmail(page, item.conversationId);
@@ -436,7 +492,9 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
 
       console.log(`  Attaching signed PDF...`);
       const attachResult = await attachSignedPdf(page, tmpPath);
-      try { unlinkSync(tmpPath); } catch {}
+      try {
+        unlinkSync(tmpPath);
+      } catch {}
       if (!attachResult.ok) {
         console.log(`  -> ${attachResult.error}, skipping`);
         await takeErrorScreenshot(page, `attach-fail-${idx}`);
@@ -475,8 +533,13 @@ export async function runCommand() {
   try {
     console.log(`Navigating to "${config.outlook.folder}"...`);
     try {
-      const folder = session.page.getByRole("treeitem", { name: config.outlook.folder });
-      await folder.waitFor({ state: "visible", timeout: TIMING.ELEMENT_VISIBLE });
+      const folder = session.page.getByRole("treeitem", {
+        name: config.outlook.folder,
+      });
+      await folder.waitFor({
+        state: "visible",
+        timeout: TIMING.ELEMENT_VISIBLE,
+      });
       await folder.click();
       console.log(`  Clicked folder`);
     } catch (_e) {
@@ -485,7 +548,11 @@ export async function runCommand() {
       throw new Error(`Folder "${config.outlook.folder}" not found`);
     }
     // Wait for email list to load
-    await session.page.locator("[data-convid]").first().waitFor({ state: "attached", timeout: TIMING.ELEMENT_VISIBLE }).catch(() => {});
+    await session.page
+      .locator("[data-convid]")
+      .first()
+      .waitFor({ state: "attached", timeout: TIMING.ELEMENT_VISIBLE })
+      .catch(() => {});
 
     const items = await collectSignedPdfs(session.page, sigBytes, sigFormat);
 
