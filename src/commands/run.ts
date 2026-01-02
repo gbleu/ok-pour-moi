@@ -258,7 +258,7 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(TIMING.MENU_ANIMATION);
 
-      const attachmentName = generateAttachmentName(item.senderLastname);
+      const attachmentName = generateAttachmentName(item.senderLastname, new Date());
       console.log(
         `\n[${idx + 1}/${items.length}] "${item.subject}" -> ${attachmentName}`,
       );
