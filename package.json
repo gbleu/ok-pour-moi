@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "module": "src/index.ts",
-  "scripts": {
-    "ok pour moi": "bun src/index.ts"
-  },
   "dependencies": {
     "pdf-lib": "1.17.1",
     "playwright": "1.57.0",
