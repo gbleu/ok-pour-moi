@@ -112,4 +112,17 @@ describe("envSchema", () => {
     });
     expect(result.OPM_OUTLOOK_FOLDER).toBe("My Custom Folder");
   });
+
+  test("rejects invalid email in CC_EMAILS list", () => {
+    const result = envSchema.safeParse({
+      ...validEnv,
+      OPM_CC_EMAILS: "valid@email.com, not-an-email",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  test("rejects empty reply message", () => {
+    const result = envSchema.safeParse({ ...validEnv, OPM_REPLY_MESSAGE: "" });
+    expect(result.success).toBe(false);
+  });
 });

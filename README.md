@@ -41,6 +41,17 @@ To quickly move emails to the folder:
 cp .env.example .env
 ```
 
+Edit `.env` with your settings. Required variables:
+
+| Variable | Description |
+|----------|-------------|
+| `OPM_MY_EMAIL` | Your email address (to identify your messages) |
+| `OPM_SIGNATURE_X` | Signature X position on page (pixels from left) |
+| `OPM_SIGNATURE_Y` | Signature Y position on page (pixels from bottom) |
+| `OPM_SIGNATURE_WIDTH` | Signature width in pixels |
+| `OPM_SIGNATURE_HEIGHT` | Signature height in pixels |
+| `OPM_REPLY_MESSAGE` | Message text for the reply |
+
 ## Usage
 
 1. Move emails with PDFs to sign into your `ok pour moi` folder (use Quick Step)

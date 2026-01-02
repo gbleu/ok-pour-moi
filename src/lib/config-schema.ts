@@ -1,8 +1,6 @@
-import { homedir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
-
-const DEFAULT_DIR = join(homedir(), ".ok-pour-moi");
+import { DEFAULT_DIR } from "./paths.js";
 
 export const envSchema = z.object({
   OPM_MY_EMAIL: z.email(),

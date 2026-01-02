@@ -1,47 +1,56 @@
 import { existsSync, mkdirSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
-import { envSchema } from "./lib/config-schema.js";
+import { envSchema, type EnvSchema } from "./lib/config-schema.js";
+import { BROWSER_DATA_DIR, LOGS_DIR } from "./lib/paths.js";
 
-const DEFAULT_DIR = join(homedir(), ".ok-pour-moi");
-export const BROWSER_DATA_DIR = join(DEFAULT_DIR, "browser");
-export const LOGS_DIR = join(DEFAULT_DIR, "logs");
+export { BROWSER_DATA_DIR, LOGS_DIR };
 
-const parsed = envSchema.safeParse(Bun.env);
+type Config = {
+  myEmail: string;
+  outlook: { folder: string };
+  signature: { imagePath: string; x: number; y: number; width: number; height: number };
+  cc: { emails: string[]; enabled: boolean };
+  replyMessage: string;
+  browser: { headless: boolean };
+};
 
-if (!parsed.success) {
-  console.error("Invalid environment configuration:");
-  for (const issue of parsed.error.issues) {
-    console.error(`  ${issue.path.join(".")}: ${issue.message}`);
-  }
-  process.exit(1);
+let _config: Config | null = null;
+
+function buildConfig(env: EnvSchema): Config {
+  return {
+    myEmail: env.OPM_MY_EMAIL,
+    outlook: { folder: env.OPM_OUTLOOK_FOLDER },
+    signature: {
+      imagePath: env.OPM_SIGNATURE_PATH,
+      x: env.OPM_SIGNATURE_X,
+      y: env.OPM_SIGNATURE_Y,
+      width: env.OPM_SIGNATURE_WIDTH,
+      height: env.OPM_SIGNATURE_HEIGHT,
+    },
+    cc: { emails: env.OPM_CC_EMAILS, enabled: env.OPM_CC_ENABLED },
+    replyMessage: env.OPM_REPLY_MESSAGE,
+    browser: { headless: env.OPM_HEADLESS ?? false },
+  };
 }
 
-const env = parsed.data;
+export function loadConfig(): Config {
+  if (_config) return _config;
 
-export const config = {
-  myEmail: env.OPM_MY_EMAIL,
-  outlook: {
-    folder: env.OPM_OUTLOOK_FOLDER,
-  },
-  signature: {
-    imagePath: env.OPM_SIGNATURE_PATH,
-    x: env.OPM_SIGNATURE_X,
-    y: env.OPM_SIGNATURE_Y,
-    width: env.OPM_SIGNATURE_WIDTH,
-    height: env.OPM_SIGNATURE_HEIGHT,
-  },
-  cc: {
-    emails: env.OPM_CC_EMAILS,
-    enabled: env.OPM_CC_ENABLED,
-  },
-  replyMessage: env.OPM_REPLY_MESSAGE,
-  browser: {
-    headless: env.OPM_HEADLESS ?? false,
-  },
-} as const;
+  const parsed = envSchema.safeParse(Bun.env);
+  if (!parsed.success) {
+    const messages = parsed.error.issues.map((i) => `  ${i.path.join(".")}: ${i.message}`);
+    throw new Error(`Invalid environment configuration:\n${messages.join("\n")}`);
+  }
 
-export type Config = typeof config;
+  _config = buildConfig(parsed.data);
+  return _config;
+}
+
+export const config: Config = new Proxy({} as Config, {
+  get(_, prop: keyof Config) {
+    const cfg = loadConfig();
+    return cfg[prop];
+  },
+});
 
 export function ensureBrowserDir() {
   if (!existsSync(BROWSER_DATA_DIR)) {

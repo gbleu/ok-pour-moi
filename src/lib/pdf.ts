@@ -55,14 +55,20 @@ export type SignaturePosition = {
   height: number;
 };
 
+export type SignatureFormat = "png" | "jpg";
+
+export function getSignatureFormat(path: string): SignatureFormat {
+  return path.toLowerCase().endsWith(".png") ? "png" : "jpg";
+}
+
 export async function signPdf(
   pdfBytes: Uint8Array,
   sigBytes: Uint8Array,
-  sigPath: string,
+  format: SignatureFormat,
   position: SignaturePosition,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
-  const sigImage = sigPath.toLowerCase().endsWith(".png")
+  const sigImage = format === "png"
     ? await pdfDoc.embedPng(sigBytes)
     : await pdfDoc.embedJpg(sigBytes);
 
