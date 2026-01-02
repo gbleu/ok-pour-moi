@@ -1,6 +1,6 @@
+import { BROWSER_DATA_DIR, DEFAULT_DIR, LOGS_DIR } from "./paths";
 import { describe, expect, test } from "bun:test";
 import { homedir } from "node:os";
-import { BROWSER_DATA_DIR, DEFAULT_DIR, LOGS_DIR } from "./paths";
 
 describe("paths", () => {
   test("DEFAULT_DIR starts with home directory", () => {

@@ -47,8 +47,12 @@ export function extractLastname(fromText: string): string {
     .replace(/<[^>]+>\s*$/, "")
     .trim();
   const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "Unknown";
-  if (parts.length === 1) return parts[0]!;
+  if (parts.length === 0) {
+    return "Unknown";
+  }
+  if (parts.length === 1) {
+    return parts[0] ?? "Unknown";
+  }
   const uppercaseParts: string[] = [];
   for (const part of parts) {
     if (part === part.toUpperCase() && part.length > 1) {
@@ -57,39 +61,48 @@ export function extractLastname(fromText: string): string {
       break;
     }
   }
-  if (uppercaseParts.length > 0) return uppercaseParts.join(" ");
-  return parts[parts.length - 1]!;
+  if (uppercaseParts.length > 0) {
+    return uppercaseParts.join(" ");
+  }
+  return parts.at(-1) ?? "Unknown";
 }
 
-export type SignaturePosition = {
+export interface SignaturePosition {
   x: number;
   y: number;
   width: number;
   height: number;
-};
+}
 
 export type SignatureFormat = "png" | "jpg";
 
 export function getSignatureFormat(path: string): SignatureFormat {
   const lower = path.toLowerCase();
-  if (lower.endsWith(".png")) return "png";
-  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
+  if (lower.endsWith(".png")) {
+    return "png";
+  }
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+    return "jpg";
+  }
   throw new Error(`Unsupported signature format: "${path}". Only .png, .jpg, .jpeg are supported.`);
 }
 
-export async function signPdf(
-  pdfBytes: Uint8Array,
-  sigBytes: Uint8Array,
-  format: SignatureFormat,
-  position: SignaturePosition,
-): Promise<Uint8Array> {
+export async function signPdf(opts: {
+  pdfBytes: Uint8Array;
+  sigBytes: Uint8Array;
+  format: SignatureFormat;
+  position: SignaturePosition;
+}): Promise<Uint8Array> {
+  const { pdfBytes, sigBytes, format, position } = opts;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const sigImage =
     format === "png" ? await pdfDoc.embedPng(sigBytes) : await pdfDoc.embedJpg(sigBytes);
 
   const pages = pdfDoc.getPages();
-  const target = pages[pages.length - 1];
-  if (!target) throw new Error("PDF has no pages");
+  const target = pages.at(-1);
+  if (!target) {
+    throw new Error("PDF has no pages");
+  }
 
   target.drawImage(sigImage, position);
 

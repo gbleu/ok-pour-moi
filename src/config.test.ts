@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
 import { BROWSER_DATA_DIR, LOGS_DIR } from "./config";
+import { describe, expect, test } from "bun:test";
 
 describe("config exports", () => {
   test("BROWSER_DATA_DIR is a string path", () => {

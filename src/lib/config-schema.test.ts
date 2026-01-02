@@ -2,14 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { envSchema } from "./config-schema";
 
 const validEnv = {
-  OPM_MY_EMAIL: "test@example.com",
-  OPM_SIGNATURE_X: "100",
-  OPM_SIGNATURE_Y: "200",
-  OPM_SIGNATURE_WIDTH: "150",
-  OPM_SIGNATURE_HEIGHT: "50",
   OPM_CC_EMAILS: "",
   OPM_CC_ENABLED: "false",
+  OPM_MY_EMAIL: "test@example.com",
   OPM_REPLY_MESSAGE: "OK pour moi",
+  OPM_SIGNATURE_HEIGHT: "50",
+  OPM_SIGNATURE_WIDTH: "150",
+  OPM_SIGNATURE_X: "100",
+  OPM_SIGNATURE_Y: "200",
 };
 
 describe("envSchema", () => {
@@ -49,11 +49,11 @@ describe("envSchema", () => {
   test("uses default values for optional fields when not provided", () => {
     const minimal = {
       OPM_MY_EMAIL: "test@example.com",
+      OPM_REPLY_MESSAGE: "OK",
+      OPM_SIGNATURE_HEIGHT: "50",
+      OPM_SIGNATURE_WIDTH: "150",
       OPM_SIGNATURE_X: "100",
       OPM_SIGNATURE_Y: "200",
-      OPM_SIGNATURE_WIDTH: "150",
-      OPM_SIGNATURE_HEIGHT: "50",
-      OPM_REPLY_MESSAGE: "OK",
     };
     const result = envSchema.parse(minimal);
     expect(result.OPM_OUTLOOK_FOLDER).toBe("ok pour moi");
@@ -62,15 +62,13 @@ describe("envSchema", () => {
   });
 
   test("rejects missing required email", () => {
-    const noEmail = { ...validEnv };
-    delete (noEmail as any).OPM_MY_EMAIL;
+    const { OPM_MY_EMAIL: _, ...noEmail } = validEnv;
     const result = envSchema.safeParse(noEmail);
     expect(result.success).toBe(false);
   });
 
   test("rejects missing required reply message", () => {
-    const noReply = { ...validEnv };
-    delete (noReply as any).OPM_REPLY_MESSAGE;
+    const { OPM_REPLY_MESSAGE: _, ...noReply } = validEnv;
     const result = envSchema.safeParse(noReply);
     expect(result.success).toBe(false);
   });
