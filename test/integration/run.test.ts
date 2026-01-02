@@ -1,11 +1,11 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright";
 import {
   findAttachmentListbox,
   findLastMessageFromOthers,
-} from "../../src/lib/outlook-dom.js";
+} from "../../src/lib/outlook-dom";
 
 const FIXTURES_DIR = join(import.meta.dir, "fixtures");
 const SCENARIOS_DIR = join(FIXTURES_DIR, "scenarios");
@@ -36,6 +36,10 @@ describe("Integration Tests with HTML Fixtures", () => {
         contentType: "application/pdf",
       })
     );
+  });
+
+  afterEach(async () => {
+    await page.close();
   });
 
   /**
