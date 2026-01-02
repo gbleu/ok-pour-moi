@@ -16,6 +16,9 @@ jobs:
 
       - run: bun install
 
+      - name: Install Playwright browsers
+        run: bunx playwright install chromium
+
       - run: bun tsc --noEmit
 
       - run: bun test --coverage --coverage-reporter=lcov
