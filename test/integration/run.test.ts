@@ -245,30 +245,30 @@ describe("Integration Tests with HTML Fixtures", () => {
   });
 
   describe("PDF download flow", () => {
-    it("should intercept PDF download requests", async () => {
+    it("should intercept PDF download requests via route", async () => {
       await loadScenario("single-pdf");
 
-      let downloadIntercepted = false;
+      let routeWasCalled = false;
 
-      // Set up download listener
-      page.on("download", () => {
-        downloadIntercepted = true;
+      // Replace the existing route with one that tracks calls
+      await page.unroute("**/download/*.pdf");
+      await page.route("**/download/*.pdf", async (route) => {
+        routeWasCalled = true;
+        await route.fulfill({
+          body: testPdfBytes,
+          contentType: "application/pdf",
+        });
       });
 
-      // Trigger download via route (simulates clicking download menu item)
-      await page.evaluate(() => {
-        const link = document.createElement("a");
-        link.href = "/download/test.pdf";
-        link.download = "test.pdf";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      // Trigger a fetch to the download endpoint
+      const response = await page.evaluate(async () => {
+        const res = await fetch("/download/test.pdf");
+        return { ok: res.ok, contentType: res.headers.get("content-type") };
       });
 
-      // Route interception should have handled the request
-      // Note: In headless mode, actual downloads may not trigger the event
-      // but the route fulfillment confirms the interception works
-      expect(true).toBe(true);
+      expect(routeWasCalled).toBe(true);
+      expect(response.ok).toBe(true);
+      expect(response.contentType).toBe("application/pdf");
     });
   });
 });
