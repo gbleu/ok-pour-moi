@@ -1,0 +1,59 @@
+<!--
+  Scenario: Thread with draft message containing attachments
+  Tests: DRAFT_MARKER_XPATH exclusion - should skip draft's attachments
+-->
+<template id="emailListContent">
+  <div class="email-item selected" data-convid="conv-004">
+    <div class="email-subject">RE: Quarterly Report</div>
+    <div class="email-sender">Sophie LEROY</div>
+    <div class="email-preview">Please find the updated report...</div>
+  </div>
+</template>
+
+<template id="readingPaneContent">
+  <div role="heading" aria-level="2" class="email-subject">RE: Quarterly Report</div>
+
+  <!-- Message from external sender with PDF -->
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Sophie LEROY &lt;sophie.leroy@partner.com&gt;">
+          From: Sophie LEROY &lt;sophie.leroy@partner.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Bonjour,</p>
+      <p>Please find attached the quarterly report for your review.</p>
+      <p>Cordialement,<br>Sophie LEROY</p>
+    </div>
+    <div class="attachments-list" role="listbox" aria-label="Message attachments">
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>quarterly-report-q4.pdf</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Draft reply from me - should be skipped -->
+  <div class="message draft-message">
+    <div class="message-header">
+      <span class="draft-marker">[Draft]</span>
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Me &lt;me@mycompany.com&gt;">
+          From: Me &lt;me@mycompany.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Thanks for the report. I've reviewed and signed it.</p>
+    </div>
+    <!-- Draft's attachments - these should be SKIPPED -->
+    <div class="attachments-list" role="listbox" aria-label="Message attachments">
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>quarterly-report-q4-signed.pdf</span>
+      </div>
+    </div>
+  </div>
+</template>

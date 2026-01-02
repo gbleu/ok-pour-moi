@@ -1,0 +1,32 @@
+<!--
+  Scenario: Email with no attachments
+  Tests: Graceful skip when no attachments are present
+-->
+<template id="emailListContent">
+  <div class="email-item selected" data-convid="conv-003">
+    <div class="email-subject">Meeting Tomorrow</div>
+    <div class="email-sender">Pierre BERNARD</div>
+    <div class="email-preview">Just a reminder about our meeting...</div>
+  </div>
+</template>
+
+<template id="readingPaneContent">
+  <div role="heading" aria-level="2" class="email-subject">Meeting Tomorrow</div>
+
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Pierre BERNARD &lt;pierre.bernard@example.com&gt;">
+          From: Pierre BERNARD &lt;pierre.bernard@example.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Bonjour,</p>
+      <p>Just a reminder about our meeting tomorrow at 10am.</p>
+      <p>Looking forward to discussing the project with you.</p>
+      <p>Cordialement,<br>Pierre BERNARD</p>
+    </div>
+    <!-- No attachments list -->
+  </div>
+</template>

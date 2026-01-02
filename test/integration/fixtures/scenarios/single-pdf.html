@@ -1,0 +1,36 @@
+<!--
+  Scenario: Single email with one PDF attachment
+  Tests: Basic flow - find message from others, find attachments, download PDF
+-->
+<template id="emailListContent">
+  <div class="email-item selected" data-convid="conv-001">
+    <div class="email-subject">Invoice December 2024</div>
+    <div class="email-sender">Jean DUPONT</div>
+    <div class="email-preview">Please find attached the invoice...</div>
+  </div>
+</template>
+
+<template id="readingPaneContent">
+  <div role="heading" aria-level="2" class="email-subject">Invoice December 2024</div>
+
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Jean DUPONT &lt;jean.dupont@example.com&gt;">
+          From: Jean DUPONT &lt;jean.dupont@example.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Bonjour,</p>
+      <p>Please find attached the invoice for December 2024.</p>
+      <p>Cordialement,<br>Jean DUPONT</p>
+    </div>
+    <div class="attachments-list" role="listbox" aria-label="Message attachments">
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>invoice-december-2024.pdf</span>
+      </div>
+    </div>
+  </div>
+</template>

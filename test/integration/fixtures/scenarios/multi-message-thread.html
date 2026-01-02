@@ -1,0 +1,96 @@
+<!--
+  Scenario: Multi-message thread with multiple senders
+  Tests: Reverse iteration to find last message from others, skip own emails
+-->
+<template id="emailListContent">
+  <div class="email-item selected" data-convid="conv-002">
+    <div class="email-subject">RE: Contract Review</div>
+    <div class="email-sender">Marie MARTIN</div>
+    <div class="email-preview">Here is the signed contract...</div>
+  </div>
+</template>
+
+<template id="readingPaneContent">
+  <div role="heading" aria-level="2" class="email-subject">RE: Contract Review</div>
+
+  <!-- First message in thread (oldest) - from me -->
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Me &lt;me@mycompany.com&gt;">
+          From: Me &lt;me@mycompany.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Hi Marie,</p>
+      <p>Please review and sign the attached contract.</p>
+    </div>
+    <div class="attachments-list" role="listbox" aria-label="Message attachments">
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>contract-draft.pdf</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second message in thread - from external sender -->
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Marie MARTIN &lt;marie.martin@client.com&gt;">
+          From: Marie MARTIN &lt;marie.martin@client.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Bonjour,</p>
+      <p>I've reviewed the contract and have some questions. See attached notes.</p>
+    </div>
+    <div class="attachments-list" role="listbox" aria-label="Message attachments">
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>contract-notes.pdf</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Third message in thread - from me again -->
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Me &lt;me@mycompany.com&gt;">
+          From: Me &lt;me@mycompany.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Thanks for the feedback. I've addressed the concerns.</p>
+    </div>
+  </div>
+
+  <!-- Fourth message (newest) - from external sender with signed contract -->
+  <div class="message">
+    <div class="message-header">
+      <div class="clickable-row" tabindex="0" style="cursor: pointer;">
+        <button class="from-button" name="From: Marie MARTIN &lt;marie.martin@client.com&gt;">
+          From: Marie MARTIN &lt;marie.martin@client.com&gt;
+        </button>
+      </div>
+    </div>
+    <div class="message-body">
+      <p>Parfait! Here is the signed contract.</p>
+      <p>Cordialement,<br>Marie MARTIN</p>
+    </div>
+    <div class="attachments-list" role="listbox" aria-label="Message attachments">
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>contract-signed.pdf</span>
+      </div>
+      <div class="attachment-option" role="option" aria-selected="false">
+        <span>📄</span>
+        <span>appendix-a.pdf</span>
+      </div>
+    </div>
+  </div>
+</template>
