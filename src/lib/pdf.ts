@@ -46,7 +46,7 @@ export async function signPdf(
   position: SignaturePosition,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
-  const sigImage = sigPath.endsWith(".png")
+  const sigImage = sigPath.toLowerCase().endsWith(".png")
     ? await pdfDoc.embedPng(sigBytes)
     : await pdfDoc.embedJpg(sigBytes);
 
