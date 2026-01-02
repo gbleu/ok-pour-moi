@@ -17,11 +17,15 @@ describe("extractLastname", () => {
   });
 
   test("handles email in angle brackets", () => {
-    expect(extractLastname("From: Smith<john.smith@example.com>")).toBe("Smith");
+    expect(extractLastname("From: Smith<john.smith@example.com>")).toBe(
+      "Smith",
+    );
   });
 
   test("handles email with trailing whitespace after closing bracket", () => {
-    expect(extractLastname("From: John Smith <john.smith@example.com>  \n")).toBe("Smith");
+    expect(
+      extractLastname("From: John Smith <john.smith@example.com>  \n"),
+    ).toBe("Smith");
   });
 
   test("returns Unknown for empty input", () => {
@@ -134,7 +138,9 @@ describe("generateAttachmentName", () => {
 
   test("uppercases lastname", () => {
     const date = new Date(2026, 5, 15);
-    expect(generateAttachmentName("van der berg", date)).toMatch(/^VAN DER BERG - /);
+    expect(generateAttachmentName("van der berg", date)).toMatch(
+      /^VAN DER BERG - /,
+    );
   });
 
   test("ends with .pdf extension", () => {
@@ -200,7 +206,9 @@ describe("getSignatureFormat", () => {
   });
 
   test("throws for unsupported extensions", () => {
-    expect(() => getSignatureFormat("signature.gif")).toThrow(/unsupported signature format/i);
+    expect(() => getSignatureFormat("signature.gif")).toThrow(
+      /unsupported signature format/i,
+    );
   });
 });
 
@@ -212,7 +220,12 @@ describe("signPdf", () => {
     const position = { height: 20, width: 50, x: 100, y: 100 };
 
     // When
-    const result = await signPdf({ format: "png", pdfBytes, position, sigBytes });
+    const result = await signPdf({
+      format: "png",
+      pdfBytes,
+      position,
+      sigBytes,
+    });
 
     // Then
     expect(result).toBeInstanceOf(Uint8Array);
@@ -224,7 +237,12 @@ describe("signPdf", () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
     const position = { height: 50, width: 100, x: 0, y: 0 };
 
-    const result = await signPdf({ format: "png", pdfBytes, position, sigBytes });
+    const result = await signPdf({
+      format: "png",
+      pdfBytes,
+      position,
+      sigBytes,
+    });
 
     expect(result).toBeInstanceOf(Uint8Array);
   });
@@ -240,7 +258,12 @@ describe("signPdf", () => {
     ];
 
     for (const position of positions) {
-      const result = await signPdf({ format: "png", pdfBytes, position, sigBytes });
+      const result = await signPdf({
+        format: "png",
+        pdfBytes,
+        position,
+        sigBytes,
+      });
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result.length).toBeGreaterThan(0);
     }
@@ -252,7 +275,12 @@ describe("signPdf", () => {
 
     // oxlint-disable-next-line await-thenable, no-confusing-void-expression -- bun:test types
     await expect(
-      signPdf({ format: "png", pdfBytes: new Uint8Array([]), position, sigBytes }),
+      signPdf({
+        format: "png",
+        pdfBytes: new Uint8Array([]),
+        position,
+        sigBytes,
+      }),
     ).rejects.toThrow();
   });
 

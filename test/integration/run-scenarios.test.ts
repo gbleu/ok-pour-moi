@@ -1,6 +1,9 @@
-import { SCENARIOS_DIR, setupBrowser } from "./test-helper.js";
 import { describe, expect, test } from "bun:test";
-import { findAttachmentListbox, findLastMessageFromOthers } from "../../src/commands/run.js";
+import {
+  findAttachmentListbox,
+  findLastMessageFromOthers,
+} from "../../src/commands/run.js";
+import { SCENARIOS_DIR, setupBrowser } from "./test-helper.js";
 
 describe("Integration: end-to-end scenarios", () => {
   const { getPage } = setupBrowser();
@@ -15,13 +18,19 @@ describe("Integration: end-to-end scenarios", () => {
     }
 
     const readingPane = page.locator('[role="main"]');
-    const result = await findLastMessageFromOthers(readingPane, "me@example.com");
+    const result = await findLastMessageFromOthers(
+      readingPane,
+      "me@example.com",
+    );
 
     expect(result).toBeDefined();
     expect(result?.senderLastname).toBe("Doe");
 
     if (result) {
-      const attachments = await findAttachmentListbox(readingPane, result.button);
+      const attachments = await findAttachmentListbox(
+        readingPane,
+        result.button,
+      );
       expect(attachments).toBeDefined();
     }
   });
@@ -31,16 +40,24 @@ describe("Integration: end-to-end scenarios", () => {
     await page.goto(`file://${SCENARIOS_DIR}/draft-with-attachments.html`);
     const readingPane = page.locator('[role="main"]');
 
-    const message = await findLastMessageFromOthers(readingPane, "me@example.com");
+    const message = await findLastMessageFromOthers(
+      readingPane,
+      "me@example.com",
+    );
     expect(message).toBeDefined();
     expect(message?.senderLastname).toBe("Brown");
 
     if (message) {
-      const attachments = await findAttachmentListbox(readingPane, message.button);
+      const attachments = await findAttachmentListbox(
+        readingPane,
+        message.button,
+      );
       expect(attachments).toBeDefined();
 
       const options = await attachments?.getByRole("option").allTextContents();
-      expect(options?.some((text) => text.includes("invoice_2024_001.pdf"))).toBe(true);
+      expect(
+        options?.some((text) => text.includes("invoice_2024_001.pdf")),
+      ).toBe(true);
     }
   });
 
@@ -49,12 +66,18 @@ describe("Integration: end-to-end scenarios", () => {
     await page.goto(`file://${SCENARIOS_DIR}/no-attachments.html`);
     const readingPane = page.locator('[role="main"]');
 
-    const message = await findLastMessageFromOthers(readingPane, "me@example.com");
+    const message = await findLastMessageFromOthers(
+      readingPane,
+      "me@example.com",
+    );
     expect(message).toBeDefined();
     expect(message?.senderLastname).toBe("Wilson");
 
     if (message) {
-      const attachments = await findAttachmentListbox(readingPane, message.button);
+      const attachments = await findAttachmentListbox(
+        readingPane,
+        message.button,
+      );
       expect(attachments).toBeUndefined();
     }
   });
@@ -166,7 +189,10 @@ describe("Integration: edge cases", () => {
     `);
     const readingPane = page.locator('[role="main"]');
 
-    const result = await findLastMessageFromOthers(readingPane, "me@example.com");
+    const result = await findLastMessageFromOthers(
+      readingPane,
+      "me@example.com",
+    );
 
     expect(result).toBeDefined();
     expect(result?.senderLastname).toBe("Unknown");
@@ -183,7 +209,10 @@ describe("Integration: edge cases", () => {
     `);
     const readingPane = page.locator('[role="main"]');
 
-    const result = await findLastMessageFromOthers(readingPane, "me@example.com");
+    const result = await findLastMessageFromOthers(
+      readingPane,
+      "me@example.com",
+    );
 
     expect(result).toBeDefined();
     expect(result?.senderLastname).toBe("O'Brien-Smith");
@@ -200,7 +229,10 @@ describe("Integration: edge cases", () => {
     `);
     const readingPane = page.locator('[role="main"]');
 
-    const result = await findLastMessageFromOthers(readingPane, "me@example.com");
+    const result = await findLastMessageFromOthers(
+      readingPane,
+      "me@example.com",
+    );
 
     expect(result).toBeDefined();
     expect(result?.senderLastname).toBe("Müller");
@@ -215,7 +247,9 @@ describe("Integration: edge cases", () => {
         </div>
       </div>
     `);
-    const attachmentsList = page.locator('[role="listbox"][aria-label*="attachments"]');
+    const attachmentsList = page.locator(
+      '[role="listbox"][aria-label*="attachments"]',
+    );
     const option = attachmentsList.getByRole("option").first();
 
     const text = await option.textContent();
@@ -232,8 +266,12 @@ describe("Integration: edge cases", () => {
         </div>
       </div>
     `);
-    const attachmentsList = page.locator('[role="listbox"][aria-label*="attachments"]');
-    const pdfOptions = attachmentsList.getByRole("option").filter({ hasText: /\.pdf/i });
+    const attachmentsList = page.locator(
+      '[role="listbox"][aria-label*="attachments"]',
+    );
+    const pdfOptions = attachmentsList
+      .getByRole("option")
+      .filter({ hasText: /\.pdf/i });
 
     const count = await pdfOptions.count();
     expect(count).toBe(1);
