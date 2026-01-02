@@ -318,12 +318,12 @@ describe("Integration: context menu and download simulation", () => {
     browser = await chromium.launch({ headless: true });
     context = await browser.newContext();
     page = await context.newPage();
-  });
+  }, 30000);
 
   afterAll(async () => {
     await context.close();
     await browser.close();
-  });
+  }, 30000);
 
   test("context menu appears on right-click", async () => {
     await page.goto(`file://${join(SCENARIOS_DIR, "single-pdf.html")}`);
@@ -377,12 +377,12 @@ describe("Integration: edge cases", () => {
     browser = await chromium.launch({ headless: true });
     context = await browser.newContext();
     page = await context.newPage();
-  });
+  }, 30000);
 
   afterAll(async () => {
     await context.close();
     await browser.close();
-  });
+  }, 30000);
 
   test("handles empty email list", async () => {
     await page.setContent(`
