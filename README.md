@@ -45,7 +45,7 @@ cp .env.example .env
 
 1. Move emails with PDFs to sign into your `ok pour moi` folder (use Quick Step)
 2. Run via Spotlight: `Cmd+Space` → type `ok pour moi` → Enter
-   Or from terminal: `bun "ok pour moi"`
+   Or from terminal: `bun src/index.ts`
 
 On first run, a browser window opens for Outlook login. Session is saved in `~/.ok-pour-moi/browser/`.
 
