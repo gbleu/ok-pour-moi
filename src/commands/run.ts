@@ -427,12 +427,12 @@ async function moveEmailToInbox(
   page: Page,
   conversationId: string,
 ): Promise<Result<void>> {
-  const emailInList = page
-    .locator(`[data-convid="${escapeCssValue(conversationId)}"]`)
-    .first();
-  await emailInList.click();
-
   try {
+    const emailInList = page
+      .locator(`[data-convid="${escapeCssValue(conversationId)}"]`)
+      .first();
+    await emailInList.click();
+
     const moveButton = page.getByRole("button", { name: "Move to" });
     await moveButton.waitFor({
       state: "visible",
@@ -444,8 +444,8 @@ async function moveEmailToInbox(
     await inboxItem.click();
     await page.waitForTimeout(TIMING.UI_SETTLE);
     return ok(undefined);
-  } catch {
-    return err("Failed to move email to inbox");
+  } catch (e) {
+    return err(`Failed to move email to inbox: ${e instanceof Error ? e.message : e}`);
   }
 }
 
