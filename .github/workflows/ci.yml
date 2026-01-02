@@ -16,7 +16,7 @@ jobs:
 
       - run: bun install
 
-      - run: bunx playwright install chromium
+      - run: bunx playwright install --with-deps chromium
 
       - run: bun tsc --noEmit
 
