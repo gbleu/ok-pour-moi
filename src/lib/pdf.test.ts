@@ -20,6 +20,10 @@ describe("extractLastname", () => {
     expect(extractLastname("From: Smith<john.smith@example.com>")).toBe("Smith");
   });
 
+  test("handles email with trailing whitespace after closing bracket", () => {
+    expect(extractLastname("From: John Smith <john.smith@example.com>  \n")).toBe("Smith");
+  });
+
   test("returns Unknown for empty input", () => {
     expect(extractLastname("From: ")).toBe("Unknown");
   });
