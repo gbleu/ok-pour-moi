@@ -42,11 +42,6 @@ export const TIMING = {
   MOVE_MENU: 5000,
 } as const;
 
-export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
-
-const ok = <T>(value: T): Result<T> => ({ ok: true, value });
-const err = <T>(error: string): Result<T> => ({ ok: false, error });
-
 // XPath Selectors Documentation:
 // These selectors are tightly coupled to Outlook Web's DOM structure.
 // If Outlook updates break automation, check these selectors first.
@@ -281,113 +276,87 @@ async function collectSignedPdfs(
 async function openReplyForEmail(
   page: Page,
   conversationId: string,
-): Promise<Result<Locator>> {
+): Promise<Locator> {
   const emailItem = page.locator(
     `[data-convid="${escapeCssValue(conversationId)}"]`,
   );
   if ((await emailItem.count()) === 0) {
-    return err("Email not found in list");
+    throw new Error("Email not found in list");
   }
 
   await emailItem.first().click();
 
-  try {
-    const replyBtn = page.getByRole("button", { name: "Reply" }).first();
-    await replyBtn.waitFor({
-      state: "visible",
-      timeout: TIMING.ELEMENT_VISIBLE,
-    });
-    await replyBtn.click();
-  } catch (e) {
-    return err(`Reply button not found: ${e instanceof Error ? e.message : e}`);
-  }
+  const replyBtn = page.getByRole("button", { name: "Reply" }).first();
+  await replyBtn.waitFor({
+    state: "visible",
+    timeout: TIMING.ELEMENT_VISIBLE,
+  });
+  await replyBtn.click();
 
-  try {
-    const composeBody = page
-      .locator('div[role="textbox"][contenteditable="true"]')
-      .first();
-    await composeBody.waitFor({
-      state: "visible",
-      timeout: TIMING.ELEMENT_VISIBLE,
-    });
-    return ok(composeBody);
-  } catch (e) {
-    return err(`Compose body not found: ${e instanceof Error ? e.message : e}`);
-  }
+  const composeBody = page
+    .locator('div[role="textbox"][contenteditable="true"]')
+    .first();
+  await composeBody.waitFor({
+    state: "visible",
+    timeout: TIMING.ELEMENT_VISIBLE,
+  });
+  return composeBody;
 }
 
-async function addCcRecipients(
-  page: Page,
-  emails: string[],
-): Promise<Result<void>> {
-  if (emails.length === 0) return ok(undefined);
+async function addCcRecipients(page: Page, emails: string[]): Promise<void> {
+  if (emails.length === 0) return;
 
   const ccList = emails.join("; ");
-  try {
-    const optionsTab = page.getByRole("tab", { name: "Options" });
-    await optionsTab.click();
-    await page.waitForTimeout(TIMING.MENU_ANIMATION);
+  const optionsTab = page.getByRole("tab", { name: "Options" });
+  await optionsTab.click();
+  await page.waitForTimeout(TIMING.MENU_ANIMATION);
 
-    const showCcCheckbox = page.getByRole("checkbox", { name: "Show Cc" });
-    await showCcCheckbox.waitFor({
-      state: "visible",
-      timeout: TIMING.CC_CHECKBOX,
-    });
-    if (!(await showCcCheckbox.isChecked())) {
-      await showCcCheckbox.click();
-      await page.waitForTimeout(TIMING.UI_SETTLE);
-    }
-
-    await page.getByRole("tab", { name: "Message" }).click();
-    await page.waitForTimeout(TIMING.MENU_ANIMATION);
-
-    const ccField = page.locator('[aria-label="Cc"]').first();
-    await ccField.waitFor({ state: "visible", timeout: TIMING.CC_FIELD });
-    await ccField.click();
-    await page.keyboard.type(ccList);
-    await page.keyboard.press("Tab");
+  const showCcCheckbox = page.getByRole("checkbox", { name: "Show Cc" });
+  await showCcCheckbox.waitFor({
+    state: "visible",
+    timeout: TIMING.CC_CHECKBOX,
+  });
+  if (!(await showCcCheckbox.isChecked())) {
+    await showCcCheckbox.click();
     await page.waitForTimeout(TIMING.UI_SETTLE);
-
-    return ok(undefined);
-  } catch (e) {
-    return err(`Failed to add CC recipients: ${e instanceof Error ? e.message : e}`);
   }
+
+  await page.getByRole("tab", { name: "Message" }).click();
+  await page.waitForTimeout(TIMING.MENU_ANIMATION);
+
+  const ccField = page.locator('[aria-label="Cc"]').first();
+  await ccField.waitFor({ state: "visible", timeout: TIMING.CC_FIELD });
+  await ccField.click();
+  await page.keyboard.type(ccList);
+  await page.keyboard.press("Tab");
+  await page.waitForTimeout(TIMING.UI_SETTLE);
 }
 
-async function attachSignedPdf(
-  page: Page,
-  tmpPath: string,
-): Promise<Result<void>> {
-  try {
-    const attachBtn = page.getByRole("button", { name: "Attach file" });
-    await attachBtn.waitFor({
-      state: "visible",
-      timeout: TIMING.ELEMENT_VISIBLE,
-    });
+async function attachSignedPdf(page: Page, tmpPath: string): Promise<void> {
+  const attachBtn = page.getByRole("button", { name: "Attach file" });
+  await attachBtn.waitFor({
+    state: "visible",
+    timeout: TIMING.ELEMENT_VISIBLE,
+  });
 
-    const [fileChooser] = await Promise.all([
-      page.waitForEvent("filechooser", { timeout: TIMING.FILE_CHOOSER }),
-      attachBtn
-        .click()
-        .then(() =>
-          page.getByRole("menuitem", { name: /browse this computer/i }).click(),
-        ),
-    ]);
-    await fileChooser.setFiles(tmpPath);
+  const [fileChooser] = await Promise.all([
+    page.waitForEvent("filechooser", { timeout: TIMING.FILE_CHOOSER }),
+    attachBtn
+      .click()
+      .then(() =>
+        page.getByRole("menuitem", { name: /browse this computer/i }).click(),
+      ),
+  ]);
+  await fileChooser.setFiles(tmpPath);
 
-    await page.waitForTimeout(TIMING.UPLOAD_COMPLETE);
+  await page.waitForTimeout(TIMING.UPLOAD_COMPLETE);
 
-    const closePromptBtn = page
-      .locator('[role="button"][aria-label="Close"]')
-      .last();
-    if ((await closePromptBtn.count()) > 0) {
-      await closePromptBtn.click().catch(() => {});
-      await page.waitForTimeout(TIMING.UI_SETTLE);
-    }
-
-    return ok(undefined);
-  } catch (e) {
-    return err(`Failed to attach file: ${e instanceof Error ? e.message : e}`);
+  const closePromptBtn = page
+    .locator('[role="button"][aria-label="Close"]')
+    .last();
+  if ((await closePromptBtn.count()) > 0) {
+    await closePromptBtn.click().catch(() => {});
+    await page.waitForTimeout(TIMING.UI_SETTLE);
   }
 }
 
@@ -426,27 +395,22 @@ async function saveDraftAndClose(
 async function moveEmailToInbox(
   page: Page,
   conversationId: string,
-): Promise<Result<void>> {
-  try {
-    const emailInList = page
-      .locator(`[data-convid="${escapeCssValue(conversationId)}"]`)
-      .first();
-    await emailInList.click();
+): Promise<void> {
+  const emailInList = page
+    .locator(`[data-convid="${escapeCssValue(conversationId)}"]`)
+    .first();
+  await emailInList.click();
 
-    const moveButton = page.getByRole("button", { name: "Move to" });
-    await moveButton.waitFor({
-      state: "visible",
-      timeout: TIMING.ELEMENT_VISIBLE,
-    });
-    await moveButton.click();
-    const inboxItem = page.getByRole("menuitem", { name: "Inbox" });
-    await inboxItem.waitFor({ state: "visible", timeout: TIMING.MOVE_MENU });
-    await inboxItem.click();
-    await page.waitForTimeout(TIMING.UI_SETTLE);
-    return ok(undefined);
-  } catch (e) {
-    return err(`Failed to move email to inbox: ${e instanceof Error ? e.message : e}`);
-  }
+  const moveButton = page.getByRole("button", { name: "Move to" });
+  await moveButton.waitFor({
+    state: "visible",
+    timeout: TIMING.ELEMENT_VISIBLE,
+  });
+  await moveButton.click();
+  const inboxItem = page.getByRole("menuitem", { name: "Inbox" });
+  await inboxItem.waitFor({ state: "visible", timeout: TIMING.MOVE_MENU });
+  await inboxItem.click();
+  await page.waitForTimeout(TIMING.UI_SETTLE);
 }
 
 async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
@@ -468,20 +432,22 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
         `\n[${idx + 1}/${items.length}] "${item.subject}" -> ${attachmentName}`,
       );
 
+      let composeBody: Locator;
       console.log(`  Opening reply...`);
-      const replyResult = await openReplyForEmail(page, item.conversationId);
-      if (!replyResult.ok) {
-        console.log(`  -> ${replyResult.error}, skipping`);
+      try {
+        composeBody = await openReplyForEmail(page, item.conversationId);
+      } catch (e) {
+        console.log(`  -> ${e instanceof Error ? e.message : e}, skipping`);
         await takeErrorScreenshot(page, `reply-fail-${idx}`);
         continue;
       }
-      const composeBody = replyResult.value;
 
       if (config.cc.enabled && config.cc.emails.length > 0) {
         console.log(`  Adding CC: ${config.cc.emails.join("; ")}`);
-        const ccResult = await addCcRecipients(page, config.cc.emails);
-        if (!ccResult.ok) {
-          console.log(`  -> ${ccResult.error}, skipping`);
+        try {
+          await addCcRecipients(page, config.cc.emails);
+        } catch (e) {
+          console.log(`  -> ${e instanceof Error ? e.message : e}, skipping`);
           await takeErrorScreenshot(page, `cc-fail-${idx}`);
           continue;
         }
@@ -491,26 +457,28 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
       await Bun.write(tmpPath, item.signedPdf);
 
       console.log(`  Attaching signed PDF...`);
-      const attachResult = await attachSignedPdf(page, tmpPath);
       try {
-        unlinkSync(tmpPath);
-      } catch {}
-      if (!attachResult.ok) {
-        console.log(`  -> ${attachResult.error}, skipping`);
+        await attachSignedPdf(page, tmpPath);
+      } catch (e) {
+        console.log(`  -> ${e instanceof Error ? e.message : e}, skipping`);
         await takeErrorScreenshot(page, `attach-fail-${idx}`);
         continue;
+      } finally {
+        try {
+          unlinkSync(tmpPath);
+        } catch {}
       }
 
       console.log(`  Saving draft...`);
       await saveDraftAndClose(page, composeBody, config.replyMessage);
 
       console.log(`  Moving to Inbox...`);
-      const moveResult = await moveEmailToInbox(page, item.conversationId);
-      if (!moveResult.ok) {
-        console.log(`  -> ${moveResult.error}`);
-        await takeErrorScreenshot(page, `move-fail-${idx}`);
-      } else {
+      try {
+        await moveEmailToInbox(page, item.conversationId);
         console.log(`  -> Done`);
+      } catch (e) {
+        console.log(`  -> ${e instanceof Error ? e.message : e}`);
+        await takeErrorScreenshot(page, `move-fail-${idx}`);
       }
     }
   } finally {
