@@ -19,9 +19,7 @@
 
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noPropertyAccessFromIndexSignature": true,
-
-    "types": ["bun-types"]
+    "noPropertyAccessFromIndexSignature": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

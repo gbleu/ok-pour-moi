@@ -13,14 +13,14 @@ import {
   takeErrorScreenshot,
 } from "../services/browser.js";
 
-type PdfItem = {
+export type PdfItem = {
   conversationId: string;
   subject: string;
   senderLastname: string;
   signedPdf: Uint8Array;
 };
 
-const TIMING = {
+export const TIMING = {
   MENU_ANIMATION: 300,
   UI_SETTLE: 500,
   CONTENT_LOAD: 1000,
@@ -51,8 +51,9 @@ const ATTACHMENTS_FOLLOWING_XPATH =
 const DRAFT_MARKER_XPATH =
   "xpath=ancestor::*[position() <= 8]//*[contains(text(), '[Draft]')]";
 
-async function findLastMessageFromOthers(
+export async function findLastMessageFromOthers(
   readingPane: Locator,
+  myEmail: string = config.myEmail,
 ): Promise<{ row: Locator; button: Locator; senderLastname: string } | null> {
   const fromButtons = readingPane.getByRole("button", { name: /^From:/ });
   const count = await fromButtons.count();
@@ -60,7 +61,7 @@ async function findLastMessageFromOthers(
   for (let i = count - 1; i >= 0; i--) {
     const btn = fromButtons.nth(i);
     const fromText = (await btn.textContent()) ?? "";
-    if (!fromText.toLowerCase().includes(config.myEmail.toLowerCase())) {
+    if (!fromText.toLowerCase().includes(myEmail.toLowerCase())) {
       const row = btn.locator(MESSAGE_ROW_XPATH);
       const senderLastname = extractLastname(fromText);
       return { row, button: btn, senderLastname };
@@ -69,7 +70,7 @@ async function findLastMessageFromOthers(
   return null;
 }
 
-async function findAttachmentListbox(
+export async function findAttachmentListbox(
   readingPane: Locator,
   messageButton: Locator,
 ): Promise<Locator | null> {
@@ -89,7 +90,7 @@ async function findAttachmentListbox(
   return null;
 }
 
-async function downloadAndSignPdfs(
+export async function downloadAndSignPdfs(
   page: Page,
   attachmentsList: Locator,
   conversationId: string,
