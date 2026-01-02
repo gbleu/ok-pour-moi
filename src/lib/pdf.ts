@@ -5,11 +5,27 @@ const FRENCH_MONTHS = [
   "juillet", "août", "septembre", "octobre", "novembre", "décembre",
 ] as const;
 
-export function generateAttachmentName(senderLastname: string): string {
-  const now = new Date();
-  const month = FRENCH_MONTHS[now.getMonth()];
-  const year = now.getFullYear() % 100;
-  return `${senderLastname.toUpperCase()} - ${month}${year}.pdf`;
+export function getTargetMonthAndYear(date: Date = new Date()): { monthIndex: number; year: number } {
+  const day = date.getDate();
+  let monthIndex = date.getMonth();
+  let year = date.getFullYear();
+
+  // Before the 10th, use previous month (timesheets are for prior period)
+  if (day < 10) {
+    monthIndex -= 1;
+    if (monthIndex < 0) {
+      monthIndex = 11; // December
+      year -= 1;
+    }
+  }
+
+  return { monthIndex, year };
+}
+
+export function generateAttachmentName(senderLastname: string, date: Date = new Date()): string {
+  const { monthIndex, year } = getTargetMonthAndYear(date);
+  const month = FRENCH_MONTHS[monthIndex];
+  return `${senderLastname.toUpperCase()} - ${month}${year % 100}.pdf`;
 }
 
 export function extractLastname(fromText: string): string {
