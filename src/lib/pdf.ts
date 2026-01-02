@@ -55,14 +55,25 @@ export type SignaturePosition = {
   height: number;
 };
 
+export type SignatureFormat = "png" | "jpg";
+
+export function getSignatureFormat(path: string): SignatureFormat {
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".png")) return "png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
+  throw new Error(
+    `Unsupported signature format: "${path}". Only .png, .jpg, .jpeg are supported.`,
+  );
+}
+
 export async function signPdf(
   pdfBytes: Uint8Array,
   sigBytes: Uint8Array,
-  sigPath: string,
+  format: SignatureFormat,
   position: SignaturePosition,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
-  const sigImage = sigPath.toLowerCase().endsWith(".png")
+  const sigImage = format === "png"
     ? await pdfDoc.embedPng(sigBytes)
     : await pdfDoc.embedJpg(sigBytes);
 

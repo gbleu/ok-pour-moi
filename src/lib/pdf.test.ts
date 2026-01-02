@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { extractLastname, generateAttachmentName, getTargetMonthAndYear, signPdf } from "./pdf";
+import { extractLastname, generateAttachmentName, getSignatureFormat, getTargetMonthAndYear, signPdf } from "./pdf";
 
 describe("extractLastname", () => {
   test("extracts lastname from simple name", () => {
@@ -172,6 +172,30 @@ describe("generateAttachmentName", () => {
   });
 });
 
+describe("getSignatureFormat", () => {
+  test("returns png for .png extension", () => {
+    expect(getSignatureFormat("signature.png")).toBe("png");
+  });
+
+  test("returns png for .PNG extension (case-insensitive)", () => {
+    expect(getSignatureFormat("signature.PNG")).toBe("png");
+  });
+
+  test("returns jpg for .jpg extension", () => {
+    expect(getSignatureFormat("signature.jpg")).toBe("jpg");
+  });
+
+  test("returns jpg for .jpeg extension", () => {
+    expect(getSignatureFormat("signature.jpeg")).toBe("jpg");
+  });
+
+  test("throws for unsupported extensions", () => {
+    expect(() => getSignatureFormat("signature.gif")).toThrow(
+      /unsupported signature format/i,
+    );
+  });
+});
+
 describe("signPdf", () => {
   test("embeds PNG signature on last page", async () => {
     // Given
@@ -180,7 +204,7 @@ describe("signPdf", () => {
     const position = { x: 100, y: 100, width: 50, height: 20 };
 
     // When
-    const result = await signPdf(pdfBytes, sigBytes, "sig.png", position);
+    const result = await signPdf(pdfBytes, sigBytes, "png", position);
 
     // Then
     expect(result).toBeInstanceOf(Uint8Array);
@@ -192,7 +216,7 @@ describe("signPdf", () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
     const position = { x: 0, y: 0, width: 100, height: 50 };
 
-    const result = await signPdf(pdfBytes, sigBytes, "signature.png", position);
+    const result = await signPdf(pdfBytes, sigBytes, "png", position);
 
     expect(result).toBeInstanceOf(Uint8Array);
   });
@@ -201,7 +225,6 @@ describe("signPdf", () => {
     const pdfBytes = await Bun.file("test/fixtures/sample.pdf").bytes();
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
 
-    // Test various positions
     const positions = [
       { x: 0, y: 0, width: 50, height: 25 },
       { x: 200, y: 300, width: 150, height: 75 },
@@ -209,20 +232,24 @@ describe("signPdf", () => {
     ];
 
     for (const position of positions) {
-      const result = await signPdf(pdfBytes, sigBytes, "sig.png", position);
+      const result = await signPdf(pdfBytes, sigBytes, "png", position);
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result.length).toBeGreaterThan(0);
     }
   });
 
-  test("signature file path with .PNG extension is treated as PNG", async () => {
-    const pdfBytes = await Bun.file("test/fixtures/sample.pdf").bytes();
+  test("throws on empty PDF", async () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
-    const position = { x: 100, y: 100, width: 50, height: 20 };
+    const position = { x: 0, y: 0, width: 50, height: 25 };
 
-    // Should work with uppercase extension
-    const result = await signPdf(pdfBytes, sigBytes, "sig.PNG", position);
+    await expect(signPdf(new Uint8Array([]), sigBytes, "png", position)).rejects.toThrow();
+  });
 
-    expect(result).toBeInstanceOf(Uint8Array);
+  test("throws on invalid PDF", async () => {
+    const invalidPdf = new Uint8Array([1, 2, 3, 4, 5]);
+    const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
+    const position = { x: 0, y: 0, width: 50, height: 25 };
+
+    await expect(signPdf(invalidPdf, sigBytes, "png", position)).rejects.toThrow();
   });
 });
