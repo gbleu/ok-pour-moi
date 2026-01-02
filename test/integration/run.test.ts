@@ -57,6 +57,9 @@ describe("Integration: run.ts DOM traversal", () => {
       expect(result).not.toBeNull();
       // Should find Jane Doe's message (last one from others), not the user's message
       expect(result?.senderLastname).toBe("Doe");
+      // Verify user's own message was explicitly skipped
+      const fromButtonName = await result?.button.getAttribute("name");
+      expect(fromButtonName).not.toContain("me@example.com");
     });
 
     test("returns null when all messages are from user", async () => {
@@ -137,10 +140,14 @@ describe("Integration: run.ts DOM traversal", () => {
       // Should find the non-draft attachments, not the draft ones
       const options = await result?.getByRole("option").allTextContents();
       expect(options?.some(t => t.includes("invoice_2024_001.pdf"))).toBe(true);
+      // Verify draft attachment was excluded
+      expect(options?.some(t => t.includes("signed_invoice.pdf"))).toBe(false);
     });
 
     test("uses fallback when XPath following doesn't find attachments", async () => {
-      // Create a scenario where XPath following won't work but fallback will
+      // XPath following fails here because the listbox is not a DOM sibling of the button.
+      // In real Outlook, attachments appear as following siblings of the message row.
+      // This test verifies the fallback to aria-label search works correctly.
       await page.setContent(`
         <div role="main">
           <div>
@@ -160,8 +167,8 @@ describe("Integration: run.ts DOM traversal", () => {
     });
   });
 
-  describe("downloadAndSignPdfs", () => {
-    test("downloads and signs PDF attachments (single-pdf scenario)", async () => {
+  describe("PDF attachment list handling", () => {
+    test("verifies PDF attachments are present in listbox (single-pdf scenario)", async () => {
       await page.goto(`file://${join(SCENARIOS_DIR, "single-pdf.html")}`);
       const attachmentsList = page.locator('[role="listbox"][aria-label*="attachments"]');
 

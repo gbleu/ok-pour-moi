@@ -46,7 +46,7 @@ describe("envSchema", () => {
     expect(result.OPM_CC_ENABLED).toBe(true);
   });
 
-  test("uses default values when optional fields missing", () => {
+  test("uses default values for optional fields when not provided", () => {
     const minimal = {
       OPM_MY_EMAIL: "test@example.com",
       OPM_SIGNATURE_X: "100",

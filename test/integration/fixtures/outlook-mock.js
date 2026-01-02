@@ -60,7 +60,9 @@
   contextMenu.querySelector('[role="menuitem"]:nth-child(2)').addEventListener('click', () => {
     if (currentAttachment) {
       downloadTriggered = true;
-      const fileName = currentAttachment.textContent.trim().match(/^(.+\.pdf)/i)?.[1] || 'attachment.pdf';
+      const rawFileName = currentAttachment.textContent.trim().match(/^(.+\.pdf)/i)?.[1] || 'attachment.pdf';
+      // Sanitize fileName to prevent path traversal and URL injection
+      const fileName = rawFileName.replace(/[^a-zA-Z0-9._-]/g, '_');
 
       // Dispatch a custom download event that Playwright can intercept
       const downloadEvent = new CustomEvent('mock-download', {
