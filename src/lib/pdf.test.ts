@@ -250,7 +250,7 @@ describe("signPdf", () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
     const position = { height: 25, width: 50, x: 0, y: 0 };
 
-    // oxlint-disable-next-line await-thenable, no-confusing-void-expression
+    // oxlint-disable-next-line await-thenable, no-confusing-void-expression -- bun:test types
     await expect(
       signPdf({ format: "png", pdfBytes: new Uint8Array([]), position, sigBytes }),
     ).rejects.toThrow();
@@ -261,7 +261,7 @@ describe("signPdf", () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
     const position = { height: 25, width: 50, x: 0, y: 0 };
 
-    // oxlint-disable-next-line await-thenable, no-confusing-void-expression
+    // oxlint-disable-next-line await-thenable, no-confusing-void-expression -- bun:test types
     await expect(
       signPdf({ format: "png", pdfBytes: invalidPdf, position, sigBytes }),
     ).rejects.toThrow();
