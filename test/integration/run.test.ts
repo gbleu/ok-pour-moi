@@ -5,7 +5,7 @@ import { chromium, type Browser, type Page } from "playwright";
 import {
   findAttachmentListbox,
   findLastMessageFromOthers,
-} from "../../src/commands/run.js";
+} from "../../src/lib/outlook-dom.js";
 
 const FIXTURES_DIR = join(import.meta.dir, "fixtures");
 const SCENARIOS_DIR = join(FIXTURES_DIR, "scenarios");
