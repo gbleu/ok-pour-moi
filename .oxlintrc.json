@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "restriction": "error",
+    "suspicious": "error",
+    "pedantic": "error",
+    "style": "error"
+  },
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "promise", "import"],
+  "ignorePatterns": ["**/fixtures/**"],
+  "rules": {
+    "func-style": ["error", "declaration"],
+    "id-length": ["error", { "exceptions": ["i", "j", "x", "y", "_"] }],
+    "max-statements": ["error", { "max": 60 }],
+    "max-lines-per-function": ["error", { "max": 250 }],
+
+    "import/no-named-export": "off",
+    "import/exports-last": "off",
+    "import/group-exports": "off",
+    "import/prefer-default-export": "off",
+    "import/consistent-type-specifier-style": "off",
+    "init-declarations": "off",
+    "no-console": "off",
+    "no-await-in-loop": "off",
+    "no-continue": "off",
+    "no-ternary": "off",
+    "no-magic-numbers": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off",
+    "no-inline-comments": "off",
+    "require-await": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "no-undefined": "off"
+  }
+}

@@ -8,39 +8,39 @@ describe("escapeCssValue", () => {
 
   test("escapes double quotes", () => {
     const result = escapeCssValue('hello"world');
-    expect(result).toContain("\\22 ");
+    expect(result).toContain(String.raw`\22 `);
   });
 
   test("escapes single quotes", () => {
     const result = escapeCssValue("hello'world");
-    expect(result).toContain("\\27 ");
+    expect(result).toContain(String.raw`\27 `);
   });
 
   test("escapes backslashes", () => {
-    const result = escapeCssValue("hello\\world");
-    expect(result).toContain("\\5c ");
+    const result = escapeCssValue(String.raw`hello\world`);
+    expect(result).toContain(String.raw`\5c `);
   });
 
   test("escapes square brackets", () => {
     const result = escapeCssValue("hello[world]");
-    expect(result).toContain("\\5b ");
-    expect(result).toContain("\\5d ");
+    expect(result).toContain(String.raw`\5b `);
+    expect(result).toContain(String.raw`\5d `);
   });
 
   test("escapes parentheses", () => {
     const result = escapeCssValue("hello(world)");
-    expect(result).toContain("\\28 ");
-    expect(result).toContain("\\29 ");
+    expect(result).toContain(String.raw`\28 `);
+    expect(result).toContain(String.raw`\29 `);
   });
 
   test("escapes control characters", () => {
     const result = escapeCssValue("hello\nworld");
-    expect(result).toContain("\\0a ");
+    expect(result).toContain(String.raw`\0a `);
   });
 
   test("escapes null character", () => {
     const result = escapeCssValue("hello\0world");
-    expect(result).toContain("\\00 ");
+    expect(result).toContain(String.raw`\00 `);
   });
 
   test("handles empty string", () => {
@@ -54,6 +54,6 @@ describe("escapeCssValue", () => {
 
   test("escapes multiple special characters in sequence", () => {
     const result = escapeCssValue("a\"b'c");
-    expect(result).toBe("a\\22 b\\27 c");
+    expect(result).toBe(String.raw`a\22 b\27 c`);
   });
 });
