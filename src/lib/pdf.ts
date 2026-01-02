@@ -58,7 +58,12 @@ export type SignaturePosition = {
 export type SignatureFormat = "png" | "jpg";
 
 export function getSignatureFormat(path: string): SignatureFormat {
-  return path.toLowerCase().endsWith(".png") ? "png" : "jpg";
+  const lower = path.toLowerCase();
+  if (lower.endsWith(".png")) return "png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
+  throw new Error(
+    `Unsupported signature format: "${path}". Only .png, .jpg, .jpeg are supported.`,
+  );
 }
 
 export async function signPdf(

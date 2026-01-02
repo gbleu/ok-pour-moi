@@ -362,7 +362,7 @@ async function attachSignedPdf(
     const attachBtn = page.getByRole("button", { name: "Attach file" });
     await attachBtn.waitFor({
       state: "visible",
-      timeout: TIMING.DOWNLOAD_MENU,
+      timeout: TIMING.ELEMENT_VISIBLE,
     });
 
     const [fileChooser] = await Promise.all([

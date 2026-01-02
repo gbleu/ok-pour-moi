@@ -189,8 +189,10 @@ describe("getSignatureFormat", () => {
     expect(getSignatureFormat("signature.jpeg")).toBe("jpg");
   });
 
-  test("returns jpg for unknown extensions", () => {
-    expect(getSignatureFormat("signature.gif")).toBe("jpg");
+  test("throws for unsupported extensions", () => {
+    expect(() => getSignatureFormat("signature.gif")).toThrow(
+      /unsupported signature format/i,
+    );
   });
 });
 
