@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { type BrowserContext, chromium, type Page } from "playwright";
+import { chromium, type Page } from "playwright";
 import {
   BROWSER_DATA_DIR,
   config,
@@ -8,20 +8,20 @@ import {
   LOGS_DIR,
 } from "../config.js";
 
-let context: BrowserContext | null = null;
-let page: Page | null = null;
+export type BrowserSession = {
+  page: Page;
+  close: () => Promise<void>;
+};
 
-export async function getOutlookPage(): Promise<Page> {
-  if (page && !page.isClosed()) return page;
-
+export async function createOutlookSession(): Promise<BrowserSession> {
   ensureBrowserDir();
 
-  context = await chromium.launchPersistentContext(BROWSER_DATA_DIR, {
+  const context = await chromium.launchPersistentContext(BROWSER_DATA_DIR, {
     headless: config.browser.headless,
     viewport: { width: 1280, height: 900 },
   });
 
-  page = context.pages()[0] ?? (await context.newPage());
+  const page = context.pages()[0] ?? (await context.newPage());
 
   await page.goto("https://outlook.office365.com/mail/");
   await waitForLogin(page);
@@ -29,7 +29,10 @@ export async function getOutlookPage(): Promise<Page> {
     .locator("#loadingScreen")
     .waitFor({ state: "hidden", timeout: 30000 });
 
-  return page;
+  return {
+    page,
+    close: () => context.close(),
+  };
 }
 
 async function waitForLogin(page: Page): Promise<void> {
@@ -45,16 +48,8 @@ async function waitForLogin(page: Page): Promise<void> {
   console.log("Logged in!\n");
 }
 
-export async function closeBrowser(): Promise<void> {
-  if (context) {
-    await context.close();
-    context = null;
-    page = null;
-  }
-}
-
 export async function takeErrorScreenshot(
-  p: Page,
+  page: Page,
   label: string,
 ): Promise<string | null> {
   try {
@@ -62,7 +57,7 @@ export async function takeErrorScreenshot(
 
     const filename = `error-${label}-${Date.now()}.png`;
     const path = join(LOGS_DIR, filename);
-    await p.screenshot({ path, fullPage: true });
+    await page.screenshot({ path, fullPage: true });
     console.log(`  [screenshot] ${path}`);
     return path;
   } catch {

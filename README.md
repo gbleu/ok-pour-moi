@@ -1,6 +1,6 @@
 # Ok pour moi
 
-PDF signing automation for Outlook. Fetches PDFs from a specified folder, signs them, and sends them back as replies.
+PDF signing automation for Outlook. Fetches PDFs from a specified folder, signs them, and prepares draft replies with the signed PDFs attached.
 
 ## Setup
 
@@ -55,5 +55,5 @@ On first run, a browser window opens for Outlook login. Session is saved in `~/.
 ~/.ok-pour-moi/
 ├── signature.png   # Signature image
 ├── browser/        # Browser session data
-└── logs/
+└── logs/           # Error screenshots
 ```
