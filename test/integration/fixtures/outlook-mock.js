@@ -40,7 +40,7 @@
         const filename = currentAttachment.textContent.trim().match(/^(.+\.pdf)/i)?.[1] || 'attachment.pdf';
         // Trigger download event - the test will intercept this via route
         const link = document.createElement('a');
-        link.href = `/download/${filename}`;
+        link.href = `/download/${encodeURIComponent(filename)}`;
         link.download = filename;
         link.click();
         contextMenu.classList.remove('visible');
@@ -113,7 +113,7 @@
      */
     triggerDownload: function(filename) {
       const link = document.createElement('a');
-      link.href = `/download/${filename}`;
+      link.href = `/download/${encodeURIComponent(filename)}`;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
