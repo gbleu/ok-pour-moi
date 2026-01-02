@@ -2,10 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
-import {
-  findLastMessageFromOthers,
-  findAttachmentListbox,
-} from "../../src/commands/run.js";
+import { findLastMessageFromOthers, findAttachmentListbox } from "../../src/commands/run.js";
 
 const SCENARIOS_DIR = join(import.meta.dir, "fixtures", "scenarios");
 
@@ -139,9 +136,9 @@ describe("Integration: run.ts DOM traversal", () => {
       expect(result).not.toBeNull();
       // Should find the non-draft attachments, not the draft ones
       const options = await result?.getByRole("option").allTextContents();
-      expect(options?.some(t => t.includes("invoice_2024_001.pdf"))).toBe(true);
+      expect(options?.some((t) => t.includes("invoice_2024_001.pdf"))).toBe(true);
       // Verify draft attachment was excluded
-      expect(options?.some(t => t.includes("signed_invoice.pdf"))).toBe(false);
+      expect(options?.some((t) => t.includes("signed_invoice.pdf"))).toBe(false);
     });
 
     test("uses fallback when XPath following doesn't find attachments", async () => {
@@ -262,7 +259,7 @@ describe("Integration: run.ts DOM traversal", () => {
 
         const options = await attachments?.getByRole("option").allTextContents();
         // Should have the invoice, not the signed_invoice from draft
-        expect(options?.some(t => t.includes("invoice_2024_001.pdf"))).toBe(true);
+        expect(options?.some((t) => t.includes("invoice_2024_001.pdf"))).toBe(true);
       }
     });
 

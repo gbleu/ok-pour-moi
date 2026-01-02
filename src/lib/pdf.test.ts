@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { extractLastname, generateAttachmentName, getSignatureFormat, getTargetMonthAndYear, signPdf } from "./pdf";
+import {
+  extractLastname,
+  generateAttachmentName,
+  getSignatureFormat,
+  getTargetMonthAndYear,
+  signPdf,
+} from "./pdf";
 
 describe("extractLastname", () => {
   test("extracts lastname from simple name", () => {
@@ -12,6 +18,10 @@ describe("extractLastname", () => {
 
   test("handles email in angle brackets", () => {
     expect(extractLastname("From: Smith<john.smith@example.com>")).toBe("Smith");
+  });
+
+  test("handles email with trailing whitespace after closing bracket", () => {
+    expect(extractLastname("From: John Smith <john.smith@example.com>  \n")).toBe("Smith");
   });
 
   test("returns Unknown for empty input", () => {
@@ -190,9 +200,7 @@ describe("getSignatureFormat", () => {
   });
 
   test("throws for unsupported extensions", () => {
-    expect(() => getSignatureFormat("signature.gif")).toThrow(
-      /unsupported signature format/i,
-    );
+    expect(() => getSignatureFormat("signature.gif")).toThrow(/unsupported signature format/i);
   });
 });
 

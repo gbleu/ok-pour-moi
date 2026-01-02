@@ -1,12 +1,6 @@
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
-import {
-  BROWSER_DATA_DIR,
-  config,
-  ensureBrowserDir,
-  ensureLogsDir,
-  LOGS_DIR,
-} from "../config.js";
+import { BROWSER_DATA_DIR, config, ensureBrowserDir, ensureLogsDir, LOGS_DIR } from "../config.js";
 
 export type BrowserSession = {
   page: Page;
@@ -25,9 +19,7 @@ export async function createOutlookSession(): Promise<BrowserSession> {
 
   await page.goto("https://outlook.office365.com/mail/");
   await waitForLogin(page);
-  await page
-    .locator("#loadingScreen")
-    .waitFor({ state: "hidden", timeout: 30000 });
+  await page.locator("#loadingScreen").waitFor({ state: "hidden", timeout: 30000 });
 
   return {
     page,
@@ -48,10 +40,7 @@ async function waitForLogin(page: Page): Promise<void> {
   console.log("Logged in!\n");
 }
 
-export async function takeErrorScreenshot(
-  page: Page,
-  label: string,
-): Promise<string | null> {
+export async function takeErrorScreenshot(page: Page, label: string): Promise<string | null> {
   try {
     ensureLogsDir();
 

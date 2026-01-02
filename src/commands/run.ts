@@ -1,10 +1,4 @@
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  rmSync,
-  unlinkSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { Locator, Page } from "playwright";
@@ -17,10 +11,7 @@ import {
   type SignatureFormat,
   signPdf,
 } from "../lib/pdf.js";
-import {
-  createOutlookSession,
-  takeErrorScreenshot,
-} from "../services/browser.js";
+import { createOutlookSession, takeErrorScreenshot } from "../services/browser.js";
 
 export type PdfItem = {
   conversationId: string;
@@ -50,8 +41,7 @@ export const TIMING = {
 // - Outlook renders each message with a "From:" button inside a clickable row
 // - The row has cursor:pointer style or tabindex for keyboard navigation
 // - We click the row (not the button) to avoid opening the contact card popup
-const MESSAGE_ROW_XPATH =
-  "xpath=ancestor::*[contains(@style, 'cursor') or @tabindex][1]";
+const MESSAGE_ROW_XPATH = "xpath=ancestor::*[contains(@style, 'cursor') or @tabindex][1]";
 
 // ATTACHMENTS_FOLLOWING_XPATH: Finds the attachments listbox after a message's From button.
 // - In Outlook, each message's attachments appear in a listbox element
@@ -64,8 +54,7 @@ const ATTACHMENTS_FOLLOWING_XPATH =
 // - Draft messages show "[Draft]" text in their header area
 // - We look up to 8 ancestors to find the message container with draft marker
 // - This helps skip our own draft attachments when looking for received files
-const DRAFT_MARKER_XPATH =
-  "xpath=ancestor::*[position() <= 8]//*[contains(text(), '[Draft]')]";
+const DRAFT_MARKER_XPATH = "xpath=ancestor::*[position() <= 8]//*[contains(text(), '[Draft]')]";
 
 export async function findLastMessageFromOthers(
   readingPane: Locator,
@@ -133,25 +122,15 @@ export async function downloadAndSignPdfs(
       timeout: TIMING.DOWNLOAD_MENU,
     });
 
-    const [download] = await Promise.all([
-      page.waitForEvent("download"),
-      downloadMenuItem.click(),
-    ]);
+    const [download] = await Promise.all([page.waitForEvent("download"), downloadMenuItem.click()]);
 
-    const pdfBytes = await download
-      .path()
-      .then((p) => (p ? readFileSync(p) : null));
+    const pdfBytes = await download.path().then((p) => (p ? readFileSync(p) : null));
     if (!pdfBytes) {
       console.log(`    ${originalFilename} - download failed`);
       continue;
     }
 
-    const signedPdf = await signPdf(
-      pdfBytes,
-      sigBytes,
-      sigFormat,
-      config.signature,
-    );
+    const signedPdf = await signPdf(pdfBytes, sigBytes, sigFormat, config.signature);
     items.push({ conversationId, subject, senderLastname, signedPdf });
     console.log(`    ${originalFilename} - signed`);
   }
@@ -181,9 +160,7 @@ async function collectSignedPdfs(
     await emailItem.click();
 
     const conversationId = (await emailItem.getAttribute("data-convid")) ?? "";
-    const subjectEl = page
-      .locator('[role="main"] [role="heading"][aria-level="2"]')
-      .first();
+    const subjectEl = page.locator('[role="main"] [role="heading"][aria-level="2"]').first();
     await subjectEl.waitFor({
       state: "visible",
       timeout: TIMING.ELEMENT_VISIBLE,
@@ -201,9 +178,7 @@ async function collectSignedPdfs(
     let noButtonCount = 0;
     while (noButtonCount < 2) {
       await page.waitForTimeout(TIMING.CONTENT_LOAD);
-      const seeMoreBtn = readingPane
-        .getByRole("button", { name: "See more messages" })
-        .first();
+      const seeMoreBtn = readingPane.getByRole("button", { name: "See more messages" }).first();
       if ((await seeMoreBtn.count()) === 0) {
         noButtonCount++;
         continue;
@@ -232,10 +207,7 @@ async function collectSignedPdfs(
     await page.waitForTimeout(TIMING.CONTENT_LOAD);
 
     console.log(`  Looking for attachments...`);
-    const attachmentsList = await findAttachmentListbox(
-      readingPane,
-      message.button,
-    );
+    const attachmentsList = await findAttachmentListbox(readingPane, message.button);
 
     if (!attachmentsList) {
       console.log(`  -> No attachments in last message, skipping`);
@@ -273,13 +245,8 @@ async function collectSignedPdfs(
   return items;
 }
 
-async function openReplyForEmail(
-  page: Page,
-  conversationId: string,
-): Promise<Locator> {
-  const emailItem = page.locator(
-    `[data-convid="${escapeCssValue(conversationId)}"]`,
-  );
+async function openReplyForEmail(page: Page, conversationId: string): Promise<Locator> {
+  const emailItem = page.locator(`[data-convid="${escapeCssValue(conversationId)}"]`);
   if ((await emailItem.count()) === 0) {
     throw new Error("Email not found in list");
   }
@@ -293,9 +260,7 @@ async function openReplyForEmail(
   });
   await replyBtn.click();
 
-  const composeBody = page
-    .locator('div[role="textbox"][contenteditable="true"]')
-    .first();
+  const composeBody = page.locator('div[role="textbox"][contenteditable="true"]').first();
   await composeBody.waitFor({
     state: "visible",
     timeout: TIMING.ELEMENT_VISIBLE,
@@ -343,34 +308,24 @@ async function attachSignedPdf(page: Page, tmpPath: string): Promise<void> {
     page.waitForEvent("filechooser", { timeout: TIMING.FILE_CHOOSER }),
     attachBtn
       .click()
-      .then(() =>
-        page.getByRole("menuitem", { name: /browse this computer/i }).click(),
-      ),
+      .then(() => page.getByRole("menuitem", { name: /browse this computer/i }).click()),
   ]);
   await fileChooser.setFiles(tmpPath);
 
   await page.waitForTimeout(TIMING.UPLOAD_COMPLETE);
 
-  const closePromptBtn = page
-    .locator('[role="button"][aria-label="Close"]')
-    .last();
+  const closePromptBtn = page.locator('[role="button"][aria-label="Close"]').last();
   if ((await closePromptBtn.count()) > 0) {
     await closePromptBtn.click().catch(() => {});
     await page.waitForTimeout(TIMING.UI_SETTLE);
   }
 }
 
-async function saveDraftAndClose(
-  page: Page,
-  composeBody: Locator,
-  message: string,
-): Promise<void> {
+async function saveDraftAndClose(page: Page, composeBody: Locator, message: string): Promise<void> {
   await composeBody.click();
   await composeBody.pressSequentially(message, { delay: 20 });
 
-  await page.keyboard.press(
-    process.platform === "darwin" ? "Meta+s" : "Control+s",
-  );
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+s" : "Control+s");
   await page.waitForTimeout(TIMING.CONTENT_LOAD);
 
   await page.keyboard.press("Escape");
@@ -392,13 +347,8 @@ async function saveDraftAndClose(
   }
 }
 
-async function moveEmailToInbox(
-  page: Page,
-  conversationId: string,
-): Promise<void> {
-  const emailInList = page
-    .locator(`[data-convid="${escapeCssValue(conversationId)}"]`)
-    .first();
+async function moveEmailToInbox(page: Page, conversationId: string): Promise<void> {
+  const emailInList = page.locator(`[data-convid="${escapeCssValue(conversationId)}"]`).first();
   await emailInList.click();
 
   const moveButton = page.getByRole("button", { name: "Move to" });
@@ -424,13 +374,8 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(TIMING.MENU_ANIMATION);
 
-      const attachmentName = generateAttachmentName(
-        item.senderLastname,
-        new Date(),
-      );
-      console.log(
-        `\n[${idx + 1}/${items.length}] "${item.subject}" -> ${attachmentName}`,
-      );
+      const attachmentName = generateAttachmentName(item.senderLastname, new Date());
+      console.log(`\n[${idx + 1}/${items.length}] "${item.subject}" -> ${attachmentName}`);
 
       let composeBody: Locator;
       console.log(`  Opening reply...`);
