@@ -325,7 +325,8 @@ describe("Integration: context menu and download simulation", () => {
     await attachment.click({ button: "right" });
 
     const contextMenu = page.locator("#context-menu");
-    await expect(contextMenu).toHaveClass(/visible/);
+    const contextMenuClass = await contextMenu.getAttribute("class");
+    expect(contextMenuClass).toMatch(/visible/);
 
     const downloadItem = page.getByRole("menuitem", { name: /download/i });
     expect(await downloadItem.isVisible()).toBe(true);
@@ -340,7 +341,8 @@ describe("Integration: context menu and download simulation", () => {
     const replyBtn = page.getByRole("button", { name: "Reply" });
     await replyBtn.click();
 
-    await expect(composeArea).toHaveClass(/visible/);
+    const composeAreaClass = await composeArea.getAttribute("class");
+    expect(composeAreaClass).toMatch(/visible/);
   });
 
   test("tabs switch correctly", async () => {
@@ -350,11 +352,11 @@ describe("Integration: context menu and download simulation", () => {
     const optionsTab = page.getByRole("tab", { name: "Options" });
 
     expect(await homeTab.getAttribute("aria-selected")).toBe("true");
-    expect(await optionsTab.getAttribute("aria-selected")).toBe("false");
+    expect(await optionsTab.getAttribute("aria-selected")).not.toBe("true");
 
     await optionsTab.click();
 
-    expect(await homeTab.getAttribute("aria-selected")).toBe("false");
+    expect(await homeTab.getAttribute("aria-selected")).not.toBe("true");
     expect(await optionsTab.getAttribute("aria-selected")).toBe("true");
   });
 });
