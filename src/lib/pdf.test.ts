@@ -250,7 +250,7 @@ describe("signPdf", () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
     const position = { x: 0, y: 0, width: 50, height: 25 };
 
-    expect(() => signPdf(new Uint8Array([]), sigBytes, "png", position)).toThrow();
+    await expect(signPdf(new Uint8Array([]), sigBytes, "png", position)).rejects.toThrow();
   });
 
   test("throws on invalid PDF", async () => {
@@ -258,6 +258,6 @@ describe("signPdf", () => {
     const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
     const position = { x: 0, y: 0, width: 50, height: 25 };
 
-    expect(() => signPdf(invalidPdf, sigBytes, "png", position)).toThrow();
+    await expect(signPdf(invalidPdf, sigBytes, "png", position)).rejects.toThrow();
   });
 });
