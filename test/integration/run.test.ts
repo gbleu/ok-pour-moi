@@ -9,16 +9,15 @@ import {
 
 const FIXTURES_DIR = join(import.meta.dir, "fixtures");
 const SCENARIOS_DIR = join(FIXTURES_DIR, "scenarios");
-
-// Read test PDF for route interception
 const TEST_PDF_PATH = join(import.meta.dir, "..", "fixtures", "sample.pdf");
-const TEST_PDF_BYTES = readFileSync(TEST_PDF_PATH);
 
 describe("Integration Tests with HTML Fixtures", () => {
   let browser: Browser;
   let page: Page;
+  let testPdfBytes: Buffer;
 
   beforeAll(async () => {
+    testPdfBytes = readFileSync(TEST_PDF_PATH);
     browser = await chromium.launch({ headless: true });
   });
 
@@ -32,7 +31,7 @@ describe("Integration Tests with HTML Fixtures", () => {
     // Intercept PDF downloads and return test PDF
     await page.route("**/download/*.pdf", (route) =>
       route.fulfill({
-        body: TEST_PDF_BYTES,
+        body: testPdfBytes,
         contentType: "application/pdf",
       })
     );
