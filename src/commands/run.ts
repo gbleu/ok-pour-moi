@@ -298,8 +298,8 @@ async function openReplyForEmail(
       timeout: TIMING.ELEMENT_VISIBLE,
     });
     await replyBtn.click();
-  } catch {
-    return err("Reply button not found");
+  } catch (e) {
+    return err(`Reply button not found: ${e instanceof Error ? e.message : e}`);
   }
 
   try {
@@ -311,8 +311,8 @@ async function openReplyForEmail(
       timeout: TIMING.ELEMENT_VISIBLE,
     });
     return ok(composeBody);
-  } catch {
-    return err("Compose body not found");
+  } catch (e) {
+    return err(`Compose body not found: ${e instanceof Error ? e.message : e}`);
   }
 }
 
@@ -349,8 +349,8 @@ async function addCcRecipients(
     await page.waitForTimeout(TIMING.UI_SETTLE);
 
     return ok(undefined);
-  } catch {
-    return err("Failed to add CC recipients");
+  } catch (e) {
+    return err(`Failed to add CC recipients: ${e instanceof Error ? e.message : e}`);
   }
 }
 
@@ -386,8 +386,8 @@ async function attachSignedPdf(
     }
 
     return ok(undefined);
-  } catch {
-    return err("Failed to attach file");
+  } catch (e) {
+    return err(`Failed to attach file: ${e instanceof Error ? e.message : e}`);
   }
 }
 

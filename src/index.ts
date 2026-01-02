@@ -18,7 +18,7 @@ and prepares reply drafts. No local state - always starts fresh.
 try {
   loadConfig();
 } catch (err) {
-  console.error((err as Error).message);
+  console.error("Error:", (err as Error).message);
   process.exit(1);
 }
 
