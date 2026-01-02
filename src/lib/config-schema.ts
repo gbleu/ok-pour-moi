@@ -15,7 +15,10 @@ export const envSchema = z.object({
     .default("")
     .transform((s) => (s.trim() === "" ? [] : s.split(",").map((e) => e.trim())))
     .pipe(z.array(z.email())),
-  OPM_CC_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
+  OPM_CC_ENABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   OPM_REPLY_MESSAGE: z.string().min(1),
   OPM_HEADLESS: z
     .enum(["true", "false"])

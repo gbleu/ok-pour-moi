@@ -30,6 +30,7 @@ In Outlook web, create a folder named `ok pour moi` (or customize via `OPM_OUTLO
 ### 5. Create Quick Step (optional)
 
 To quickly move emails to the folder:
+
 1. In Outlook toolbar, click the `ok pour moi` dropdown next to "Move to"
 2. Click "Create new Quick Step"
 3. Name it `ok pour moi`, choose action "Move to folder" → select your folder
@@ -43,14 +44,14 @@ cp .env.example .env
 
 Edit `.env` with your settings. Required variables:
 
-| Variable | Description |
-|----------|-------------|
-| `OPM_MY_EMAIL` | Your email address (to identify your messages) |
-| `OPM_SIGNATURE_X` | Signature X position on page (pixels from left) |
-| `OPM_SIGNATURE_Y` | Signature Y position on page (pixels from bottom) |
-| `OPM_SIGNATURE_WIDTH` | Signature width in pixels |
-| `OPM_SIGNATURE_HEIGHT` | Signature height in pixels |
-| `OPM_REPLY_MESSAGE` | Message text for the reply |
+| Variable               | Description                                       |
+| ---------------------- | ------------------------------------------------- |
+| `OPM_MY_EMAIL`         | Your email address (to identify your messages)    |
+| `OPM_SIGNATURE_X`      | Signature X position on page (pixels from left)   |
+| `OPM_SIGNATURE_Y`      | Signature Y position on page (pixels from bottom) |
+| `OPM_SIGNATURE_WIDTH`  | Signature width in pixels                         |
+| `OPM_SIGNATURE_HEIGHT` | Signature height in pixels                        |
+| `OPM_REPLY_MESSAGE`    | Message text for the reply                        |
 
 ## Usage
 

@@ -1,197 +1,199 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Outlook Mock - No Attachments Scenario</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      height: 100vh;
-    }
-    .sidebar {
-      width: 250px;
-      background: #f3f3f3;
-      border-right: 1px solid #ddd;
-      padding: 10px;
-    }
-    .folder-tree {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .folder-tree [role="treeitem"] {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .folder-tree [role="treeitem"]:hover {
-      background: #e5e5e5;
-    }
-    .folder-tree [role="treeitem"].selected {
-      background: #cce4f7;
-    }
-    .email-list {
-      width: 350px;
-      background: #fff;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
-    }
-    .email-item {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-    }
-    .email-item:hover {
-      background: #f5f5f5;
-    }
-    .email-item.selected {
-      background: #cce4f7;
-    }
-    .reading-pane {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .message {
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-    }
-    .message-row {
-      cursor: pointer;
-    }
-    .from-button {
-      background: none;
-      border: none;
-      color: #0078d4;
-      cursor: pointer;
-      font-weight: 600;
-      padding: 0;
-    }
-    .context-menu {
-      position: fixed;
-      background: #fff;
-      border: 1px solid #ccc;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      border-radius: 4px;
-      display: none;
-      z-index: 1000;
-    }
-    .context-menu.visible {
-      display: block;
-    }
-    .context-menu [role="menuitem"] {
-      padding: 8px 16px;
-      cursor: pointer;
-    }
-    .context-menu [role="menuitem"]:hover {
-      background: #f0f0f0;
-    }
-    .subject-heading {
-      font-size: 1.5em;
-      margin-bottom: 20px;
-    }
-    .tab-bar {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 10px;
-    }
-    .tab-bar [role="tab"] {
-      padding: 8px 16px;
-      background: #f0f0f0;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px 4px 0 0;
-    }
-    .tab-bar [role="tab"][aria-selected="true"] {
-      background: #0078d4;
-      color: white;
-    }
-    .toolbar {
-      margin-bottom: 10px;
-    }
-    .toolbar button {
-      padding: 8px 16px;
-      margin-right: 8px;
-      background: #0078d4;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .compose-area {
-      display: none;
-      margin-top: 20px;
-      padding: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .compose-area.visible {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-  <div class="sidebar">
-    <ul class="folder-tree" role="tree">
-      <li role="treeitem" tabindex="0">Inbox</li>
-      <li role="treeitem" tabindex="0" class="selected">ok pour moi</li>
-      <li role="treeitem" tabindex="0">Sent Items</li>
-      <li role="treeitem" tabindex="0">Drafts</li>
-    </ul>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Outlook Mock - No Attachments Scenario</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+      }
+      .sidebar {
+        width: 250px;
+        background: #f3f3f3;
+        border-right: 1px solid #ddd;
+        padding: 10px;
+      }
+      .folder-tree {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .folder-tree [role="treeitem"] {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .folder-tree [role="treeitem"]:hover {
+        background: #e5e5e5;
+      }
+      .folder-tree [role="treeitem"].selected {
+        background: #cce4f7;
+      }
+      .email-list {
+        width: 350px;
+        background: #fff;
+        border-right: 1px solid #ddd;
+        overflow-y: auto;
+      }
+      .email-item {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+      }
+      .email-item:hover {
+        background: #f5f5f5;
+      }
+      .email-item.selected {
+        background: #cce4f7;
+      }
+      .reading-pane {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .message {
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+      .message-row {
+        cursor: pointer;
+      }
+      .from-button {
+        background: none;
+        border: none;
+        color: #0078d4;
+        cursor: pointer;
+        font-weight: 600;
+        padding: 0;
+      }
+      .context-menu {
+        position: fixed;
+        background: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        display: none;
+        z-index: 1000;
+      }
+      .context-menu.visible {
+        display: block;
+      }
+      .context-menu [role="menuitem"] {
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+      .context-menu [role="menuitem"]:hover {
+        background: #f0f0f0;
+      }
+      .subject-heading {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+      }
+      .tab-bar {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+      .tab-bar [role="tab"] {
+        padding: 8px 16px;
+        background: #f0f0f0;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px 4px 0 0;
+      }
+      .tab-bar [role="tab"][aria-selected="true"] {
+        background: #0078d4;
+        color: white;
+      }
+      .toolbar {
+        margin-bottom: 10px;
+      }
+      .toolbar button {
+        padding: 8px 16px;
+        margin-right: 8px;
+        background: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .compose-area {
+        display: none;
+        margin-top: 20px;
+        padding: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .compose-area.visible {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <ul class="folder-tree" role="tree">
+        <li role="treeitem" tabindex="0">Inbox</li>
+        <li role="treeitem" tabindex="0" class="selected">ok pour moi</li>
+        <li role="treeitem" tabindex="0">Sent Items</li>
+        <li role="treeitem" tabindex="0">Drafts</li>
+      </ul>
+    </div>
 
-  <div class="email-list" id="email-list">
-    <div class="email-item" data-convid="conv-003">
-      <strong>Bob Wilson</strong>
-      <div>Quick question</div>
-      <small>Today 11:00 AM</small>
-    </div>
-  </div>
-
-  <div class="reading-pane" role="main" id="reading-pane">
-    <div class="tab-bar">
-      <button role="tab" name="Home" aria-selected="true">Home</button>
-      <button role="tab" name="Message">Message</button>
-      <button role="tab" name="Options">Options</button>
-    </div>
-    <div class="toolbar">
-      <button role="button" name="Reply">Reply</button>
-      <button role="button" name="Attach file">Attach file</button>
-      <button role="button" name="Move to">Move to</button>
-    </div>
-    <div id="subject-area">
-      <h2 role="heading" aria-level="2" class="subject-heading">Quick question</h2>
-    </div>
-    <div id="messages-area">
-      <div class="message">
-        <div class="message-row" tabindex="0" style="cursor: pointer;">
-          <button class="from-button" name="From: Bob Wilson <bob.wilson@example.com>">From: Bob Wilson &lt;bob.wilson@example.com&gt;</button>
-        </div>
-        <p>Hi there!</p>
-        <p>Just wanted to check in about the project timeline. Do you have any updates?</p>
-        <p>Thanks,<br>Bob</p>
-        <!-- No attachments in this message -->
+    <div class="email-list" id="email-list">
+      <div class="email-item" data-convid="conv-003">
+        <strong>Bob Wilson</strong>
+        <div>Quick question</div>
+        <small>Today 11:00 AM</small>
       </div>
     </div>
-    <div class="compose-area" id="compose-area">
-      <div role="textbox" contenteditable="true" aria-label="Message body"></div>
-      <div aria-label="Cc" contenteditable="true" style="display:none;"></div>
-      <input type="checkbox" role="checkbox" aria-label="Show Cc" style="display:none;">
+
+    <div class="reading-pane" role="main" id="reading-pane">
+      <div class="tab-bar">
+        <button role="tab" name="Home" aria-selected="true">Home</button>
+        <button role="tab" name="Message">Message</button>
+        <button role="tab" name="Options">Options</button>
+      </div>
+      <div class="toolbar">
+        <button role="button" name="Reply">Reply</button>
+        <button role="button" name="Attach file">Attach file</button>
+        <button role="button" name="Move to">Move to</button>
+      </div>
+      <div id="subject-area">
+        <h2 role="heading" aria-level="2" class="subject-heading">Quick question</h2>
+      </div>
+      <div id="messages-area">
+        <div class="message">
+          <div class="message-row" tabindex="0" style="cursor: pointer;">
+            <button class="from-button" name="From: Bob Wilson <bob.wilson@example.com>">
+              From: Bob Wilson &lt;bob.wilson@example.com&gt;
+            </button>
+          </div>
+          <p>Hi there!</p>
+          <p>Just wanted to check in about the project timeline. Do you have any updates?</p>
+          <p>Thanks,<br />Bob</p>
+          <!-- No attachments in this message -->
+        </div>
+      </div>
+      <div class="compose-area" id="compose-area">
+        <div role="textbox" contenteditable="true" aria-label="Message body"></div>
+        <div aria-label="Cc" contenteditable="true" style="display:none;"></div>
+        <input type="checkbox" role="checkbox" aria-label="Show Cc" style="display:none;" />
+      </div>
     </div>
-  </div>
 
-  <div class="context-menu" id="context-menu" role="menu">
-    <div role="menuitem">Open</div>
-    <div role="menuitem">Download</div>
-    <div role="menuitem">Save As</div>
-  </div>
+    <div class="context-menu" id="context-menu" role="menu">
+      <div role="menuitem">Open</div>
+      <div role="menuitem">Download</div>
+      <div role="menuitem">Save As</div>
+    </div>
 
-  <script src="../outlook-mock.js"></script>
-</body>
+    <script src="../outlook-mock.js"></script>
+  </body>
 </html>

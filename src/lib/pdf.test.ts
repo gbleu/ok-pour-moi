@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { extractLastname, generateAttachmentName, getSignatureFormat, getTargetMonthAndYear, signPdf } from "./pdf";
+import {
+  extractLastname,
+  generateAttachmentName,
+  getSignatureFormat,
+  getTargetMonthAndYear,
+  signPdf,
+} from "./pdf";
 
 describe("extractLastname", () => {
   test("extracts lastname from simple name", () => {
@@ -190,9 +196,7 @@ describe("getSignatureFormat", () => {
   });
 
   test("throws for unsupported extensions", () => {
-    expect(() => getSignatureFormat("signature.gif")).toThrow(
-      /unsupported signature format/i,
-    );
+    expect(() => getSignatureFormat("signature.gif")).toThrow(/unsupported signature format/i);
   });
 });
 

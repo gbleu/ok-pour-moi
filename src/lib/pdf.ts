@@ -1,11 +1,24 @@
 import { PDFDocument } from "pdf-lib";
 
 const FRENCH_MONTHS = [
-  "janvier", "février", "mars", "avril", "mai", "juin",
-  "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
 ] as const;
 
-export function getTargetMonthAndYear(date: Date = new Date()): { monthIndex: number; year: number } {
+export function getTargetMonthAndYear(date: Date = new Date()): {
+  monthIndex: number;
+  year: number;
+} {
   const day = date.getDate();
   let monthIndex = date.getMonth();
   let year = date.getFullYear();
@@ -31,7 +44,7 @@ export function generateAttachmentName(senderLastname: string, date: Date = new 
 export function extractLastname(fromText: string): string {
   const name = fromText
     .replace(/^From:\s*/i, "")
-    .replace(/<[^>]+>$/, "")
+    .replace(/<[^>]+>\s*$/, "")
     .trim();
   const parts = name.split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "Unknown";
@@ -61,9 +74,7 @@ export function getSignatureFormat(path: string): SignatureFormat {
   const lower = path.toLowerCase();
   if (lower.endsWith(".png")) return "png";
   if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "jpg";
-  throw new Error(
-    `Unsupported signature format: "${path}". Only .png, .jpg, .jpeg are supported.`,
-  );
+  throw new Error(`Unsupported signature format: "${path}". Only .png, .jpg, .jpeg are supported.`);
 }
 
 export async function signPdf(
@@ -73,9 +84,8 @@ export async function signPdf(
   position: SignaturePosition,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.load(pdfBytes);
-  const sigImage = format === "png"
-    ? await pdfDoc.embedPng(sigBytes)
-    : await pdfDoc.embedJpg(sigBytes);
+  const sigImage =
+    format === "png" ? await pdfDoc.embedPng(sigBytes) : await pdfDoc.embedJpg(sigBytes);
 
   const pages = pdfDoc.getPages();
   const target = pages[pages.length - 1];
