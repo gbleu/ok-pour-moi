@@ -237,7 +237,7 @@ async function collectSignedPdfs(
       );
       items.push(...newItems);
     } catch (e) {
-      console.error(`  -> Download/sign failed: ${e}`);
+      console.error(`  -> Download/sign failed: ${e instanceof Error ? e.message : String(e)}`);
       await takeErrorScreenshot(page, `download-fail-${i}`);
     }
   }
@@ -382,7 +382,7 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
       try {
         composeBody = await openReplyForEmail(page, item.conversationId);
       } catch (e) {
-        console.log(`  -> ${e instanceof Error ? e.message : e}, skipping`);
+        console.log(`  -> ${e instanceof Error ? e.message : String(e)}, skipping`);
         await takeErrorScreenshot(page, `reply-fail-${idx}`);
         continue;
       }
@@ -392,7 +392,7 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
         try {
           await addCcRecipients(page, config.cc.emails);
         } catch (e) {
-          console.log(`  -> ${e instanceof Error ? e.message : e}, skipping`);
+          console.log(`  -> ${e instanceof Error ? e.message : String(e)}, skipping`);
           await takeErrorScreenshot(page, `cc-fail-${idx}`);
           continue;
         }
@@ -405,7 +405,7 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
       try {
         await attachSignedPdf(page, tmpPath);
       } catch (e) {
-        console.log(`  -> ${e instanceof Error ? e.message : e}, skipping`);
+        console.log(`  -> ${e instanceof Error ? e.message : String(e)}, skipping`);
         await takeErrorScreenshot(page, `attach-fail-${idx}`);
         continue;
       } finally {
@@ -422,7 +422,7 @@ async function prepareDrafts(page: Page, items: PdfItem[]): Promise<void> {
         await moveEmailToInbox(page, item.conversationId);
         console.log(`  -> Done`);
       } catch (e) {
-        console.log(`  -> ${e instanceof Error ? e.message : e}`);
+        console.log(`  -> ${e instanceof Error ? e.message : String(e)}`);
         await takeErrorScreenshot(page, `move-fail-${idx}`);
       }
     }
@@ -455,7 +455,7 @@ export async function runCommand() {
       });
       await folder.click();
       console.log(`  Clicked folder`);
-    } catch (_e) {
+    } catch {
       console.error(`  Failed to find folder "${config.outlook.folder}"`);
       await takeErrorScreenshot(session.page, "folder-not-found");
       throw new Error(`Folder "${config.outlook.folder}" not found`);

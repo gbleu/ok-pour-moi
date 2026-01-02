@@ -20,8 +20,8 @@ describe("Integration: run.ts DOM traversal", () => {
     page = await context.newPage();
 
     // Set up route interception for PDF downloads
-    await page.route("**/mock-downloads/**", (route) => {
-      route.fulfill({
+    await page.route("**/mock-downloads/**", async (route) => {
+      await route.fulfill({
         status: 200,
         contentType: "application/pdf",
         body: Buffer.from(testPdfBytes),
