@@ -28,15 +28,14 @@ export async function createOutlookSession(): Promise<BrowserSession> {
 }
 
 async function waitForLogin(page: Page): Promise<void> {
-  const url = page.url();
-  const isLoggedIn = url.includes("outlook.office365.com/mail") && !url.includes("login");
+  const inbox = page.getByRole("treeitem", { name: "Inbox" }).first();
 
-  if (isLoggedIn) {
+  if (await inbox.isVisible()) {
     return;
   }
 
   console.log("\nPlease log in to Outlook in the browser window...");
-  await page.waitForURL("**/mail/**", { timeout: 300_000 });
+  await inbox.waitFor({ state: "visible", timeout: 300_000 });
   console.log("Logged in!\n");
 }
 

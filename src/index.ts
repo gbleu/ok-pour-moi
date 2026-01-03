@@ -7,7 +7,7 @@ if (command === "help" || command === "--help" || command === "-h") {
   console.log(`
 ok-pour-moi - PDF signing automation for Outlook
 
-Usage: ./opm
+Usage: bun run start
 
 Fetches PDFs from configured Outlook folder, signs them,
 and prepares reply drafts. No local state - always starts fresh.

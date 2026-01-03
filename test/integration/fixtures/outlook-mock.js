@@ -175,14 +175,20 @@
         .forEach((t) => t.setAttribute("aria-selected", "false"));
       tab.setAttribute("aria-selected", "true");
 
-      // Show/hide CC checkbox based on Options tab
-      if (tab.getAttribute("name") === "Options") {
-        document.querySelector('[aria-label="Show Cc"]').style.display = "block";
-      }
-      if (tab.getAttribute("name") === "Message") {
-        const ccField = document.querySelector('[aria-label="Cc"]');
-        if (ccField && document.querySelector('[aria-label="Show Cc"]').checked) {
-          ccField.style.display = "block";
+      const tabName = tab.getAttribute("name");
+      const toolbarHome = document.getElementById("toolbar-home");
+      const toolbarOptions = document.getElementById("toolbar-options");
+
+      // Toggle toolbars
+      if (toolbarHome) toolbarHome.style.display = tabName === "Options" ? "none" : "";
+      if (toolbarOptions) toolbarOptions.style.display = tabName === "Options" ? "" : "none";
+
+      // Show CC field when switching to Message tab if checkbox is checked
+      if (tabName === "Message") {
+        const ccWrapper = document.getElementById("cc-field-wrapper");
+        const showCcCheckbox = document.querySelector('[aria-label="Show Cc"]');
+        if (ccWrapper && showCcCheckbox && showCcCheckbox.checked) {
+          ccWrapper.classList.remove("hidden");
         }
       }
     });
@@ -192,9 +198,9 @@
   const showCcCheckbox = document.querySelector('[aria-label="Show Cc"]');
   if (showCcCheckbox) {
     showCcCheckbox.addEventListener("change", () => {
-      const ccField = document.querySelector('[aria-label="Cc"]');
-      if (ccField) {
-        ccField.style.display = showCcCheckbox.checked ? "block" : "none";
+      const ccWrapper = document.getElementById("cc-field-wrapper");
+      if (ccWrapper) {
+        ccWrapper.classList.toggle("hidden", !showCcCheckbox.checked);
       }
     });
   }
