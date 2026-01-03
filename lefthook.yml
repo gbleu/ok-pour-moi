@@ -1,0 +1,8 @@
+output:
+  - failure
+
+pre-commit:
+  commands:
+    fmt:
+      run: bun run fmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
