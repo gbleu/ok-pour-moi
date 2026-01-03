@@ -1,4 +1,4 @@
-output: false
+skip_output: [meta, success]
 
 pre-commit:
   commands:
