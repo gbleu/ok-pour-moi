@@ -581,6 +581,12 @@
       <div role="menuitem">🗑️ Deleted Items</div>
     </div>
 
+    <!-- Attach File Menu -->
+    <div class="context-menu" id="attach-menu" role="menu">
+      <div role="menuitem">📁 Browse this computer</div>
+      <div role="menuitem">☁️ Browse cloud locations</div>
+    </div>
+
     <!-- Discard Dialog -->
     <div class="dialog-overlay" id="discard-dialog" role="dialog">
       <div class="dialog">
@@ -609,7 +615,8 @@
           currentEmail: 'conv-001',
           composing: false,
           attachedFiles: [],
-          downloadTriggered: false
+          downloadTriggered: false,
+          draftSaved: false
         };
 
         const $ = (sel) => document.querySelector(sel);
@@ -696,9 +703,19 @@
           $('[aria-label="Message body"]').focus();
         });
 
-        // Attach file button
-        $('[name="Attach file"]').addEventListener('click', () => {
+        // Attach file button - show menu
+        $('[name="Attach file"]').addEventListener('click', (e) => {
+          const menu = $('#attach-menu');
+          const rect = e.target.getBoundingClientRect();
+          menu.style.left = rect.left + 'px';
+          menu.style.top = rect.bottom + 'px';
+          menu.classList.add('visible');
+        });
+
+        // Browse this computer - triggers file input (fires filechooser event)
+        $('#attach-menu [role="menuitem"]:first-child').addEventListener('click', () => {
           $('#file-input').click();
+          $('#attach-menu').classList.remove('visible');
         });
 
         // File input change
@@ -776,10 +793,21 @@
 
         // Close menus on outside click
         document.addEventListener('click', (e) => {
-          if (!e.target.closest('.context-menu') && !e.target.closest('[name="Move to"]')) {
+          if (!e.target.closest('.context-menu') && !e.target.closest('[name="Move to"]') && !e.target.closest('[name="Attach file"]')) {
             $$('.context-menu').forEach(m => m.classList.remove('visible'));
           }
         });
+
+        // Helper to reset compose state
+        function resetComposeState() {
+          $('#compose-area').classList.remove('visible');
+          $('[aria-label="Message body"]').textContent = '';
+          $('#compose-attachment-list').innerHTML = '';
+          $('#compose-attachments').classList.remove('has-files');
+          state.composing = false;
+          state.draftSaved = false;
+          state.attachedFiles = [];
+        }
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -787,19 +815,25 @@
           if ((e.metaKey || e.ctrlKey) && e.key === 's') {
             e.preventDefault();
             if (state.composing) {
+              state.draftSaved = true;
               console.log('Draft saved');
             }
           }
           // Escape to close compose or menus
           if (e.key === 'Escape') {
             $$('.context-menu').forEach(m => m.classList.remove('visible'));
+            $('#discard-dialog').classList.remove('visible');
             if (state.composing) {
-              const body = $('[aria-label="Message body"]').textContent;
-              if (body.trim()) {
-                $('#discard-dialog').classList.add('visible');
+              // If draft was saved, close without dialog
+              if (state.draftSaved) {
+                resetComposeState();
               } else {
-                $('#compose-area').classList.remove('visible');
-                state.composing = false;
+                const body = $('[aria-label="Message body"]').textContent;
+                if (body.trim()) {
+                  $('#discard-dialog').classList.add('visible');
+                } else {
+                  resetComposeState();
+                }
               }
             }
           }
@@ -811,14 +845,11 @@
         });
         $('[name="Discard"]').addEventListener('click', () => {
           $('#discard-dialog').classList.remove('visible');
-          $('#compose-area').classList.remove('visible');
-          $('[aria-label="Message body"]').textContent = '';
-          state.composing = false;
+          resetComposeState();
         });
         $('[name="Save"]').addEventListener('click', () => {
           $('#discard-dialog').classList.remove('visible');
-          $('#compose-area').classList.remove('visible');
-          state.composing = false;
+          resetComposeState();
         });
 
         // Expose for tests

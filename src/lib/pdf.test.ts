@@ -6,6 +6,7 @@ import {
   getTargetMonthAndYear,
   signPdf,
 } from "./pdf";
+import { FIXTURES_DIR } from "../__test__/test-helper.js";
 
 describe("extractLastname", () => {
   test("extracts lastname from simple name", () => {
@@ -207,8 +208,8 @@ describe("getSignatureFormat", () => {
 describe("signPdf", () => {
   test("embeds PNG signature on last page", async () => {
     // Given
-    const pdfBytes = await Bun.file("test/fixtures/sample.pdf").bytes();
-    const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
+    const pdfBytes = await Bun.file(`${FIXTURES_DIR}/sample.pdf`).bytes();
+    const sigBytes = await Bun.file(`${FIXTURES_DIR}/signature.png`).bytes();
     const position = { height: 20, width: 50, x: 100, y: 100 };
 
     // When
@@ -220,8 +221,8 @@ describe("signPdf", () => {
   });
 
   test("returns Uint8Array", async () => {
-    const pdfBytes = await Bun.file("test/fixtures/sample.pdf").bytes();
-    const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
+    const pdfBytes = await Bun.file(`${FIXTURES_DIR}/sample.pdf`).bytes();
+    const sigBytes = await Bun.file(`${FIXTURES_DIR}/signature.png`).bytes();
     const position = { height: 50, width: 100, x: 0, y: 0 };
 
     const result = await signPdf({ format: "png", pdfBytes, position, sigBytes });
@@ -230,8 +231,8 @@ describe("signPdf", () => {
   });
 
   test("handles different signature positions", async () => {
-    const pdfBytes = await Bun.file("test/fixtures/sample.pdf").bytes();
-    const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
+    const pdfBytes = await Bun.file(`${FIXTURES_DIR}/sample.pdf`).bytes();
+    const sigBytes = await Bun.file(`${FIXTURES_DIR}/signature.png`).bytes();
 
     const positions = [
       { height: 25, width: 50, x: 0, y: 0 },
@@ -247,7 +248,7 @@ describe("signPdf", () => {
   });
 
   test("throws on empty PDF", async () => {
-    const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
+    const sigBytes = await Bun.file(`${FIXTURES_DIR}/signature.png`).bytes();
     const position = { height: 25, width: 50, x: 0, y: 0 };
 
     // oxlint-disable-next-line await-thenable, no-confusing-void-expression -- bun:test types
@@ -258,7 +259,7 @@ describe("signPdf", () => {
 
   test("throws on invalid PDF", async () => {
     const invalidPdf = new Uint8Array([1, 2, 3, 4, 5]);
-    const sigBytes = await Bun.file("test/fixtures/signature.png").bytes();
+    const sigBytes = await Bun.file(`${FIXTURES_DIR}/signature.png`).bytes();
     const position = { height: 25, width: 50, x: 0, y: 0 };
 
     // oxlint-disable-next-line await-thenable, no-confusing-void-expression -- bun:test types
