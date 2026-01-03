@@ -150,6 +150,9 @@
       .compose-area.visible {
         display: block;
       }
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -176,10 +179,16 @@
         <button role="tab" name="Message">Message</button>
         <button role="tab" name="Options">Options</button>
       </div>
-      <div class="toolbar">
+      <div class="toolbar" id="toolbar-home">
         <button role="button" name="Reply">Reply</button>
         <button role="button" name="Attach file">Attach file</button>
         <button role="button" name="Move to">Move to</button>
+      </div>
+      <div class="toolbar" id="toolbar-options" style="display: none;">
+        <label style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" role="checkbox" aria-label="Show Cc" />
+          Show Cc
+        </label>
       </div>
       <div id="subject-area">
         <h2 role="heading" aria-level="2" class="subject-heading">Document for signature</h2>
@@ -202,9 +211,15 @@
         </div>
       </div>
       <div class="compose-area" id="compose-area">
+        <div style="margin-bottom: 8px;" id="cc-field-wrapper" class="hidden">
+          <label>Cc:</label>
+          <div
+            aria-label="Cc"
+            contenteditable="true"
+            style="padding: 4px; border: 1px solid #ccc;"
+          ></div>
+        </div>
         <div role="textbox" contenteditable="true" aria-label="Message body"></div>
-        <div aria-label="Cc" contenteditable="true" style="display:none;"></div>
-        <input type="checkbox" role="checkbox" aria-label="Show Cc" style="display:none;" />
       </div>
     </div>
 

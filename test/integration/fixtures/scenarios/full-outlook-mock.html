@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Outlook Web Mock</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        display: flex;
+        height: 100vh;
+        background: #f3f2f1;
+      }
+
+      /* Sidebar - Folder tree */
+      .sidebar {
+        width: 220px;
+        background: #fff;
+        border-right: 1px solid #edebe9;
+        padding: 8px;
+        overflow-y: auto;
+      }
+      .folder-tree { list-style: none; }
+      .folder-tree [role="treeitem"] {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .folder-tree [role="treeitem"]:hover { background: #f3f2f1; }
+      .folder-tree [role="treeitem"].selected { background: #edebe9; font-weight: 600; }
+      .folder-tree .badge {
+        background: #0078d4;
+        color: #fff;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: auto;
+      }
+
+      /* Email list */
+      .email-list {
+        width: 360px;
+        background: #fff;
+        border-right: 1px solid #edebe9;
+        overflow-y: auto;
+      }
+      .email-list-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #edebe9;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .email-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f3f2f1;
+        cursor: pointer;
+      }
+      .email-item:hover { background: #f3f2f1; }
+      .email-item.selected { background: #edebe9; }
+      .email-item.unread { border-left: 3px solid #0078d4; }
+      .email-item .sender { font-weight: 600; font-size: 14px; }
+      .email-item .subject { font-size: 13px; color: #323130; margin-top: 2px; }
+      .email-item .preview { font-size: 12px; color: #605e5c; margin-top: 2px; }
+      .email-item .meta { font-size: 11px; color: #a19f9d; margin-top: 4px; display: flex; gap: 8px; }
+      .email-item .attachment-icon { color: #0078d4; }
+
+      /* Reading pane */
+      .reading-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      /* Ribbon tabs */
+      .ribbon { border-bottom: 1px solid #edebe9; background: #f3f2f1; }
+      .tab-bar { display: flex; padding: 0 8px; }
+      .tab-bar [role="tab"] {
+        padding: 10px 16px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        color: #323130;
+        border-bottom: 2px solid transparent;
+      }
+      .tab-bar [role="tab"]:hover { background: #edebe9; }
+      .tab-bar [role="tab"][aria-selected="true"] {
+        border-bottom-color: #0078d4;
+        color: #0078d4;
+        font-weight: 600;
+      }
+
+      /* Toolbar */
+      .toolbar {
+        display: flex;
+        gap: 4px;
+        padding: 8px 16px;
+        border-bottom: 1px solid #edebe9;
+        flex-wrap: wrap;
+      }
+      .toolbar button {
+        padding: 6px 12px;
+        background: #fff;
+        border: 1px solid #8a8886;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .toolbar button:hover { background: #f3f2f1; }
+      .toolbar button.primary { background: #0078d4; color: #fff; border-color: #0078d4; }
+      .toolbar button.primary:hover { background: #106ebe; }
+      .toolbar .separator { width: 1px; background: #edebe9; margin: 0 8px; }
+
+      /* Message area */
+      .message-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+      .subject-heading {
+        font-size: 20px;
+        font-weight: 600;
+        color: #323130;
+        margin-bottom: 16px;
+      }
+
+      /* Message bubbles */
+      .message {
+        background: #f3f2f1;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .message.collapsed .message-body,
+      .message.collapsed .attachment-list { display: none; }
+      .message-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+      }
+      .message-header:hover { opacity: 0.8; }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #0078d4;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .message-meta { flex: 1; }
+      .from-button {
+        background: none;
+        border: none;
+        color: #0078d4;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 0;
+        text-align: left;
+      }
+      .from-button:hover { text-decoration: underline; }
+      .message-date { font-size: 12px; color: #605e5c; }
+      .message-body { margin-top: 12px; font-size: 14px; line-height: 1.5; color: #323130; }
+      .message-body p { margin-bottom: 8px; }
+
+      /* Attachments */
+      .attachment-list {
+        margin-top: 16px;
+        padding: 12px;
+        background: #fff;
+        border-radius: 4px;
+        border: 1px solid #edebe9;
+      }
+      .attachment-list-label { font-size: 12px; color: #605e5c; margin-bottom: 8px; }
+      [role="option"].attachment {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      [role="option"].attachment:hover { background: #f3f2f1; }
+      .attachment-icon {
+        width: 32px;
+        height: 32px;
+        background: #d13438;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .attachment-info { flex: 1; }
+      .attachment-name { font-size: 13px; color: #323130; }
+      .attachment-size { font-size: 11px; color: #605e5c; }
+
+      /* See more button */
+      .see-more-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: #fff;
+        border: 1px dashed #8a8886;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #0078d4;
+        margin-bottom: 16px;
+      }
+      .see-more-btn:hover { background: #f3f2f1; }
+      .see-more-btn.hidden { display: none; }
+
+      /* Context menu */
+      .context-menu {
+        position: fixed;
+        background: #fff;
+        border: 1px solid #edebe9;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-radius: 4px;
+        min-width: 180px;
+        z-index: 1000;
+        display: none;
+      }
+      .context-menu.visible { display: block; }
+      .context-menu [role="menuitem"] {
+        padding: 10px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .context-menu [role="menuitem"]:hover { background: #f3f2f1; }
+      .context-menu .separator { height: 1px; background: #edebe9; margin: 4px 0; }
+
+      /* Compose area */
+      .compose-area {
+        display: none;
+        border-top: 1px solid #edebe9;
+        padding: 16px;
+        background: #fff;
+      }
+      .compose-area.visible { display: block; }
+      .compose-field {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .compose-field label {
+        width: 40px;
+        font-size: 13px;
+        color: #605e5c;
+      }
+      .compose-field input,
+      .compose-field [contenteditable] {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #8a8886;
+        border-radius: 2px;
+        font-size: 13px;
+      }
+      .compose-field.hidden { display: none; }
+      .compose-body {
+        min-height: 120px;
+        padding: 12px;
+        border: 1px solid #8a8886;
+        border-radius: 2px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .compose-body:focus { outline: 2px solid #0078d4; border-color: transparent; }
+      .compose-attachments {
+        margin-top: 12px;
+        padding: 8px;
+        background: #f3f2f1;
+        border-radius: 4px;
+        display: none;
+      }
+      .compose-attachments.has-files { display: block; }
+      .compose-attachment-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px;
+        background: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+
+      /* File input (hidden) */
+      #file-input { display: none; }
+
+      /* Draft indicator */
+      .draft-indicator {
+        display: inline-block;
+        background: #fff4ce;
+        color: #835c00;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 2px;
+        margin-left: 8px;
+      }
+
+      /* Dialog */
+      .dialog-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+      .dialog-overlay.visible { display: flex; }
+      .dialog {
+        background: #fff;
+        border-radius: 4px;
+        padding: 24px;
+        min-width: 300px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      }
+      .dialog h3 { margin-bottom: 16px; font-size: 18px; }
+      .dialog-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+      .dialog-buttons button {
+        padding: 8px 16px;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .dialog-buttons .cancel { background: #fff; border: 1px solid #8a8886; }
+      .dialog-buttons .confirm { background: #0078d4; color: #fff; border: none; }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <ul class="folder-tree" role="tree">
+        <li role="treeitem" tabindex="0">📥 Inbox <span class="badge">3</span></li>
+        <li role="treeitem" tabindex="0" class="selected">
+          📁 ok pour moi <span class="badge">2</span>
+        </li>
+        <li role="treeitem" tabindex="0">📤 Sent Items</li>
+        <li role="treeitem" tabindex="0">📝 Drafts</li>
+        <li role="treeitem" tabindex="0">🗑️ Deleted Items</li>
+      </ul>
+    </div>
+
+    <!-- Email List -->
+    <div class="email-list" id="email-list">
+      <div class="email-list-header">ok pour moi</div>
+      <div class="email-item unread" data-convid="conv-001">
+        <div class="sender">Jean Dupont</div>
+        <div class="subject">Contrat de location - signature requise</div>
+        <div class="preview">Bonjour, veuillez trouver ci-joint le contrat...</div>
+        <div class="meta">
+          <span>Today 14:30</span>
+          <span class="attachment-icon">📎</span>
+        </div>
+      </div>
+      <div class="email-item" data-convid="conv-002">
+        <div class="sender">Marie Martin</div>
+        <div class="subject">Documents fiscaux 2024</div>
+        <div class="preview">Ci-joint les documents pour signature...</div>
+        <div class="meta">
+          <span>Yesterday</span>
+          <span class="attachment-icon">📎</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reading Pane -->
+    <div class="reading-pane" role="main" id="reading-pane">
+      <!-- Ribbon -->
+      <div class="ribbon">
+        <div class="tab-bar" role="tablist">
+          <button role="tab" name="Home" aria-selected="true">Home</button>
+          <button role="tab" name="Message" aria-selected="false">Message</button>
+          <button role="tab" name="Options" aria-selected="false">Options</button>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar" id="toolbar-home">
+        <button role="button" name="Reply" class="primary">↩️ Reply</button>
+        <button role="button" name="Reply all">↩️ Reply all</button>
+        <button role="button" name="Forward">➡️ Forward</button>
+        <div class="separator"></div>
+        <button role="button" name="Attach file">📎 Attach file</button>
+        <div class="separator"></div>
+        <button role="button" name="Move to">📁 Move to</button>
+        <button role="button" name="Delete">🗑️ Delete</button>
+      </div>
+
+      <!-- Options toolbar (hidden by default) -->
+      <div class="toolbar" id="toolbar-options" style="display: none;">
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+          <input type="checkbox" role="checkbox" aria-label="Show Cc" />
+          Show Cc
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+          <input type="checkbox" role="checkbox" aria-label="Show Bcc" />
+          Show Bcc
+        </label>
+      </div>
+
+      <!-- Message Area -->
+      <div class="message-area" id="message-area">
+        <h2 role="heading" aria-level="2" class="subject-heading" id="subject-heading">
+          Contrat de location - signature requise
+        </h2>
+
+        <!-- See more messages button (for threads) -->
+        <button
+          class="see-more-btn hidden"
+          role="button"
+          name="See more messages"
+          id="see-more-btn"
+        >
+          ⬇️ See more messages (2 hidden)
+        </button>
+
+        <!-- Older messages (initially hidden in thread view) -->
+        <div class="message collapsed" id="msg-oldest" style="display: none;">
+          <div class="message-header" tabindex="0" style="cursor: pointer;">
+            <div class="avatar">ME</div>
+            <div class="message-meta">
+              <button class="from-button" name="From: me@example.com">
+                From: Me &lt;me@example.com&gt;
+              </button>
+              <div class="message-date">Dec 28, 2024 09:15</div>
+            </div>
+          </div>
+          <div class="message-body">
+            <p>Bonjour Jean,</p>
+            <p>Pourriez-vous m'envoyer le contrat de location ?</p>
+            <p>Cordialement</p>
+          </div>
+        </div>
+
+        <div class="message collapsed" id="msg-middle" style="display: none;">
+          <div class="message-header" tabindex="0" style="cursor: pointer;">
+            <div class="avatar">JD</div>
+            <div class="message-meta">
+              <button class="from-button" name="From: Jean Dupont <jean.dupont@example.com>">
+                From: Jean Dupont &lt;jean.dupont@example.com&gt;
+              </button>
+              <div class="message-date">Dec 28, 2024 11:30</div>
+            </div>
+          </div>
+          <div class="message-body">
+            <p>Bonjour,</p>
+            <p>Voici une première version du contrat.</p>
+          </div>
+          <div class="attachment-list">
+            <div class="attachment-list-label">Attachments (1)</div>
+            <div role="listbox" aria-label="Message attachments">
+              <div
+                role="option"
+                class="attachment"
+                data-filename="contrat_v1.pdf"
+                data-url="/mock-downloads/contrat_v1.pdf"
+              >
+                <div class="attachment-icon">PDF</div>
+                <div class="attachment-info">
+                  <div class="attachment-name">contrat_v1.pdf</div>
+                  <div class="attachment-size">245 KB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest message (visible) -->
+        <div class="message" id="msg-latest">
+          <div class="message-header" tabindex="0" style="cursor: pointer;">
+            <div class="avatar">JD</div>
+            <div class="message-meta">
+              <button class="from-button" name="From: Jean Dupont <jean.dupont@example.com>">
+                From: Jean Dupont &lt;jean.dupont@example.com&gt;
+              </button>
+              <div class="message-date">Today 14:30</div>
+            </div>
+          </div>
+          <div class="message-body">
+            <p>Bonjour,</p>
+            <p>Veuillez trouver ci-joint la version finale du contrat de location.</p>
+            <p>Merci de le signer et de me le retourner.</p>
+            <p>Cordialement,<br />Jean Dupont</p>
+          </div>
+          <div class="attachment-list">
+            <div class="attachment-list-label">Attachments (2)</div>
+            <div role="listbox" aria-label="Message attachments">
+              <div
+                role="option"
+                class="attachment"
+                data-filename="contrat_location_2024.pdf"
+                data-url="/mock-downloads/contrat_location_2024.pdf"
+              >
+                <div class="attachment-icon">PDF</div>
+                <div class="attachment-info">
+                  <div class="attachment-name">contrat_location_2024.pdf</div>
+                  <div class="attachment-size">892 KB</div>
+                </div>
+              </div>
+              <div
+                role="option"
+                class="attachment"
+                data-filename="annexe_reglement.pdf"
+                data-url="/mock-downloads/annexe_reglement.pdf"
+              >
+                <div class="attachment-icon">PDF</div>
+                <div class="attachment-info">
+                  <div class="attachment-name">annexe_reglement.pdf</div>
+                  <div class="attachment-size">156 KB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compose Area -->
+      <div class="compose-area" id="compose-area">
+        <div class="compose-field">
+          <label>To:</label>
+          <input type="text" aria-label="To" value="jean.dupont@example.com" readonly />
+        </div>
+        <div class="compose-field hidden" id="cc-field">
+          <label>Cc:</label>
+          <div contenteditable="true" aria-label="Cc"></div>
+        </div>
+        <div class="compose-field hidden" id="bcc-field">
+          <label>Bcc:</label>
+          <div contenteditable="true" aria-label="Bcc"></div>
+        </div>
+        <div
+          class="compose-body"
+          role="textbox"
+          contenteditable="true"
+          aria-label="Message body"
+        ></div>
+        <div class="compose-attachments" id="compose-attachments">
+          <div class="attachment-list-label">Attachments:</div>
+          <div id="compose-attachment-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu" role="menu">
+      <div role="menuitem">📂 Open</div>
+      <div role="menuitem">💾 Download</div>
+      <div role="menuitem">📋 Copy</div>
+      <div class="separator"></div>
+      <div role="menuitem">🔗 Share</div>
+    </div>
+
+    <!-- Move To Menu -->
+    <div class="context-menu" id="move-menu" role="menu">
+      <div role="menuitem">📥 Inbox</div>
+      <div role="menuitem">📁 Archive</div>
+      <div role="menuitem">🗑️ Deleted Items</div>
+    </div>
+
+    <!-- Discard Dialog -->
+    <div class="dialog-overlay" id="discard-dialog" role="dialog">
+      <div class="dialog">
+        <h3>Discard draft?</h3>
+        <p>Do you want to save this message as a draft?</p>
+        <div class="dialog-buttons">
+          <button class="cancel" role="button" name="Cancel">Cancel</button>
+          <button role="button" name="Discard">Discard</button>
+          <button class="confirm" role="button" name="Save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input
+      type="file"
+      id="file-input"
+      accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+      multiple
+    />
+
+    <script>
+      (function() {
+        const state = {
+          currentAttachment: null,
+          currentEmail: 'conv-001',
+          composing: false,
+          attachedFiles: [],
+          downloadTriggered: false
+        };
+
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => document.querySelectorAll(sel);
+
+        // Email data
+        const emails = {
+          'conv-001': {
+            subject: 'Contrat de location - signature requise',
+            hasThread: true
+          },
+          'conv-002': {
+            subject: 'Documents fiscaux 2024',
+            hasThread: false
+          }
+        };
+
+        // Folder selection
+        $$('[role="treeitem"]').forEach(folder => {
+          folder.addEventListener('click', () => {
+            $$('[role="treeitem"]').forEach(f => f.classList.remove('selected'));
+            folder.classList.add('selected');
+          });
+        });
+
+        // Email selection
+        $$('.email-item').forEach(item => {
+          item.addEventListener('click', () => {
+            $$('.email-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            item.classList.remove('unread');
+            state.currentEmail = item.getAttribute('data-convid');
+
+            const email = emails[state.currentEmail];
+            if (email) {
+              $('#subject-heading').textContent = email.subject;
+              $('#see-more-btn').classList.toggle('hidden', !email.hasThread);
+            }
+          });
+        });
+
+        // See more messages
+        $('#see-more-btn').addEventListener('click', function() {
+          $$('#msg-oldest, #msg-middle').forEach(msg => {
+            msg.style.display = 'block';
+          });
+          this.classList.add('hidden');
+        });
+
+        // Message expand (only expand, never collapse on click)
+        $$('.message-header').forEach(header => {
+          header.addEventListener('click', () => {
+            const msg = header.closest('.message');
+            msg.classList.remove('collapsed');
+          });
+        });
+
+        // Tab switching
+        $$('[role="tab"]').forEach(tab => {
+          tab.addEventListener('click', () => {
+            $$('[role="tab"]').forEach(t => t.setAttribute('aria-selected', 'false'));
+            tab.setAttribute('aria-selected', 'true');
+
+            const tabName = tab.getAttribute('name');
+            $('#toolbar-home').style.display = tabName === 'Options' ? 'none' : 'flex';
+            $('#toolbar-options').style.display = tabName === 'Options' ? 'flex' : 'none';
+          });
+        });
+
+        // Show Cc checkbox
+        $('[aria-label="Show Cc"]').addEventListener('change', function() {
+          $('#cc-field').classList.toggle('hidden', !this.checked);
+        });
+
+        // Show Bcc checkbox
+        $('[aria-label="Show Bcc"]').addEventListener('change', function() {
+          $('#bcc-field').classList.toggle('hidden', !this.checked);
+        });
+
+        // Reply button
+        $('[name="Reply"]').addEventListener('click', () => {
+          state.composing = true;
+          $('#compose-area').classList.add('visible');
+          $('[aria-label="Message body"]').focus();
+        });
+
+        // Attach file button
+        $('[name="Attach file"]').addEventListener('click', () => {
+          $('#file-input').click();
+        });
+
+        // File input change
+        $('#file-input').addEventListener('change', function() {
+          const files = Array.from(this.files);
+          files.forEach(file => {
+            state.attachedFiles.push(file.name);
+            const item = document.createElement('div');
+            item.className = 'compose-attachment-item';
+            item.innerHTML = `📎 ${file.name}`;
+            $('#compose-attachment-list').appendChild(item);
+          });
+          if (state.attachedFiles.length > 0) {
+            $('#compose-attachments').classList.add('has-files');
+          }
+          this.value = '';
+        });
+
+        // Context menu for attachments
+        document.addEventListener('contextmenu', (e) => {
+          const attachment = e.target.closest('[role="option"].attachment');
+          if (attachment) {
+            e.preventDefault();
+            state.currentAttachment = attachment;
+            const menu = $('#context-menu');
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.classList.add('visible');
+          }
+        });
+
+        // Download menu item
+        $('#context-menu [role="menuitem"]:nth-child(2)').addEventListener('click', () => {
+          if (state.currentAttachment) {
+            state.downloadTriggered = true;
+            const filename = state.currentAttachment.getAttribute('data-filename') || 'attachment.pdf';
+            const url = state.currentAttachment.getAttribute('data-url') || '/mock-downloads/' + filename;
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          $('#context-menu').classList.remove('visible');
+          state.currentAttachment = null;
+        });
+
+        // Move to button
+        $('[name="Move to"]').addEventListener('click', (e) => {
+          const menu = $('#move-menu');
+          const rect = e.target.getBoundingClientRect();
+          menu.style.left = rect.left + 'px';
+          menu.style.top = rect.bottom + 'px';
+          menu.classList.add('visible');
+        });
+
+        // Move to Inbox
+        $('#move-menu [role="menuitem"]:first-child').addEventListener('click', () => {
+          const selected = $('.email-item.selected');
+          if (selected) {
+            selected.remove();
+            // Update badge
+            const badge = $('[role="treeitem"].selected .badge');
+            if (badge) {
+              const count = parseInt(badge.textContent) - 1;
+              badge.textContent = count > 0 ? count : '';
+              if (count <= 0) badge.remove();
+            }
+          }
+          $('#move-menu').classList.remove('visible');
+        });
+
+        // Close menus on outside click
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.context-menu') && !e.target.closest('[name="Move to"]')) {
+            $$('.context-menu').forEach(m => m.classList.remove('visible'));
+          }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+          // Cmd/Ctrl + S to save draft
+          if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+            e.preventDefault();
+            if (state.composing) {
+              console.log('Draft saved');
+            }
+          }
+          // Escape to close compose or menus
+          if (e.key === 'Escape') {
+            $$('.context-menu').forEach(m => m.classList.remove('visible'));
+            if (state.composing) {
+              const body = $('[aria-label="Message body"]').textContent;
+              if (body.trim()) {
+                $('#discard-dialog').classList.add('visible');
+              } else {
+                $('#compose-area').classList.remove('visible');
+                state.composing = false;
+              }
+            }
+          }
+        });
+
+        // Dialog buttons
+        $('[name="Cancel"]').addEventListener('click', () => {
+          $('#discard-dialog').classList.remove('visible');
+        });
+        $('[name="Discard"]').addEventListener('click', () => {
+          $('#discard-dialog').classList.remove('visible');
+          $('#compose-area').classList.remove('visible');
+          $('[aria-label="Message body"]').textContent = '';
+          state.composing = false;
+        });
+        $('[name="Save"]').addEventListener('click', () => {
+          $('#discard-dialog').classList.remove('visible');
+          $('#compose-area').classList.remove('visible');
+          state.composing = false;
+        });
+
+        // Expose for tests
+        window.OutlookMock = {
+          getState: () => state,
+          wasDownloadTriggered: () => state.downloadTriggered,
+          resetDownloadFlag: () => { state.downloadTriggered = false; },
+          getCurrentAttachment: () => state.currentAttachment,
+          getAttachedFiles: () => state.attachedFiles
+        };
+      })();
+    </script>
+  </body>
+</html>
