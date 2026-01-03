@@ -294,4 +294,15 @@ describe("signPdf", () => {
       signPdf({ format: "png", pdfBytes: invalidPdf, position, sigBytes }),
     ).rejects.toThrow();
   });
+
+  test("embeds JPG signature on last page", async () => {
+    const pdfBytes = await Bun.file("test/fixtures/sample.pdf").bytes();
+    const sigBytes = await Bun.file("test/fixtures/signature.jpg").bytes();
+    const position = { height: 20, width: 50, x: 100, y: 100 };
+
+    const result = await signPdf({ format: "jpg", pdfBytes, position, sigBytes });
+
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(result.length).toBeGreaterThan(pdfBytes.length);
+  });
 });

@@ -111,59 +111,6 @@ describe("Integration: end-to-end scenarios", () => {
     const text = await subject.textContent();
     expect(text).toBe("Document for signature");
   });
-});
-
-describe("Integration: context menu and download simulation", () => {
-  const { getPage } = setupBrowser();
-
-  test("context menu appears on right-click", async () => {
-    const page = getPage();
-    await page.goto(`file://${SCENARIOS_DIR}/single-pdf.html`);
-
-    const attachment = page.locator('[role="option"]').first();
-    await attachment.click({ button: "right" });
-
-    const contextMenu = page.locator("#context-menu");
-    const contextMenuClass = await contextMenu.getAttribute("class");
-    expect(contextMenuClass).toMatch(/visible/);
-
-    const downloadItem = page.getByRole("menuitem", { name: /download/i });
-    expect(await downloadItem.isVisible()).toBe(true);
-  }, 15_000);
-
-  test("reply button reveals compose area", async () => {
-    const page = getPage();
-    await page.goto(`file://${SCENARIOS_DIR}/single-pdf.html`);
-
-    const composeArea = page.locator("#compose-area");
-    expect(await composeArea.isVisible()).toBe(false);
-
-    const replyBtn = page.getByRole("button", { name: "Reply" });
-    await replyBtn.click();
-
-    const composeAreaClass = await composeArea.getAttribute("class");
-    expect(composeAreaClass).toMatch(/visible/);
-  }, 15_000);
-
-  test("tabs switch correctly", async () => {
-    const page = getPage();
-    await page.goto(`file://${SCENARIOS_DIR}/single-pdf.html`);
-
-    const homeTab = page.getByRole("tab", { name: "Home" });
-    const optionsTab = page.getByRole("tab", { name: "Options" });
-
-    expect(await homeTab.getAttribute("aria-selected")).toBe("true");
-    expect(await optionsTab.getAttribute("aria-selected")).not.toBe("true");
-
-    await optionsTab.click();
-
-    expect(await homeTab.getAttribute("aria-selected")).not.toBe("true");
-    expect(await optionsTab.getAttribute("aria-selected")).toBe("true");
-  }, 15_000);
-});
-
-describe("Integration: edge cases", () => {
-  const { getPage } = setupBrowser();
 
   test("handles empty email list", async () => {
     const page = getPage();

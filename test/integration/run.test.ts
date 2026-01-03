@@ -1,6 +1,23 @@
 import { SCENARIOS_DIR, setupBrowserWithPdfRoute } from "./test-helper.js";
+import { TIMING, findAttachmentListbox, findLastMessageFromOthers } from "../../src/commands/run.js";
 import { describe, expect, test } from "bun:test";
-import { findAttachmentListbox, findLastMessageFromOthers } from "../../src/commands/run.js";
+
+describe("TIMING constants", () => {
+  test("exports expected timing constants", () => {
+    expect(TIMING).toEqual({
+      CC_CHECKBOX: 3000,
+      CC_FIELD: 5000,
+      CONTENT_LOAD: 1000,
+      DOWNLOAD_MENU: 5000,
+      ELEMENT_VISIBLE: 10_000,
+      FILE_CHOOSER: 10_000,
+      MENU_ANIMATION: 300,
+      MOVE_MENU: 5000,
+      UI_SETTLE: 500,
+      UPLOAD_COMPLETE: 2000,
+    });
+  });
+});
 
 describe("Integration: run.ts DOM traversal", () => {
   const { getPage } = setupBrowserWithPdfRoute();
@@ -132,6 +149,30 @@ describe("Integration: run.ts DOM traversal", () => {
       const result = await findAttachmentListbox(readingPane, messageButton);
 
       expect(result).toBeDefined();
+    });
+
+    test("fallback finds last non-draft listbox when button has no following attachments", async () => {
+      const page = getPage();
+      await page.setContent(`
+        <div role="main">
+          <div class="message-container">
+            <div role="listbox" aria-label="Message attachments">
+              <div role="option">attachment.pdf</div>
+            </div>
+          </div>
+          <div class="other-message">
+            <button name="From: Test User">From: Test User</button>
+          </div>
+        </div>
+      `);
+      const readingPane = page.locator('[role="main"]');
+      const messageButton = page.getByRole("button", { name: /^From:/ });
+
+      const result = await findAttachmentListbox(readingPane, messageButton);
+
+      expect(result).toBeDefined();
+      const options = await result?.getByRole("option").allTextContents();
+      expect(options).toContain("attachment.pdf");
     });
   });
 
