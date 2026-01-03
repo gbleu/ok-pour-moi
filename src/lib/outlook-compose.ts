@@ -11,6 +11,7 @@ import {
 import type { Page } from "playwright";
 import type { PdfItem } from "./outlook-dom.js";
 import { createTempRunDir } from "./temp-files.js";
+import { formatError } from "./error.js";
 import { generateAttachmentName } from "./pdf.js";
 import { takeErrorScreenshot } from "../services/browser.js";
 
@@ -41,7 +42,7 @@ export async function prepareDrafts(
       try {
         composeBody = await openReply(page, item.conversationId);
       } catch (error) {
-        console.log(`  -> ${error instanceof Error ? error.message : String(error)}, skipping`);
+        console.log(`  -> ${formatError(error)}, skipping`);
         await takeErrorScreenshot(page, `reply-fail-${idx}`);
         continue;
       }
@@ -51,7 +52,7 @@ export async function prepareDrafts(
         try {
           await addCcRecipients(page, options.ccEmails);
         } catch (error) {
-          console.log(`  -> ${error instanceof Error ? error.message : String(error)}, skipping`);
+          console.log(`  -> ${formatError(error)}, skipping`);
           await takeErrorScreenshot(page, `cc-fail-${idx}`);
           continue;
         }
@@ -64,7 +65,7 @@ export async function prepareDrafts(
       try {
         await attachFile(page, tmpPath);
       } catch (error) {
-        console.log(`  -> ${error instanceof Error ? error.message : String(error)}, skipping`);
+        console.log(`  -> ${formatError(error)}, skipping`);
         await takeErrorScreenshot(page, `attach-fail-${idx}`);
         continue;
       } finally {
@@ -81,7 +82,7 @@ export async function prepareDrafts(
         await moveToFolder(page, item.conversationId, "Inbox");
         console.log(`  -> Done`);
       } catch (error) {
-        console.log(`  -> ${error instanceof Error ? error.message : String(error)}`);
+        console.log(`  -> ${formatError(error)}`);
         await takeErrorScreenshot(page, `move-fail-${idx}`);
       }
     }

@@ -42,16 +42,18 @@ export async function selectEmail(
 export async function expandThread(page: Page): Promise<number> {
   const readingPane = page.locator('[role="main"]');
   let expandClicks = 0;
-  let noButtonCount = 0;
 
-  while (noButtonCount < 2) {
+  for (let misses = 0; misses < 2; ) {
     await page.waitForTimeout(TIMING.CONTENT_LOAD);
     const seeMoreBtn = readingPane.getByRole("button", { name: "See more messages" }).first();
-    if ((await seeMoreBtn.count()) === 0) {
-      noButtonCount += 1;
+    const visible = await seeMoreBtn.isVisible().catch(() => false);
+
+    if (!visible) {
+      misses += 1;
       continue;
     }
-    noButtonCount = 0;
+
+    misses = 0;
     expandClicks += 1;
     await seeMoreBtn.click();
   }
@@ -176,12 +178,15 @@ export async function attachFile(page: Page, filePath: string): Promise<void> {
   ]);
   await fileChooser.setFiles(filePath);
 
-  await page.waitForTimeout(TIMING.UPLOAD_COMPLETE);
+  const attachmentChip = page.locator('[class*="attachment"]').filter({ hasText: /./ });
+  await attachmentChip.waitFor({ state: "visible", timeout: TIMING.UPLOAD_COMPLETE }).catch(() => {
+    /* Ignore if attachment indicator doesn't appear */
+  });
 
   const closePromptBtn = page.locator('[role="button"][aria-label="Close"]').last();
   if ((await closePromptBtn.count()) > 0) {
     await closePromptBtn.click().catch(() => {
-      // Ignore click errors
+      /* Ignore click errors */
     });
     await page.waitForTimeout(TIMING.UI_SETTLE);
   }
