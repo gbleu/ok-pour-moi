@@ -15,6 +15,10 @@ interface Config {
 
 let _config: Config | undefined;
 
+export function _resetConfigForTesting(): void {
+  _config = undefined;
+}
+
 function buildConfig(env: EnvSchema): Config {
   return {
     browser: { headless: env.OPM_HEADLESS ?? false },

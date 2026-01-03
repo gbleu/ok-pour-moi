@@ -56,7 +56,7 @@ User data stored in `~/.ok-pour-moi/`:
 
 ### Testing
 
-Integration tests use mock HTML scenarios in `test/integration/fixtures/scenarios/`. Browser context is shared across tests via `setupBrowser()` helper.
+Integration tests use a mock Outlook HTML fixture in `src/__test__/fixtures/`. Browser context is shared across tests via `setupBrowser()` helper from `src/__test__/test-helper.ts`.
 
 ## Import Sorting Rules (oxlint)
 
@@ -69,7 +69,7 @@ Sorting is by **first imported member name** (case-sensitive ASCII: uppercase be
 
 ```typescript
 // Correct order:
-import { SCENARIOS_DIR, setupBrowser } from "./test-helper.js";  // S < a
+import { FIXTURES_DIR, setupBrowser } from "./test-helper.js";    // F < a
 import { addCcRecipients, closeCompose } from "./actions.js";     // a < d
 import { describe, expect, test } from "bun:test";                // d
 
