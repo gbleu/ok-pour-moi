@@ -40,15 +40,13 @@ describe("E2E: Full workflow with comprehensive Outlook mock", () => {
     // Step 2: Find last message from sender (not me)
     const readingPane = page.locator('[role="main"]');
     const message = await findLastMessageFromOthers(readingPane, "me@example.com");
-    expect(message).toBeDefined();
-    expect(message?.senderLastname).toBe("Dupont");
-
-    if (message?.row && (await message.row.count()) > 0) {
-      await message.row.click();
-    }
-
     if (!message) {
-      throw new Error("Message not found");
+      throw new Error("No message found from others");
+    }
+    expect(message.senderLastname).toBe("Dupont");
+
+    if ((await message.row.count()) > 0) {
+      await message.row.click();
     }
 
     // Step 3: Download PDF attachment
@@ -59,11 +57,11 @@ describe("E2E: Full workflow with comprehensive Outlook mock", () => {
     expect(await pdfOptions?.count()).toBe(2);
 
     const firstPdf = pdfOptions?.first();
-    expect(await firstPdf?.textContent()).toContain("contrat_location_2024.pdf");
-
     if (!firstPdf) {
-      throw new Error("PDF option not found");
+      throw new Error("No PDF attachment found");
     }
+    expect(await firstPdf.textContent()).toContain("contrat_location_2024.pdf");
+
     const download = await downloadAttachment(page, firstPdf);
     expect(download.suggestedFilename()).toBe("contrat_location_2024.pdf");
 
