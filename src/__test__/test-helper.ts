@@ -8,7 +8,9 @@ let sharedBrowser: Browser | undefined;
 let testPdfBytes: ArrayBuffer | undefined;
 
 async function getSharedBrowser(): Promise<Browser> {
-  sharedBrowser ??= await chromium.launch({ headless: true });
+  if (!sharedBrowser || !sharedBrowser.isConnected()) {
+    sharedBrowser = await chromium.launch({ headless: true });
+  }
   return sharedBrowser;
 }
 

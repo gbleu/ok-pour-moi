@@ -1,7 +1,14 @@
 import { FIXTURES_DIR, setupBrowser } from "../__test__/test-helper.js";
+import {
+  addCcRecipients,
+  closeCompose,
+  expandThread,
+  openReply,
+  saveDraft,
+  selectEmail,
+  typeMessage,
+} from "./outlook-actions.js";
 import { describe, expect, test } from "bun:test";
-
-import { expandThread, openReply, selectEmail, typeMessage } from "./outlook-actions.js";
 
 describe("outlook-actions UI edge cases", () => {
   const { getPage } = setupBrowser();
@@ -59,6 +66,46 @@ describe("outlook-actions UI edge cases", () => {
 
     // Then: back to compose
     expect(await dialog.isHidden()).toBe(true);
+    expect(await composeBody.isVisible()).toBe(true);
+  }, 30_000);
+
+  test("addCcRecipients with empty array returns early", async () => {
+    const page = getPage();
+    await page.goto(`file://${FIXTURES_DIR}/outlook.html`);
+
+    // When / Then - should return without error
+    await addCcRecipients(page, []);
+  }, 30_000);
+
+  test("closeCompose after saving draft does not show dialog", async () => {
+    const page = getPage();
+    await page.goto(`file://${FIXTURES_DIR}/outlook.html`);
+
+    // Given: compose with content, then save
+    const composeBody = await openReply(page);
+    await typeMessage(composeBody, "test message");
+    await saveDraft(page);
+
+    // When
+    await closeCompose(page);
+
+    // Then - should close without dialog
+    const composeArea = page.locator("#compose-area");
+    expect(await composeArea.isHidden()).toBe(true);
+  }, 30_000);
+
+  test("closeCompose with unsaved content cancels dialog and returns to compose", async () => {
+    const page = getPage();
+    await page.goto(`file://${FIXTURES_DIR}/outlook.html`);
+
+    // Given: compose with unsaved content
+    const composeBody = await openReply(page);
+    await typeMessage(composeBody, "unsaved content");
+
+    // When
+    await closeCompose(page);
+
+    // Then - should still be in compose (dialog was cancelled)
     expect(await composeBody.isVisible()).toBe(true);
   }, 30_000);
 });
