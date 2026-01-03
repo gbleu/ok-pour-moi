@@ -9,6 +9,7 @@ import {
   selectEmail,
 } from "./outlook-actions.js";
 import type { Page } from "playwright";
+import { formatError } from "./error.js";
 import { readFileSync } from "node:fs";
 import { takeErrorScreenshot } from "../services/browser.js";
 
@@ -86,12 +87,12 @@ export async function collectSignedPdfs(
     console.log(`  Found ${pdfCount} PDF(s), downloading...`);
     console.log(`  Sender: ${message.senderLastname}`);
 
-    try {
-      for (let j = 0; j < pdfCount; j += 1) {
-        const option = pdfOptions.nth(j);
-        const text = (await option.textContent()) ?? "";
-        const originalFilename = text.match(/^(.+\.pdf)/i)?.[1] ?? "attachment.pdf";
+    for (let j = 0; j < pdfCount; j += 1) {
+      const option = pdfOptions.nth(j);
+      const text = (await option.textContent()) ?? "";
+      const originalFilename = text.match(/^(.+\.pdf)/i)?.[1] ?? "attachment.pdf";
 
+      try {
         const download = await downloadAttachment(page, option);
         const downloadPath = await download.path();
         const pdfBytes = downloadPath ? readFileSync(downloadPath) : undefined;
@@ -108,12 +109,10 @@ export async function collectSignedPdfs(
         });
         items.push({ conversationId, senderLastname: message.senderLastname, signedPdf, subject });
         console.log(`    ${originalFilename} - signed`);
+      } catch (error) {
+        console.error(`    ${originalFilename} - failed: ${formatError(error)}`);
+        await takeErrorScreenshot(page, `download-fail-${i}-${j}`);
       }
-    } catch (error) {
-      console.error(
-        `  -> Download/sign failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      await takeErrorScreenshot(page, `download-fail-${i}`);
     }
   }
 

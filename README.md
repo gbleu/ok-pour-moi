@@ -23,6 +23,8 @@ mkdir -p ~/.ok-pour-moi
 cp /path/to/your/signature.png ~/.ok-pour-moi/signature.png
 ```
 
+Supported formats: `.png`, `.jpg`, `.jpeg`
+
 ### 4. Create Outlook folder
 
 In Outlook web, create a folder named `ok pour moi` (or customize via `OPM_OUTLOOK_FOLDER` in `.env`).
@@ -42,7 +44,9 @@ To quickly move emails to the folder:
 cp .env.example .env
 ```
 
-Edit `.env` with your settings. Required variables:
+Edit `.env` with your settings.
+
+**Required variables:**
 
 | Variable               | Description                                       |
 | ---------------------- | ------------------------------------------------- |
@@ -52,6 +56,16 @@ Edit `.env` with your settings. Required variables:
 | `OPM_SIGNATURE_WIDTH`  | Signature width in pixels                         |
 | `OPM_SIGNATURE_HEIGHT` | Signature height in pixels                        |
 | `OPM_REPLY_MESSAGE`    | Message text for the reply                        |
+
+**Optional variables:**
+
+| Variable             | Default                        | Description                        |
+| -------------------- | ------------------------------ | ---------------------------------- |
+| `OPM_OUTLOOK_FOLDER` | `ok pour moi`                  | Outlook folder to process          |
+| `OPM_SIGNATURE_PATH` | `~/.ok-pour-moi/signature.png` | Path to signature image            |
+| `OPM_CC_EMAILS`      | (empty)                        | Comma-separated CC email addresses |
+| `OPM_CC_ENABLED`     | `false`                        | Enable CC recipients               |
+| `OPM_HEADLESS`       | (unset)                        | Run browser in headless mode       |
 
 ## Usage
 

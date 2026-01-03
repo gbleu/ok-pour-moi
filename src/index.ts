@@ -1,3 +1,4 @@
+import { formatError } from "./lib/error.js";
 import { loadConfig } from "./config.js";
 import { runCommand } from "./commands/run.js";
 
@@ -17,7 +18,7 @@ and prepares reply drafts. No local state - always starts fresh.
     loadConfig();
     await runCommand();
   } catch (error: unknown) {
-    console.error("Error:", error instanceof Error ? error.message : String(error));
+    console.error("Error:", formatError(error));
     process.exitCode = 1;
   }
 }
