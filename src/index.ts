@@ -1,5 +1,4 @@
 import { formatError } from "./lib/error.js";
-import { loadConfig } from "./config.js";
 import { runCommand } from "./commands/run.js";
 
 const command = Bun.argv.at(2);
@@ -15,7 +14,6 @@ and prepares reply drafts. No local state - always starts fresh.
 `);
 } else {
   try {
-    loadConfig();
     await runCommand();
   } catch (error: unknown) {
     console.error("Error:", formatError(error));
