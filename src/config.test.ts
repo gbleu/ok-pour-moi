@@ -1,30 +1,14 @@
-import {
-  BROWSER_DATA_DIR,
-  LOGS_DIR,
-  _resetConfigForTesting,
-  config,
-  ensureBrowserDir,
-  ensureLogsDir,
-  loadConfig,
-} from "./config";
+import { BROWSER_DATA_DIR, LOGS_DIR, config, ensureBrowserDir, ensureLogsDir } from "./config";
 import { describe, expect, test } from "bun:test";
 
 describe("config exports", () => {
-  test("BROWSER_DATA_DIR is a string path", () => {
-    expect(typeof BROWSER_DATA_DIR).toBe("string");
-    expect(BROWSER_DATA_DIR.length).toBeGreaterThan(0);
-  });
-
-  test("LOGS_DIR is a string path", () => {
-    expect(typeof LOGS_DIR).toBe("string");
-    expect(LOGS_DIR.length).toBeGreaterThan(0);
-  });
-
-  test("BROWSER_DATA_DIR contains expected directory name", () => {
+  test("BROWSER_DATA_DIR is a string path containing 'browser'", () => {
+    expect(BROWSER_DATA_DIR).toBeTypeOf("string");
     expect(BROWSER_DATA_DIR).toContain("browser");
   });
 
-  test("LOGS_DIR contains expected directory name", () => {
+  test("LOGS_DIR is a string path containing 'logs'", () => {
+    expect(LOGS_DIR).toBeTypeOf("string");
     expect(LOGS_DIR).toContain("logs");
   });
 });
@@ -45,46 +29,18 @@ describe("ensureLogsDir", () => {
   });
 });
 
-describe("loadConfig", () => {
-  test("returns cached config on subsequent calls", () => {
-    // Given
-    _resetConfigForTesting();
-    const first = loadConfig();
-
-    // When
-    const second = loadConfig();
-
-    // Then
-    expect(first).toBe(second);
-  });
-
-  test("loads config from environment", () => {
-    // Given
-    _resetConfigForTesting();
-
-    // When
-    const cfg = loadConfig();
-
-    // Then
-    expect(cfg).toHaveProperty("browser.headless");
-    expect(cfg).toHaveProperty("cc.emails");
-    expect(cfg).toHaveProperty("cc.enabled");
-    expect(cfg).toHaveProperty("myEmail");
-    expect(cfg).toHaveProperty("outlook.folder");
-    expect(cfg).toHaveProperty("replyMessage");
-    expect(cfg).toHaveProperty("signature.height");
-    expect(cfg).toHaveProperty("signature.imagePath");
-    expect(cfg).toHaveProperty("signature.width");
-    expect(cfg).toHaveProperty("signature.x");
-    expect(cfg).toHaveProperty("signature.y");
-  });
-});
-
-describe("config proxy", () => {
-  test("accesses config properties via proxy", () => {
-    // When / Then
-    expect(typeof config.myEmail).toBe("string");
-    expect(typeof config.browser.headless).toBe("boolean");
-    expect(typeof config.outlook.folder).toBe("string");
+describe("config", () => {
+  test("has all expected properties with correct types", () => {
+    expect(config.browser.headless).toBeTypeOf("boolean");
+    expect(config.cc.emails).toBeArray();
+    expect(config.cc.enabled).toBeTypeOf("boolean");
+    expect(config.myEmail).toBeTypeOf("string");
+    expect(config.outlook.folder).toBeTypeOf("string");
+    expect(config.replyMessage).toBeTypeOf("string");
+    expect(config.signature.height).toBeTypeOf("number");
+    expect(config.signature.imagePath).toBeTypeOf("string");
+    expect(config.signature.width).toBeTypeOf("number");
+    expect(config.signature.x).toBeTypeOf("number");
+    expect(config.signature.y).toBeTypeOf("number");
   });
 });
