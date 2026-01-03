@@ -2,7 +2,7 @@ import { type Browser, type BrowserContext, type Page, chromium } from "playwrig
 import { afterAll, beforeAll } from "bun:test";
 import { join } from "node:path";
 
-export const SCENARIOS_DIR = join(import.meta.dir, "fixtures", "scenarios");
+export const FIXTURES_DIR = join(import.meta.dir, "fixtures");
 
 let sharedBrowser: Browser | undefined;
 let testPdfBytes: ArrayBuffer | undefined;
@@ -13,7 +13,7 @@ async function getSharedBrowser(): Promise<Browser> {
 }
 
 async function getTestPdfBytes(): Promise<ArrayBuffer> {
-  testPdfBytes ??= await Bun.file(join(import.meta.dir, "../fixtures/sample.pdf")).arrayBuffer();
+  testPdfBytes ??= await Bun.file(join(FIXTURES_DIR, "sample.pdf")).arrayBuffer();
   return testPdfBytes;
 }
 
