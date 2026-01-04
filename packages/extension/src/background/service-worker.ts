@@ -42,10 +42,14 @@ function startDownloadCapture(): void {
   // Listen for PDF download requests
   webRequestListener = (details: chrome.webRequest.WebRequestDetails): void => {
     // Only capture attachment downloads
-    if (
-      !details.url.includes("attachments.office.net") &&
-      !details.url.includes("GetFileAttachment")
-    ) {
+    try {
+      const url = new URL(details.url);
+      const isAttachmentUrl =
+        url.hostname === "attachments.office.net" && url.pathname.includes("GetFileAttachment");
+      if (!isAttachmentUrl) {
+        return;
+      }
+    } catch {
       return;
     }
 
