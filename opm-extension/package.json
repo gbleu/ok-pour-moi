@@ -1,0 +1,20 @@
+{
+  "name": "opm-extension",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "bun run build.ts",
+    "watch": "bun run build.ts --watch"
+  },
+  "dependencies": {
+    "pdf-lib": "1.17.1"
+  },
+  "devDependencies": {
+    "@anthropic-ai/claude-code": "*",
+    "@anthropic-ai/sdk": "*",
+    "@anthropic-ai/tokenizer": "*",
+    "@changesets/cli": "*",
+    "@types/chrome": "^0.0.287",
+    "typescript": "^5.7.2"
+  }
+}

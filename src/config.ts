@@ -14,7 +14,7 @@ if (!parsed.success) {
 const env = parsed.data;
 
 export const config = {
-  browser: { headless: env.OPM_HEADLESS ?? false },
+  browser: { headless: env.OPM_HEADLESS ?? false, useChrome: env.OPM_USE_CHROME },
   cc: { emails: env.OPM_CC_EMAILS, enabled: env.OPM_CC_ENABLED },
   myEmail: env.OPM_MY_EMAIL,
   outlook: { folder: env.OPM_OUTLOOK_FOLDER },
