@@ -14,6 +14,7 @@ export interface PdfItem {
   conversationId: string;
   filename: string;
   senderLastname: string;
+  senderEmail: string;
   signedPdf: Uint8Array;
   subject: string;
 }
@@ -105,6 +106,7 @@ export async function collectSignedPdfs(
         items.push({
           conversationId,
           filename: response.filename,
+          senderEmail: message.senderEmail,
           senderLastname: message.senderLastname,
           signedPdf: new Uint8Array(response.signedPdf),
           subject,

@@ -1,10 +1,11 @@
 import { TIMING, simulateKeyPress, sleep } from "./dom-utils.js";
 import {
   addCcRecipients,
+  addToRecipient,
   attachFile,
   closeCompose,
   moveToFolder,
-  openReply,
+  openForward,
   saveDraft,
   typeMessage,
 } from "./outlook-actions.js";
@@ -28,8 +29,11 @@ export async function prepareDrafts(
     onProgress?.(idx + 1, items.length, item.subject);
 
     try {
-      console.log(`[OPM]   Opening reply...`);
-      const composeBody = await openReply(item.conversationId);
+      console.log(`[OPM]   Opening forward...`);
+      const composeBody = await openForward(item.conversationId);
+
+      console.log(`[OPM]   Adding To recipient: ${item.senderEmail}`);
+      await addToRecipient(item.senderEmail, composeBody);
 
       console.log(`[OPM]   Typing message...`);
       typeMessage(composeBody, config.replyMessage);

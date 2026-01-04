@@ -10,8 +10,9 @@ import {
   typeText,
   waitForElement,
 } from "./dom-utils.js";
+import { extractEmail, extractLastname } from "../shared/pdf.js";
+
 import { escapeCssValue } from "../shared/css.js";
-import { extractLastname } from "../shared/pdf.js";
 
 export async function navigateToFolder(folderName: string): Promise<void> {
   const treeitems = document.querySelectorAll('[role="treeitem"]');
@@ -48,6 +49,7 @@ export interface EmailSelection {
 export interface MessageInfo {
   element: Element;
   senderLastname: string;
+  senderEmail: string;
 }
 
 export async function selectEmail(index: number): Promise<EmailSelection> {
@@ -142,7 +144,7 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
         fromText.includes("From:") ? fromText : `From: ${fromText}`,
       );
       console.log(`[OPM] Found message from others: "${fromText}" -> lastname: ${senderLastname}`);
-      return { element: el, senderLastname };
+      return { element: el, senderEmail: extractEmail(fromText), senderLastname };
     }
   }
 
@@ -357,6 +359,25 @@ export async function openReply(conversationId?: string): Promise<HTMLElement> {
   return composeBody;
 }
 
+export async function openForward(conversationId?: string): Promise<HTMLElement> {
+  if (conversationId !== undefined && conversationId !== "") {
+    const emailItem = document.querySelector(`[data-convid="${escapeCssValue(conversationId)}"]`);
+    if (emailItem !== null) {
+      simulateClick(emailItem);
+      await sleep(TIMING.UI_SETTLE);
+    }
+  }
+
+  const forwardBtn = await waitForElement('button[name="Forward"], button[aria-label*="Forward"]');
+  simulateClick(forwardBtn);
+
+  const composeBody = await waitForElement('div[role="textbox"][contenteditable="true"]');
+  if (!(composeBody instanceof HTMLElement)) {
+    throw new Error("Compose body is not an HTMLElement");
+  }
+  return composeBody;
+}
+
 export async function addCcRecipients(emails: string[], composeBody?: HTMLElement): Promise<void> {
   if (emails.length === 0) {
     return;
@@ -544,6 +565,40 @@ export async function addCcRecipients(emails: string[], composeBody?: HTMLElemen
     simulateKeyPress("Tab");
     await sleep(TIMING.UI_SETTLE);
   }
+}
+
+export async function addToRecipient(email: string, _composeBody?: HTMLElement): Promise<void> {
+  if (email === "") {
+    return;
+  }
+  await sleep(TIMING.UI_SETTLE);
+
+  // Find To input - in Forward mode it's visible
+  const toInput = await waitForElement(
+    '[role="combobox"][aria-label="To"], input[aria-label="To"]',
+    { timeout: TIMING.CC_FIELD },
+  );
+
+  if (!(toInput instanceof HTMLElement)) {
+    throw new Error("Could not find To input field");
+  }
+
+  simulateClick(toInput);
+  await sleep(TIMING.UI_SETTLE);
+
+  if (toInput.isContentEditable || toInput.getAttribute("contenteditable") === "true") {
+    toInput.focus();
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- Required for contenteditable
+    document.execCommand("insertText", false, email);
+  } else {
+    toInput.focus();
+    (toInput as HTMLInputElement).value = email;
+    toInput.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  await sleep(TIMING.UI_SETTLE);
+  simulateKeyPress("Tab");
+  await sleep(TIMING.UI_SETTLE);
 }
 
 export async function attachFile(pdfBytes: Uint8Array, filename: string): Promise<void> {
