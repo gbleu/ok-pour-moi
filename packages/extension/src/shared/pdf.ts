@@ -69,7 +69,7 @@ export function extractLastname(fromText: string): string {
 
 export function extractEmail(fromText: string): string {
   const angleMatch = fromText.match(/<([^>]+@[^>]+)>/);
-  if (angleMatch?.[1]) {
+  if (angleMatch) {
     return angleMatch[1];
   }
   const emailMatch = fromText.match(/[\w.+-]+@[\w.-]+\.\w+/);

@@ -590,9 +590,9 @@ export async function addToRecipient(email: string, _composeBody?: HTMLElement):
     toInput.focus();
     // eslint-disable-next-line @typescript-eslint/no-deprecated -- Required for contenteditable
     document.execCommand("insertText", false, email);
-  } else {
+  } else if (toInput instanceof HTMLInputElement) {
     toInput.focus();
-    (toInput as HTMLInputElement).value = email;
+    toInput.value = email;
     toInput.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
