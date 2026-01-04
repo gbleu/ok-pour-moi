@@ -67,6 +67,15 @@ export function extractLastname(fromText: string): string {
   return parts.at(-1) ?? "Unknown";
 }
 
+export function extractEmail(fromText: string): string {
+  const angleMatch = fromText.match(/<([^>]+@[^>]+)>/);
+  if (angleMatch?.[1]) {
+    return angleMatch[1];
+  }
+  const emailMatch = fromText.match(/[\w.+-]+@[\w.-]+\.\w+/);
+  return emailMatch?.[0] ?? "";
+}
+
 export interface SignaturePosition {
   height: number;
   width: number;
