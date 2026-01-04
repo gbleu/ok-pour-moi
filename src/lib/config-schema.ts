@@ -24,6 +24,10 @@ export const envSchema = z.object({
   OPM_SIGNATURE_WIDTH: z.coerce.number(),
   OPM_SIGNATURE_X: z.coerce.number(),
   OPM_SIGNATURE_Y: z.coerce.number(),
+  OPM_USE_CHROME: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((val) => val === "true"),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

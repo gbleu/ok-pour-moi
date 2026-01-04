@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>OK Pour Moi</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        width: 320px;
+        padding: 16px;
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+      }
+      h3 {
+        margin: 0 0 12px 0;
+        color: #333;
+        font-size: 16px;
+      }
+      .status {
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      .status.ready {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .status.error {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .status.warning {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .status.info {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .run-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        background: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .run-btn:hover:not(:disabled) {
+        background: #006cbd;
+      }
+      .run-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .progress {
+        margin-top: 12px;
+      }
+      .progress progress {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+      }
+      .progress-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+      .settings-link {
+        margin-top: 12px;
+        text-align: center;
+        font-size: 13px;
+      }
+      .settings-link a {
+        color: #0078d4;
+        text-decoration: none;
+      }
+      .settings-link a:hover {
+        text-decoration: underline;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>OK Pour Moi</h3>
+    <div id="status" class="status info">Checking configuration...</div>
+    <button id="run-btn" class="run-btn" disabled>Sign PDFs & Create Drafts</button>
+    <div id="progress" class="progress hidden">
+      <progress id="progress-bar" max="100" value="0"></progress>
+      <div id="progress-text" class="progress-text"></div>
+    </div>
+    <div class="settings-link">
+      <a href="#" id="settings-link">Settings</a>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

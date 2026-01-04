@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | xargs bun run fmt --no-error-on-unmatched-pattern"
+            "command": "bun run fmt || true"
           }
         ]
       }
