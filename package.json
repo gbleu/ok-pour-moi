@@ -2,6 +2,9 @@
   "name": "ok-pour-moi",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "type": "module",
   "module": "src/index.ts",
   "scripts": {
