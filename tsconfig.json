@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
@@ -19,15 +19,11 @@
 
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noPropertyAccessFromIndexSignature": true,
 
-    "exactOptionalPropertyTypes": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-
-    "types": ["bun-types"]
+    "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "build.ts"]
 }

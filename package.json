@@ -2,24 +2,18 @@
   "name": "ok-pour-moi",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "type": "module",
-  "module": "src/index.ts",
   "scripts": {
-    "start": "bun src/index.ts",
+    "build": "bun run build.ts",
     "fmt": "oxfmt",
-    "lint": "oxlint --type-aware --type-check",
-    "test": "bun test"
+    "lint": "oxlint --type-aware --type-check"
   },
   "dependencies": {
-    "pdf-lib": "1.17.1",
-    "playwright": "1.57.0",
-    "zod": "4.3.5"
+    "pdf-lib": "1.17.1"
   },
   "devDependencies": {
     "@types/bun": "1.3.5",
+    "@types/chrome": "^0.0.287",
     "lefthook": "^2.0.13",
     "oxfmt": "^0.21.0",
     "oxlint": "^1.36.0",

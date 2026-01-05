@@ -1,81 +1,47 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Commands
 
 ```bash
-# Install dependencies
-bun install
-bunx playwright install chromium
-
-# Run the tool
-bun run start
-
-# Run all tests
-bun test
-
-# Run a single test file
-bun test src/lib/pdf.test.ts
-
-# Lint (type-aware)
-bun run lint
-
-# Format
-bun run fmt
+bun install          # Install dependencies
+bun run build        # Build extension to ./dist
+bun run lint         # Lint (type-aware)
+bun run fmt          # Format
 ```
 
 ## Architecture
 
-This is a PDF signing automation tool for Outlook Web. It processes emails from a designated folder, signs attached PDFs, and creates reply drafts.
+Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, signs them, creates reply drafts.
 
-### Flow
-
-1. `src/index.ts` → loads config, calls `runCommand()`
-2. `src/commands/run.ts` → orchestrates the workflow via `runWorkflow()`
-3. `src/services/browser.ts` → manages Playwright persistent context, handles Outlook login
-4. `src/lib/outlook-dom.ts` → reads emails, downloads attachments, returns `PdfItem[]` with signed PDFs
-5. `src/lib/outlook-compose.ts` → creates draft replies with signed PDF attachments
-6. `src/lib/outlook-actions.ts` → low-level Outlook DOM interactions (navigation, clicking, typing)
-
-### Key Types
-
-- `PdfItem`: conversation data with signed PDF bytes
-- `SignaturePosition`: coordinates for PDF signature placement
-- `BrowserSession`: Playwright page wrapper with cleanup
-
-### Config
-
-Environment variables validated via Zod schema (`src/lib/config-schema.ts`). Config is lazy-loaded and cached as a singleton via proxy (`src/config.ts`).
-
-User data stored in `~/.ok-pour-moi/`:
-
-- `signature.png` - signature image
-- `browser/` - Playwright persistent session
-- `logs/` - error screenshots
-
-### Testing
-
-Integration tests use a mock Outlook HTML fixture in `src/__test__/fixtures/`. Browser context is shared across tests via `setupBrowser()` helper from `src/__test__/test-helper.ts`.
-
-## Import Sorting Rules (oxlint)
-
-The `sort-imports` rule enforces this order:
-
-1. **Multi-specifier imports first** (2+ members), sorted by first member name
-2. **Single-specifier imports second** (1 member), sorted by first member name
-
-Sorting is by **first imported member name** (case-sensitive ASCII: uppercase before lowercase), NOT by module path.
-
-```typescript
-// Correct order:
-import { FIXTURES_DIR, setupBrowser } from "./test-helper.js";    // F < a
-import { addCcRecipients, closeCompose } from "./actions.js";     // a < d
-import { describe, expect, test } from "bun:test";                // d
-
-import type { Page } from "playwright";     // P < c (single-specifier)
-import { collectPdfs } from "./dom.js";     // c < g
-import { getFormat } from "./pdf.js";       // g
+```
+src/
+├── content/           # Content scripts (injected into Outlook)
+│   ├── outlook-actions.ts  # DOM interactions (click, type, download)
+│   ├── outlook-compose.ts  # Create draft replies
+│   ├── outlook-dom.ts      # Find messages, attachments, sign PDFs
+│   ├── dom-utils.ts        # Low-level DOM utilities
+│   └── content.ts          # Entry point, message handling
+├── background/        # Service worker
+│   └── service-worker.ts   # PDF signing, config storage
+├── popup/             # Extension popup UI
+├── options/           # Settings page
+└── shared/            # Shared types and utilities
+    ├── pdf.ts         # PDF signing with pdf-lib
+    ├── storage.ts     # Chrome storage API wrappers
+    └── messages.ts    # Message types
 ```
 
-Empty catch handlers must have a comment: `.catch(() => { /* Ignore */ })`
+### Workflow
+
+1. User selects conversation in Outlook Web
+2. Clicks extension popup → "Run"
+3. Content script finds PDF attachments from latest message
+4. Downloads PDF, sends to service worker for signing
+5. Creates reply draft with signed PDF attached
+
+## Import Sorting (oxlint)
+
+1. Multi-specifier imports first (2+ members), sorted by first member
+2. Single-specifier imports second, sorted by first member
+
+Sorting by first imported member name (case-sensitive ASCII), not module path.
