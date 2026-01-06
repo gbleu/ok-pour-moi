@@ -66,6 +66,24 @@ export async function expandThread(): Promise<number> {
   return expandClicks;
 }
 
+function isOwnMessage(
+  myEmail: string,
+  {
+    elementEmail,
+    fromText,
+    textContent,
+  }: { elementEmail: string; fromText: string; textContent: string },
+): boolean {
+  const myEmailLower = myEmail.toLowerCase();
+  const textLower = textContent.toLowerCase();
+  return (
+    elementEmail.toLowerCase() === myEmailLower ||
+    fromText.toLowerCase().includes(myEmailLower) ||
+    textLower === "you" ||
+    textLower === "moi"
+  );
+}
+
 export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (readingPane === null) {
@@ -87,26 +105,21 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
     const elementEmail =
       emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
 
-    const myEmailLower = myEmail.toLowerCase();
-    const isOwnMessage =
-      elementEmail.toLowerCase() === myEmailLower ||
-      fromText.toLowerCase().includes(myEmailLower) ||
-      textContent.toLowerCase() === "you" ||
-      textContent.toLowerCase() === "moi";
+    if (isOwnMessage(myEmail, { elementEmail, fromText, textContent })) {
+      continue;
+    }
 
-    if (!isOwnMessage) {
-      const senderLastname = extractLastname(
-        fromText.includes("From:") ? fromText : `From: ${fromText}`,
-      );
-      const senderEmail =
-        elementEmail ||
-        extractEmail(textContent) ||
-        (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
-        extractEmail(fromText);
+    const senderLastname = extractLastname(
+      fromText.includes("From:") ? fromText : `From: ${fromText}`,
+    );
+    const senderEmail =
+      elementEmail ||
+      extractEmail(textContent) ||
+      (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
+      extractEmail(fromText);
 
-      if (senderEmail) {
-        return { element: el, senderEmail, senderLastname };
-      }
+    if (senderEmail) {
+      return { element: el, senderEmail, senderLastname };
     }
   }
 
