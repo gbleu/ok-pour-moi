@@ -25,6 +25,8 @@ This creates the extension in the `./dist` directory.
 3. Click "Load unpacked"
 4. Select the `dist` directory from this project
 
+**Note**: After making code changes, rebuild with `bun run build` and click the reload icon on the extension card in `chrome://extensions/`
+
 ### 4. Configure extension
 
 1. Click the extension icon in Chrome toolbar
@@ -37,7 +39,7 @@ This creates the extension in the `./dist` directory.
 
 ## Usage
 
-1. Open Outlook Web (`outlook.office.com`, `outlook.office365.com`, or `outlook.live.com`)
+1. Open Outlook Web (`outlook.com`, `outlook.office.com`, `outlook.office365.com`, or `outlook.live.com`)
 2. Select a conversation containing PDF attachments
 3. Click the extension icon in Chrome toolbar
 4. Click "Sign PDFs & Create Drafts"
