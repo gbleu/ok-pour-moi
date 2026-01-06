@@ -4,19 +4,46 @@
     <meta charset="UTF-8" />
     <title>Mock Outlook Message</title>
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; }
-      .message { border: 1px solid #eee; margin: 10px 0; padding: 15px; }
-      .attachment { background: #f5f5f5; padding: 8px 12px; margin: 4px 0; cursor: pointer; }
-      .compose-dialog { position: fixed; bottom: 0; right: 20px; width: 500px; background: white; border: 1px solid #ccc; padding: 15px; }
-      .compose-body { min-height: 150px; border: 1px solid #ccc; padding: 10px; }
-      [contenteditable]:focus { outline: 2px solid #0078d4; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      .message {
+        border: 1px solid #eee;
+        margin: 10px 0;
+        padding: 15px;
+      }
+      .attachment {
+        background: #f5f5f5;
+        padding: 8px 12px;
+        margin: 4px 0;
+        cursor: pointer;
+      }
+      .compose-dialog {
+        position: fixed;
+        bottom: 0;
+        right: 20px;
+        width: 500px;
+        background: white;
+        border: 1px solid #ccc;
+        padding: 15px;
+      }
+      .compose-body {
+        min-height: 150px;
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+      [contenteditable]:focus {
+        outline: 2px solid #0078d4;
+      }
     </style>
   </head>
   <body>
     <div role="main">
       <div role="heading" aria-level="2">Quarterly Report Review</div>
 
-      <button name="See more messages" style="display: none;">See more messages</button>
+      <button name="See more messages" style="display: none">See more messages</button>
 
       <div role="listitem" class="message" data-is-focusable="true">
         <button role="button" aria-label="From: Sarah Connor" name="From: Sarah Connor">
@@ -55,7 +82,7 @@
 
     <button name="Reply" aria-label="Reply">Reply</button>
 
-    <div role="dialog" class="compose-dialog" style="display: none;">
+    <div role="dialog" class="compose-dialog" style="display: none">
       <div role="tab" name="Home">Home</div>
       <div role="textbox" contenteditable="true" class="compose-body"></div>
       <div role="listbox" aria-label="Attachments">
@@ -65,10 +92,10 @@
         </div>
       </div>
       <button aria-label="Attach">Attach</button>
-      <input type="file" accept="application/pdf" style="display: none;" />
+      <input type="file" accept="application/pdf" style="display: none" />
     </div>
 
-    <div role="menuitem" style="display: none;">Download</div>
-    <div role="menuitem" style="display: none;">Remove</div>
+    <div role="menuitem" style="display: none">Download</div>
+    <div role="menuitem" style="display: none">Remove</div>
   </body>
 </html>
