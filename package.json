@@ -7,6 +7,7 @@
     "build": "bun run build.ts",
     "fmt": "oxfmt",
     "lint": "oxlint --type-aware --type-check",
+    "test": "bun test",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "test:e2e:ui": "playwright test --config e2e/playwright.config.ts --ui"
   },
