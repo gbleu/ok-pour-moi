@@ -25,5 +25,5 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*.ts", "build.ts"]
+  "include": ["src/**/*.ts", "build.ts", "e2e/**/*.ts"]
 }

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mock Outlook Message</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; }
+      .message { border: 1px solid #eee; margin: 10px 0; padding: 15px; }
+      .attachment { background: #f5f5f5; padding: 8px 12px; margin: 4px 0; cursor: pointer; }
+      .compose-dialog { position: fixed; bottom: 0; right: 20px; width: 500px; background: white; border: 1px solid #ccc; padding: 15px; }
+      .compose-body { min-height: 150px; border: 1px solid #ccc; padding: 10px; }
+      [contenteditable]:focus { outline: 2px solid #0078d4; }
+    </style>
+  </head>
+  <body>
+    <div role="main">
+      <div role="heading" aria-level="2">Quarterly Report Review</div>
+
+      <button name="See more messages" style="display: none;">See more messages</button>
+
+      <div role="listitem" class="message" data-is-focusable="true">
+        <button role="button" aria-label="From: Sarah Connor" name="From: Sarah Connor">
+          <span data-email="sarah.connor@cyberdyne.com">Sarah CONNOR</span>
+        </button>
+        <div class="message-body">
+          <p>Please find attached the quarterly report for your review and signature.</p>
+        </div>
+        <div role="listbox" aria-label="Attachments">
+          <div role="option" class="attachment">Q4_Report.pdf (2.3 MB)</div>
+          <div role="option" class="attachment">summary.xlsx (156 KB)</div>
+        </div>
+      </div>
+
+      <div role="listitem" class="message" data-is-focusable="true">
+        <button role="button" aria-label="From: Me" name="From: Me">
+          <span>You</span>
+        </button>
+        <div class="message-body">
+          <p>Thanks, I'll take a look.</p>
+        </div>
+      </div>
+
+      <div role="listitem" class="message" data-is-focusable="true">
+        <button role="button" aria-label="From: Sarah Connor" name="From: Sarah Connor">
+          <span data-email="sarah.connor@cyberdyne.com">Sarah CONNOR</span>
+        </button>
+        <div class="message-body">
+          <p>Here is the updated version with corrections.</p>
+        </div>
+        <div role="listbox" aria-label="Attachments">
+          <div role="option" class="attachment">Q4_Report_v2.pdf (2.4 MB)</div>
+        </div>
+      </div>
+    </div>
+
+    <button name="Reply" aria-label="Reply">Reply</button>
+
+    <div role="dialog" class="compose-dialog" style="display: none;">
+      <div role="tab" name="Home">Home</div>
+      <div role="textbox" contenteditable="true" class="compose-body"></div>
+      <div role="listbox" aria-label="Attachments">
+        <div role="option" class="attachment">
+          <span>existing-attachment.pdf</span>
+          <button aria-label="More actions">...</button>
+        </div>
+      </div>
+      <button aria-label="Attach">Attach</button>
+      <input type="file" accept="application/pdf" style="display: none;" />
+    </div>
+
+    <div role="menuitem" style="display: none;">Download</div>
+    <div role="menuitem" style="display: none;">Remove</div>
+  </body>
+</html>

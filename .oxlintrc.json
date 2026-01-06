@@ -33,6 +33,10 @@
     "no-inline-comments": "off",
     "require-await": "off",
     "oxc/no-rest-spread-properties": "off",
-    "no-undefined": "off"
+    "no-undefined": "off",
+    "promise/catch-or-return": "off",
+    "promise/prefer-await-to-then": "off",
+    "typescript/promise-function-async": "off",
+    "typescript/require-await": "off"
   }
 }

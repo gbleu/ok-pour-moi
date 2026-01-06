@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mock Outlook Inbox</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; }
+      .conversation-list { width: 350px; border-right: 1px solid #ccc; }
+      .conversation { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+      .conversation:hover { background: #f5f5f5; }
+      .conversation[aria-selected="true"] { background: #e8f0fe; }
+      .reading-pane { flex: 1; padding: 20px; }
+      .container { display: flex; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="conversation-list">
+        <div data-convid="conv-001" aria-selected="true" tabindex="0" class="conversation">
+          <strong>Invoice Review</strong>
+          <div>John Doe</div>
+        </div>
+        <div data-convid="conv-002" tabindex="-1" class="conversation">
+          <strong>Meeting Notes</strong>
+          <div>Jane Smith</div>
+        </div>
+        <div data-convid="conv-003" tabindex="-1" class="conversation">
+          <strong>Project Update</strong>
+          <div>Mike Johnson</div>
+        </div>
+      </div>
+      <div role="main" class="reading-pane">
+        <div role="heading" aria-level="2">Invoice Review</div>
+
+        <div role="listitem" class="message">
+          <button role="button" aria-label="From: John Doe" name="From: John Doe">
+            <span data-email="john.doe@example.com">John Doe</span>
+          </button>
+          <p>Please review the attached invoice.</p>
+          <div role="listbox" aria-label="Attachments">
+            <div role="option">invoice.pdf (125 KB)</div>
+          </div>
+        </div>
+
+        <div role="listitem" class="message own-message">
+          <button role="button" aria-label="From: Me" name="From: Me">
+            <span>You</span>
+          </button>
+          <p>Looking at it now.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
