@@ -1,6 +1,6 @@
 # Ok pour moi
 
-PDF signing automation for Outlook. Fetches PDFs from a specified folder, signs them, and prepares draft replies with the signed PDFs attached.
+Chrome extension for signing PDF attachments in Outlook Web. Downloads PDF attachments from email conversations, signs them with your signature, and creates reply drafts with the signed PDFs attached.
 
 ## Setup
 
@@ -8,78 +8,64 @@ PDF signing automation for Outlook. Fetches PDFs from a specified folder, signs 
 
 ```bash
 bun install
-bunx playwright install chromium
 ```
 
-### 2. Create config directory
+### 2. Build the extension
 
 ```bash
-mkdir -p ~/.ok-pour-moi
+bun run build
 ```
 
-### 3. Add your signature image
+This creates the extension in the `./dist` directory.
 
-```bash
-cp /path/to/your/signature.png ~/.ok-pour-moi/signature.png
-```
+### 3. Load extension in Chrome
 
-Supported formats: `.png`, `.jpg`, `.jpeg`
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable "Developer mode" (toggle in top-right corner)
+3. Click "Load unpacked"
+4. Select the `dist` directory from this project
 
-### 4. Create Outlook folder
+### 4. Configure extension
 
-In Outlook web, create a folder named `ok pour moi` (or customize via `OPM_OUTLOOK_FOLDER` in `.env`).
-
-### 5. Create Quick Step (optional)
-
-To quickly move emails to the folder:
-
-1. In Outlook toolbar, click the `ok pour moi` dropdown next to "Move to"
-2. Click "Create new Quick Step"
-3. Name it `ok pour moi`, choose action "Move to folder" → select your folder
-4. Now you can move emails with one click from the toolbar
-
-### 6. Create config file
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your settings.
-
-**Required variables:**
-
-| Variable               | Description                                       |
-| ---------------------- | ------------------------------------------------- |
-| `OPM_MY_EMAIL`         | Your email address (to identify your messages)    |
-| `OPM_SIGNATURE_X`      | Signature X position on page (pixels from left)   |
-| `OPM_SIGNATURE_Y`      | Signature Y position on page (pixels from bottom) |
-| `OPM_SIGNATURE_WIDTH`  | Signature width in pixels                         |
-| `OPM_SIGNATURE_HEIGHT` | Signature height in pixels                        |
-| `OPM_REPLY_MESSAGE`    | Message text for the reply                        |
-
-**Optional variables:**
-
-| Variable             | Default                        | Description                        |
-| -------------------- | ------------------------------ | ---------------------------------- |
-| `OPM_OUTLOOK_FOLDER` | `ok pour moi`                  | Outlook folder to process          |
-| `OPM_SIGNATURE_PATH` | `~/.ok-pour-moi/signature.png` | Path to signature image            |
-| `OPM_CC_EMAILS`      | (empty)                        | Comma-separated CC email addresses |
-| `OPM_CC_ENABLED`     | `false`                        | Enable CC recipients               |
-| `OPM_HEADLESS`       | (unset)                        | Run browser in headless mode       |
+1. Click the extension icon in Chrome toolbar
+2. Click "Settings" to open the configuration page
+3. Fill in required settings:
+   - **Your Email Address**: Used to identify your messages in conversations
+   - **Reply Message**: Text to include in reply drafts
+   - **Signature Image**: Upload your signature (PNG or JPG format)
+   - **Signature Position**: Set X/Y position (pixels from left/bottom) and dimensions
 
 ## Usage
 
-1. Move emails with PDFs to sign into your `ok pour moi` folder (use Quick Step)
-2. Run via Spotlight: `Cmd+Space` → type `ok pour moi` → Enter
-   Or from terminal: `bun src/index.ts`
+1. Open Outlook Web (`outlook.office.com`, `outlook.office365.com`, or `outlook.live.com`)
+2. Select a conversation containing PDF attachments
+3. Click the extension icon in Chrome toolbar
+4. Click "Sign PDFs & Create Drafts"
 
-On first run, a browser window opens for Outlook login. Session is saved in `~/.ok-pour-moi/browser/`.
+The extension will:
+- Find PDF attachments in the latest message of the conversation
+- Download and sign each PDF with your signature
+- Create a reply draft with the signed PDFs attached
+- Include your reply message in the draft
 
-## Directory structure
+## Development
+
+```bash
+bun install          # Install dependencies
+bun run build        # Build extension to ./dist
+bun run lint         # Lint (type-aware)
+bun run fmt          # Format
+```
+
+## Architecture
+
+See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation.
 
 ```
-~/.ok-pour-moi/
-├── signature.png   # Signature image
-├── browser/        # Browser session data
-└── logs/           # Error screenshots
+src/
+├── content/           # Content scripts (injected into Outlook)
+├── background/        # Service worker (PDF signing, config storage)
+├── popup/             # Extension popup UI
+├── options/           # Settings page
+└── shared/            # Shared types and utilities
 ```
