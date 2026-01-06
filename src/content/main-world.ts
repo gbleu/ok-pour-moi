@@ -1,68 +1,63 @@
-/* eslint-disable unicorn/prefer-global-this -- window is required here */
-/* eslint-disable promise/prefer-await-to-then */
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- Type assertion for window extension */
-// This script runs in the MAIN world (page context) to intercept blob URLs
-// It communicates with the content script via window.postMessage
+/* eslint-disable unicorn/prefer-global-this */
 
-// Module marker (required to satisfy import/unambiguous rule, but this file runs in MAIN world)
-export type MainWorldModule = true;
-
-interface OpmWindow extends Window {
-  __opmBlobCaptureSetup: boolean;
-  __opmCapturedPdfData: number[] | undefined;
+interface BlobMessage {
+  id: string;
+  type: "OPM_GET_BLOB";
+  url: string;
 }
 
-const opmWindow = window as unknown as OpmWindow;
+function isBlobMessage(data: unknown): data is BlobMessage {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "type" in data &&
+    data.type === "OPM_GET_BLOB" &&
+    "id" in data &&
+    "url" in data
+  );
+}
 
-function setupBlobCapture(): void {
-  if (opmWindow.__opmBlobCaptureSetup) {
+const capturedBlobs = new Map<string, Blob>();
+
+const originalCreateObjectURL = URL.createObjectURL.bind(URL);
+URL.createObjectURL = (obj: Blob | MediaSource): string => {
+  const url = originalCreateObjectURL(obj);
+  if (obj instanceof Blob && obj.type === "application/pdf") {
+    capturedBlobs.set(url, obj);
+    window.postMessage({ type: "OPM_BLOB_CAPTURED", url }, "*");
+  }
+  return url;
+};
+
+async function handleBlobRequest(id: string, url: string): Promise<void> {
+  const blob = capturedBlobs.get(url);
+
+  if (blob === undefined) {
+    window.postMessage({ error: "Blob not found", id, type: "OPM_BLOB_RESULT" }, "*");
     return;
   }
-  opmWindow.__opmBlobCaptureSetup = true;
-  opmWindow.__opmCapturedPdfData = undefined;
 
-  const originalCreateObjectURL = URL.createObjectURL.bind(URL);
-
-  URL.createObjectURL = function createObjectURLOverride(obj: Blob | MediaSource): string {
-    if (obj instanceof Blob && obj.type === "application/pdf") {
-      console.log("[OPM-main] Captured PDF blob:", obj.size, "bytes");
-      (async (): Promise<void> => {
-        try {
-          const buffer = await obj.arrayBuffer();
-          opmWindow.__opmCapturedPdfData = [...new Uint8Array(buffer)];
-          console.log(
-            "[OPM-main] Stored PDF data:",
-            opmWindow.__opmCapturedPdfData.length,
-            "bytes",
-          );
-          opmWindow.postMessage(
-            { size: opmWindow.__opmCapturedPdfData.length, type: "OPM_BLOB_CAPTURED" },
-            "*",
-          );
-        } catch (error: unknown) {
-          console.error("[OPM-main] Failed to read blob:", error);
-        }
-      })().catch(() => {
-        /* Ignore */
-      });
-    }
-    return originalCreateObjectURL(obj);
-  };
-
-  // Listen for requests to get the captured data
-  opmWindow.addEventListener("message", (event: MessageEvent<{ type: string }>) => {
-    if (event.data?.type === "OPM_GET_BLOB_DATA") {
-      console.log("[OPM-main] Received request for blob data");
-      if (opmWindow.__opmCapturedPdfData === undefined) {
-        opmWindow.postMessage({ data: undefined, type: "OPM_BLOB_DATA" }, "*");
-      } else {
-        opmWindow.postMessage({ data: opmWindow.__opmCapturedPdfData, type: "OPM_BLOB_DATA" }, "*");
-        opmWindow.__opmCapturedPdfData = undefined;
-      }
-    }
-  });
-
-  console.log("[OPM-main] Blob capture installed in MAIN world");
+  try {
+    const buffer = await blob.arrayBuffer();
+    window.postMessage({ data: [...new Uint8Array(buffer)], id, type: "OPM_BLOB_RESULT" }, "*");
+  } catch (error: unknown) {
+    window.postMessage(
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+        id,
+        type: "OPM_BLOB_RESULT",
+      },
+      "*",
+    );
+  }
 }
 
-setupBlobCapture();
+window.addEventListener("message", (event) => {
+  if (event.source !== window || !isBlobMessage(event.data)) {
+    return;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  handleBlobRequest(event.data.id, event.data.url);
+});
+
+export type MainWorldModule = true;

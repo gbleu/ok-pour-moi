@@ -3,9 +3,10 @@
   "name": "OK Pour Moi",
   "version": "1.0.0",
   "description": "Sign PDF attachments in Outlook Web and create reply drafts",
-  "permissions": ["storage", "activeTab", "scripting", "downloads", "webRequest"],
+  "permissions": ["storage", "activeTab", "scripting", "downloads"],
   "host_permissions": [
     "https://outlook.office365.com/*",
+    "https://outlook.office.com/*",
     "https://outlook.live.com/*",
     "https://attachments.office.net/*"
   ],
@@ -19,13 +20,21 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://outlook.office365.com/mail/*", "https://outlook.live.com/mail/*"],
+      "matches": [
+        "https://outlook.office365.com/mail/*",
+        "https://outlook.office.com/mail/*",
+        "https://outlook.live.com/mail/*"
+      ],
       "js": ["content/main-world.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://outlook.office365.com/mail/*", "https://outlook.live.com/mail/*"],
+      "matches": [
+        "https://outlook.office365.com/mail/*",
+        "https://outlook.office.com/mail/*",
+        "https://outlook.live.com/mail/*"
+      ],
       "js": ["content/content.js"],
       "run_at": "document_idle"
     }

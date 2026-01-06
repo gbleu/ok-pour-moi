@@ -35,11 +35,7 @@ export interface WorkflowResult {
 export type ContentToBackgroundMessage =
   | { payload: SignPdfRequest; type: "SIGN_PDF" }
   | { type: "GET_CONFIG" }
-  | { type: "GET_SIGNATURE" }
-  | { payload: { url: string }; type: "FETCH_ATTACHMENT" }
-  | { type: "START_DOWNLOAD_CAPTURE" }
-  | { type: "STOP_DOWNLOAD_CAPTURE" }
-  | { type: "GET_CAPTURED_DOWNLOAD" };
+  | { type: "GET_SIGNATURE" };
 
 export type PopupToContentMessage =
   | { config: WorkflowConfig; type: "START_WORKFLOW" }

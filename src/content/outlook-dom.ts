@@ -21,12 +21,9 @@ export async function collectSignedPdfs(
   config: WorkflowConfig,
   onProgress?: (current: number, total: number, subject: string) => void,
 ): Promise<PdfItem[]> {
-  const items: PdfItem[] = [];
-
   const readingPane = document.querySelector('[role="main"]');
-  if (readingPane === null) {
-    console.log("[OPM] No reading pane - select a conversation first");
-    return items;
+  if (!readingPane) {
+    return [];
   }
 
   const subjectEl = readingPane.querySelector('[role="heading"][aria-level="2"]');
@@ -40,34 +37,29 @@ export async function collectSignedPdfs(
   );
   const conversationId = selectedEmail?.dataset.convid ?? "";
 
-  console.log(`[OPM] Subject: "${subject}"`);
   onProgress?.(1, 1, subject);
 
   await expandThread();
 
   const message = findLastMessageFromOthers(config.myEmail);
-  if (message === undefined) {
-    console.log("[OPM] No messages from others found");
-    return items;
+  if (!message) {
+    return [];
   }
 
   await expandMessage(message.element);
 
   const attachmentsList = findAttachmentListbox(message.element);
-  if (attachmentsList === undefined) {
-    console.log("[OPM] No attachments found");
-    return items;
+  if (!attachmentsList) {
+    return [];
   }
 
-  const pdfOptions = getPdfOptions(attachmentsList);
-  const [firstPdf] = pdfOptions;
-  if (firstPdf === undefined) {
-    console.log("[OPM] No PDF attachments found");
-    return items;
+  const [firstPdf] = getPdfOptions(attachmentsList);
+  if (!firstPdf) {
+    return [];
   }
 
-  const text = firstPdf.textContent ?? "";
-  const originalFilename = text.match(/^(.+\.pdf)/i)?.[1] ?? "attachment.pdf";
+  const originalFilename =
+    (firstPdf.textContent ?? "").match(/^(.+\.pdf)/i)?.[1] ?? "attachment.pdf";
 
   try {
     const pdfBytes = await downloadAttachment(firstPdf);
@@ -87,23 +79,23 @@ export async function collectSignedPdfs(
       type: "SIGN_PDF",
     });
 
-    if (!response.success || response.signedPdf === undefined || response.filename === undefined) {
+    if (!response.success || !response.signedPdf || response.filename === undefined) {
       console.error(`[OPM] Signing failed: ${response.error}`);
-      return items;
+      return [];
     }
 
-    items.push({
-      conversationId,
-      filename: response.filename,
-      senderEmail: message.senderEmail,
-      senderLastname: message.senderLastname,
-      signedPdf: new Uint8Array(response.signedPdf),
-      subject,
-    });
-    console.log(`[OPM] Signed: ${response.filename}`);
+    return [
+      {
+        conversationId,
+        filename: response.filename,
+        senderEmail: message.senderEmail,
+        senderLastname: message.senderLastname,
+        signedPdf: new Uint8Array(response.signedPdf),
+        subject,
+      },
+    ];
   } catch (error) {
     console.error(`[OPM] Download failed:`, error);
+    return [];
   }
-
-  return items;
 }

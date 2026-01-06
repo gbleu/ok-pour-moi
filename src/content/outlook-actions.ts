@@ -5,7 +5,6 @@ import {
   getByRole,
   simulateClick,
   simulateKeyPress,
-  simulateRightClick,
   sleep,
   typeText,
   waitForElement,
@@ -178,98 +177,111 @@ export function getPdfOptions(attachmentListbox: Element): Element[] {
   return [...options].filter((opt) => (opt.textContent ?? "").toLowerCase().includes(".pdf"));
 }
 
-// Blob capture via main-world.js
-let blobListenerReady = false;
-
-function setupBlobCapture(): void {
-  if (!blobListenerReady) {
-    window.addEventListener("message", (event: MessageEvent<{ type: string }>) => {
-      if (event.data?.type === "OPM_BLOB_CAPTURED") {
-        console.log("[OPM] Blob captured");
-      }
-    });
-    blobListenerReady = true;
-  }
+interface BlobCapturedMessage {
+  type: "OPM_BLOB_CAPTURED";
+  url: string;
 }
 
-async function getBlobData(): Promise<Uint8Array | undefined> {
-  return new Promise((resolve) => {
-    function handler(event: MessageEvent<{ data: number[] | undefined; type: string }>): void {
-      if (event.data?.type === "OPM_BLOB_DATA") {
-        window.removeEventListener("message", handler);
-        resolve(event.data.data !== undefined ? new Uint8Array(event.data.data) : undefined);
-      }
-    }
-    window.addEventListener("message", handler);
-    window.postMessage({ type: "OPM_GET_BLOB_DATA" }, "*");
-    setTimeout(() => {
+interface BlobResultMessage {
+  data?: number[];
+  error?: string;
+  id: string;
+  type: "OPM_BLOB_RESULT";
+}
+
+function isBlobCaptured(data: unknown): data is BlobCapturedMessage {
+  return (
+    typeof data === "object" && data !== null && "type" in data && data.type === "OPM_BLOB_CAPTURED"
+  );
+}
+
+function isBlobResult(data: unknown, id: string): data is BlobResultMessage {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "type" in data &&
+    data.type === "OPM_BLOB_RESULT" &&
+    "id" in data &&
+    data.id === id
+  );
+}
+
+async function waitForWindowMessage<TMessage>(
+  predicate: (data: unknown) => data is TMessage,
+  timeout: number,
+): Promise<TMessage> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
       window.removeEventListener("message", handler);
-      resolve(undefined);
-    }, 1000);
+      reject(new Error("Message timeout"));
+    }, timeout);
+
+    function handler(event: MessageEvent): void {
+      if (!predicate(event.data)) {
+        return;
+      }
+      window.removeEventListener("message", handler);
+      clearTimeout(timer);
+      resolve(event.data);
+    }
+
+    window.addEventListener("message", handler);
   });
 }
 
-async function pollForBlobData(maxAttempts = 30): Promise<Uint8Array | undefined> {
-  for (let idx = 0; idx < maxAttempts; idx += 1) {
-    await sleep(100);
-    const data = await getBlobData();
-    if (data !== undefined && data.length > 0) {
-      return data;
-    }
+async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
+  const messageId = `opm-blob-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  window.postMessage({ id: messageId, type: "OPM_GET_BLOB", url: blobUrl }, "*");
+
+  const result = await waitForWindowMessage<BlobResultMessage>(
+    (data): data is BlobResultMessage => isBlobResult(data, messageId),
+    30_000,
+  );
+
+  if (result.error !== undefined) {
+    throw new Error(result.error);
   }
-  return undefined;
+  if (!result.data) {
+    throw new Error("No blob data received");
+  }
+  return new Uint8Array(result.data);
+}
+
+async function waitForAttachmentUrl(maxAttempts = 20): Promise<string> {
+  for (let idx = 0; idx < maxAttempts; idx += 1) {
+    const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
+    if (match?.[1] !== undefined) {
+      return decodeURIComponent(match[1]);
+    }
+    await sleep(100);
+  }
+  throw new Error("Attachment ID not found in URL");
 }
 
 export async function downloadAttachment(option: Element): Promise<Uint8Array> {
-  setupBlobCapture();
+  simulateClick(option);
+  await waitForAttachmentUrl();
 
-  simulateRightClick(option);
+  const blobPromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
+
+  await sleep(TIMING.UI_SETTLE);
+  const downloadBtn = await waitForElement('[role="menuitem"]', {
+    match: (el) => {
+      const text = (el.textContent ?? "").toLowerCase();
+      return text.includes("download") || text.includes("télécharger");
+    },
+    timeout: 3000,
+  });
+  simulateClick(downloadBtn);
+
+  const { url } = await blobPromise;
+  const pdfBytes = await getBlobFromMainWorld(url);
+
+  simulateKeyPress("Escape");
   await sleep(TIMING.MENU_ANIMATION);
 
-  let downloadItem: Element | undefined;
-  try {
-    downloadItem = await waitForElement('[role="menuitem"]', {
-      match: (el) => (el.textContent ?? "").toLowerCase().includes("download"),
-      timeout: TIMING.MOVE_MENU,
-    });
-  } catch {
-    downloadItem = undefined;
-  }
-
-  if (downloadItem !== undefined) {
-    simulateClick(downloadItem);
-    const data = await pollForBlobData();
-    if (data !== undefined) {
-      return data;
-    }
-  } else {
-    simulateKeyPress("Escape");
-    await sleep(TIMING.MENU_ANIMATION);
-  }
-
-  simulateClick(option);
-  await sleep(1500);
-
-  let downloadBtn: Element | undefined;
-  try {
-    downloadBtn = await waitForElement(
-      'button[aria-label*="Download"], button[name*="Download"], [role="button"][aria-label*="Download"]',
-      { timeout: 5000 },
-    );
-  } catch {
-    downloadBtn = undefined;
-  }
-
-  if (downloadBtn !== undefined) {
-    simulateClick(downloadBtn);
-    const data = await pollForBlobData();
-    simulateKeyPress("Escape");
-    if (data !== undefined) {
-      return data;
-    }
-  }
-
-  throw new Error("Could not download attachment");
+  return pdfBytes;
 }
 
 export async function openReply(conversationId?: string): Promise<HTMLElement> {

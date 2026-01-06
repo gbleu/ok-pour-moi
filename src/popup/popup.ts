@@ -44,11 +44,23 @@ async function checkConfig(): Promise<{ config?: WorkflowConfig; error?: string;
 }
 
 async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab?.url === undefined || !/outlook\.(office365|live)\.com\/mail/.test(tab.url)) {
-    return undefined;
+  // First try active tab in current window
+  const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (
+    activeTab?.url !== undefined &&
+    /outlook\.(office365|office|live)\.com\/mail/.test(activeTab.url)
+  ) {
+    return activeTab;
   }
-  return tab;
+  // Fallback: find any Outlook tab (useful when popup is opened as a page)
+  const outlookTabs = await chrome.tabs.query({
+    url: [
+      "*://outlook.office365.com/mail/*",
+      "*://outlook.office.com/mail/*",
+      "*://outlook.live.com/mail/*",
+    ],
+  });
+  return outlookTabs[0];
 }
 
 async function runWorkflow(): Promise<void> {
