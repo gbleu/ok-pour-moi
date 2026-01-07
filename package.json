@@ -17,7 +17,7 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/bun": "1.3.5",
-    "@types/chrome": "^0.0.287",
+    "@types/chrome": "^0.1.32",
     "lefthook": "^2.0.13",
     "oxfmt": "^0.23.0",
     "oxlint": "^1.36.0",
