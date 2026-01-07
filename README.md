@@ -1,85 +1,59 @@
 # Ok pour moi
 
-PDF signing automation for Outlook. Fetches PDFs from a specified folder, signs them, and prepares draft replies with the signed PDFs attached.
+Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, signs them, and creates reply drafts.
 
 ## Setup
 
-### 1. Install dependencies
+### 1. Install dependencies and build
 
 ```bash
 bun install
-bunx playwright install chromium
+bun run build
 ```
 
-### 2. Create config directory
+### 2. Load extension in Chrome
 
-```bash
-mkdir -p ~/.ok-pour-moi
-```
+1. Open `chrome://extensions/`
+2. Enable "Developer mode" (top right)
+3. Click "Load unpacked" → select the `dist/` folder
 
-### 3. Add your signature image
+### 3. Configure the extension
 
-```bash
-cp /path/to/your/signature.png ~/.ok-pour-moi/signature.png
-```
+Click the extension icon → "Options" to configure:
 
-Supported formats: `.png`, `.jpg`, `.jpeg`
-
-### 4. Create Outlook folder
-
-In Outlook web, create a folder named `ok pour moi` (or customize via `OPM_OUTLOOK_FOLDER` in `.env`).
-
-### 5. Create Quick Step (optional)
-
-To quickly move emails to the folder:
-
-1. In Outlook toolbar, click the `ok pour moi` dropdown next to "Move to"
-2. Click "Create new Quick Step"
-3. Name it `ok pour moi`, choose action "Move to folder" → select your folder
-4. Now you can move emails with one click from the toolbar
-
-### 6. Create config file
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your settings.
-
-**Required variables:**
-
-| Variable               | Description                                       |
-| ---------------------- | ------------------------------------------------- |
-| `OPM_MY_EMAIL`         | Your email address (to identify your messages)    |
-| `OPM_SIGNATURE_X`      | Signature X position on page (pixels from left)   |
-| `OPM_SIGNATURE_Y`      | Signature Y position on page (pixels from bottom) |
-| `OPM_SIGNATURE_WIDTH`  | Signature width in pixels                         |
-| `OPM_SIGNATURE_HEIGHT` | Signature height in pixels                        |
-| `OPM_REPLY_MESSAGE`    | Message text for the reply                        |
-
-**Optional variables:**
-
-| Variable             | Default                        | Description                        |
-| -------------------- | ------------------------------ | ---------------------------------- |
-| `OPM_OUTLOOK_FOLDER` | `ok pour moi`                  | Outlook folder to process          |
-| `OPM_SIGNATURE_PATH` | `~/.ok-pour-moi/signature.png` | Path to signature image            |
-| `OPM_CC_EMAILS`      | (empty)                        | Comma-separated CC email addresses |
-| `OPM_CC_ENABLED`     | `false`                        | Enable CC recipients               |
-| `OPM_HEADLESS`       | (unset)                        | Run browser in headless mode       |
+- **Signature image**: PNG or JPG of your signature
+- **Signature position**: X, Y coordinates and dimensions
+- **Reply message**: Text for the reply draft
+- **CC emails** (optional): Comma-separated addresses
 
 ## Usage
 
-1. Move emails with PDFs to sign into your `ok pour moi` folder (use Quick Step)
-2. Run via Spotlight: `Cmd+Space` → type `ok pour moi` → Enter
-   Or from terminal: `bun src/index.ts`
+1. Open a conversation in Outlook Web with PDF attachments
+2. Click the extension icon
+3. Click "Run"
 
-On first run, a browser window opens for Outlook login. Session is saved in `~/.ok-pour-moi/browser/`.
+The extension will:
+1. Find PDF attachments from the latest message
+2. Download and sign each PDF
+3. Create a reply draft with signed PDFs attached
 
-## Directory structure
+## Development
+
+```bash
+bun run build    # Build to ./dist
+bun run lint     # Type-aware linting
+bun run fmt      # Format code
+bun run test     # Unit tests
+bun run test:e2e # E2E tests
+```
+
+## Architecture
 
 ```
-~/.ok-pour-moi/
-├── signature.png   # Signature image
-├── browser/        # Browser session data
-└── logs/           # Error screenshots
+src/
+├── content/       # Content scripts (injected into Outlook)
+├── background/    # Service worker (PDF signing, storage)
+├── popup/         # Extension popup UI
+├── options/       # Settings page
+└── shared/        # Shared types and utilities
 ```
