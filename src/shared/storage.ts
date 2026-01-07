@@ -1,6 +1,7 @@
 import type { SignatureFormat, SignaturePosition } from "./pdf.js";
 
 export interface SyncStorage {
+  [key: string]: unknown;
   myEmail: string;
   replyMessage: string;
   signaturePosition: SignaturePosition;
@@ -27,8 +28,7 @@ export const DEFAULT_SYNC_STORAGE: SyncStorage = {
 };
 
 export async function getSyncStorage(): Promise<SyncStorage> {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Chrome storage API returns unknown
-  const result = await chrome.storage.sync.get(DEFAULT_SYNC_STORAGE as unknown as Record<string, unknown>);
+  const result = await chrome.storage.sync.get(DEFAULT_SYNC_STORAGE);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Chrome storage API returns unknown
   return result as unknown as SyncStorage;
 }
