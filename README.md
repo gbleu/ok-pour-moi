@@ -33,6 +33,7 @@ Click the extension icon → "Options" to configure:
 3. Click "Sign PDFs & Create Drafts"
 
 The extension will:
+
 1. Find PDF attachments from the latest message
 2. Download and sign each PDF
 3. Create a reply draft with signed PDFs attached
