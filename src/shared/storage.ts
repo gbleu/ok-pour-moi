@@ -27,9 +27,10 @@ export const DEFAULT_SYNC_STORAGE: SyncStorage = {
 };
 
 export async function getSyncStorage(): Promise<SyncStorage> {
-  const result = await chrome.storage.sync.get(DEFAULT_SYNC_STORAGE);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Chrome storage API returns unknown
-  return result as SyncStorage;
+  const result = await chrome.storage.sync.get(DEFAULT_SYNC_STORAGE as unknown as Record<string, unknown>);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Chrome storage API returns unknown
+  return result as unknown as SyncStorage;
 }
 
 export async function setSyncStorage(data: Partial<SyncStorage>): Promise<void> {
@@ -40,7 +41,7 @@ export async function getLocalStorage(): Promise<LocalStorage> {
   // eslint-disable-next-line unicorn/no-null -- Chrome storage API requires null
   const result = await chrome.storage.local.get({ lastRun: null, signatureImage: null });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Chrome storage API returns unknown
-  return result as LocalStorage;
+  return result as unknown as LocalStorage;
 }
 
 export async function setLocalStorage(data: Partial<LocalStorage>): Promise<void> {
