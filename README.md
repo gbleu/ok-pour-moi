@@ -30,7 +30,7 @@ Click the extension icon → "Options" to configure:
 
 1. Open a conversation in Outlook Web with PDF attachments
 2. Click the extension icon
-3. Click "Run"
+3. Click "Sign PDFs & Create Drafts"
 
 The extension will:
 1. Find PDF attachments from the latest message
