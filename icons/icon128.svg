@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" fill="#0078d4" rx="19.2"/>
+  <path d="M32 64 L57.6 89.6 L96 38.4" 
+        stroke="white" stroke-width="12.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="108.8" font-family="Arial, sans-serif" font-size="32" 
+        fill="white" text-anchor="middle" font-weight="bold">OK</text>
+</svg>

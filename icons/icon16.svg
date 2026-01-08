@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect width="16" height="16" fill="#0078d4" rx="2.4"/>
+  <path d="M4 8 L7.2 11.2 L12 4.8" 
+        stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="8" y="13.6" font-family="Arial, sans-serif" font-size="4" 
+        fill="white" text-anchor="middle" font-weight="bold">OK</text>
+</svg>
