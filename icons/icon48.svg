@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" fill="#0078d4" rx="7.199999999999999"/>
+  <path d="M12 24 L21.6 33.599999999999994 L36 14.399999999999999" 
+        stroke="white" stroke-width="4.800000000000001" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="24" y="40.8" font-family="Arial, sans-serif" font-size="12" 
+        fill="white" text-anchor="middle" font-weight="bold">OK</text>
+</svg>
