@@ -44,10 +44,16 @@ Use design tools like:
 - Photoshop
 - Canva (quick templates)
 
-### Automated Creation
-Run the helper script:
+### Automated Creation (Optional)
+
+View asset creation instructions:
 ```bash
-python3 ../scripts/create-store-assets.py
+bun run store:assets
+```
+
+Or use the Python script if PIL is installed:
+```bash
+python3 scripts/create-store-assets.py
 ```
 
 ## Asset Guidelines

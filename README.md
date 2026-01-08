@@ -71,6 +71,10 @@ Ready to publish to Chrome Web Store! See [CHROME_STORE_GUIDE.md](./CHROME_STORE
    ```bash
    bun run store:assets
    ```
+   This shows instructions for creating assets. You can also use the Python script if PIL is available:
+   ```bash
+   python3 scripts/create-store-assets.py  # Optional: requires PIL
+   ```
    Replace placeholders in `store-assets/` with actual screenshots and promotional images.
 
 3. **Package for submission:**

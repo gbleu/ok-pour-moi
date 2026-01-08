@@ -84,8 +84,11 @@ Create these assets before submission:
 ### Asset Creation Tips
 
 ```bash
-# Use Python/PIL to create promotional tiles
-python3 scripts/create-store-assets.py
+# View asset creation instructions
+bun run store:assets
+
+# For actual image generation, use design tools or Python with PIL:
+python3 scripts/create-store-assets.py  # If Python/PIL available
 
 # Or use design tools:
 # - Figma (recommended for web design)
