@@ -36,8 +36,7 @@ test.describe("Content Script DOM Queries", () => {
         const emailElement = el.querySelector<HTMLElement>("[data-email]");
         const elementEmail = emailElement?.dataset.email ?? "";
 
-        const isOwnMessage =
-          textContent.toLowerCase() === "you" || textContent.toLowerCase() === "moi";
+        const isOwnMessage = ["you", "moi"].includes(textContent.toLowerCase());
 
         if (!isOwnMessage) {
           return { email: elementEmail, found: true, fromText };
