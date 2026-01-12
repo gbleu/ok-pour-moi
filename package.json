@@ -21,6 +21,6 @@
     "lefthook": "^2.0.14",
     "oxfmt": "^0.24.0",
     "oxlint": "^1.36.0",
-    "oxlint-tsgolint": "^0.10.1"
+    "oxlint-tsgolint": "^0.11.0"
   }
 }
