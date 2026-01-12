@@ -10,3 +10,4 @@ verification-screenshots
 test-results
 .gitignore
 playwright-report
+package-lock.json
