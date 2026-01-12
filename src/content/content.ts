@@ -42,7 +42,7 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
 
 // Debug trigger: press Ctrl+Shift+O to start workflow
 document.addEventListener("keydown", (event) => {
-  if (event.ctrlKey && event.shiftKey && (event.key === "O" || event.key === "o")) {
+  if (event.ctrlKey && event.shiftKey && ["O", "o"].includes(event.key)) {
     console.log("[OPM] Debug trigger: Ctrl+Shift+O pressed");
     (async (): Promise<void> => {
       const sync = await getSyncStorage();
