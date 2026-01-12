@@ -20,6 +20,7 @@ src/
 │   ├── outlook-compose.ts  # Create draft replies
 │   ├── outlook-dom.ts      # Find messages, attachments, sign PDFs
 │   ├── dom-utils.ts        # Low-level DOM utilities
+│   ├── main-world.ts       # Blob URL interception (MAIN world script)
 │   └── content.ts          # Entry point, message handling
 ├── background/        # Service worker
 │   └── service-worker.ts   # PDF signing, config storage
@@ -28,7 +29,9 @@ src/
 └── shared/            # Shared types and utilities
     ├── pdf.ts         # PDF signing with pdf-lib
     ├── storage.ts     # Chrome storage API wrappers
-    └── messages.ts    # Message types
+    ├── messages.ts    # Message types
+    ├── css.ts         # CSS value escaping utility
+    └── dom.ts         # DOM element getter utility
 ```
 
 ### Workflow
