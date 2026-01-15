@@ -18,7 +18,7 @@
     "@playwright/test": "^1.57.0",
     "@types/bun": "1.3.5",
     "@types/chrome": "^0.1.33",
-    "lefthook": "^2.0.14",
+    "lefthook": "^2.0.15",
     "oxfmt": "^0.24.0",
     "oxlint": "^1.39.0",
     "oxlint-tsgolint": "^0.11.0"
