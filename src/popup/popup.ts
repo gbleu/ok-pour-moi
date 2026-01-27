@@ -48,7 +48,9 @@ async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
   const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (
     activeTab?.url !== undefined &&
-    /outlook\.(office365|office|live)\.com\/mail/.test(activeTab.url)
+    /outlook\.(office365|office|live)\.com\/mail|outlook\.cloud\.microsoft\/mail/.test(
+      activeTab.url,
+    )
   ) {
     return activeTab;
   }
@@ -58,6 +60,7 @@ async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
       "*://outlook.office365.com/mail/*",
       "*://outlook.office.com/mail/*",
       "*://outlook.live.com/mail/*",
+      "*://outlook.cloud.microsoft/mail/*",
     ],
   });
   return outlookTabs[0];

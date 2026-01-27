@@ -105,6 +105,10 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
     const elementEmail =
       emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
 
+    // Also check title attribute (used by cloud.microsoft domain)
+    const titleElement = el.querySelector("[title*='@']");
+    const titleEmail = titleElement?.getAttribute("title") ?? "";
+
     if (isOwnMessage(myEmail, { elementEmail, fromText, textContent })) {
       continue;
     }
@@ -114,13 +118,13 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
     );
     const senderEmail =
       elementEmail ||
+      titleEmail ||
       extractEmail(textContent) ||
       (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
       extractEmail(fromText);
 
-    if (senderEmail) {
-      return { element: el, senderEmail, senderLastname };
-    }
+    // Return even without email - Reply will work via Outlook's native handling
+    return { element: el, senderEmail, senderLastname };
   }
 
   return undefined;

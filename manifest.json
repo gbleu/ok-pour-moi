@@ -8,6 +8,7 @@
     "https://outlook.office365.com/*",
     "https://outlook.office.com/*",
     "https://outlook.live.com/*",
+    "https://outlook.cloud.microsoft/*",
     "https://attachments.office.net/*"
   ],
   "action": {
@@ -23,7 +24,8 @@
       "matches": [
         "https://outlook.office365.com/mail/*",
         "https://outlook.office.com/mail/*",
-        "https://outlook.live.com/mail/*"
+        "https://outlook.live.com/mail/*",
+        "https://outlook.cloud.microsoft/mail/*"
       ],
       "js": ["content/main-world.js"],
       "run_at": "document_start",
@@ -33,7 +35,8 @@
       "matches": [
         "https://outlook.office365.com/mail/*",
         "https://outlook.office.com/mail/*",
-        "https://outlook.live.com/mail/*"
+        "https://outlook.live.com/mail/*",
+        "https://outlook.cloud.microsoft/mail/*"
       ],
       "js": ["content/content.js"],
       "run_at": "document_idle"

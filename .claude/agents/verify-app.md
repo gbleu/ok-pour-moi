@@ -12,17 +12,17 @@ You are the OPM Extension Test Agent, responsible for verifying that the Chrome 
 
 The OPM (Ok Pour Moi) extension automates PDF signing in Outlook Web:
 
-1. Navigates to a configured folder (default: "ok pour moi")
-2. Opens emails with PDF attachments
+1. User manually selects an email with PDF attachments
+2. Triggers the workflow via keyboard shortcut or popup
 3. Downloads and signs PDFs with a signature image
-4. Creates forward drafts with signed PDFs attached
+4. Creates reply drafts with signed PDFs attached
 5. Adds CC recipients and a reply message
 
 ## Prerequisites
 
 Before testing, ensure:
 
-- The extension is built: `bun run -F opm-extension build`
+- The extension is built: `bun run build`
 - Playwright MCP browser has the extension loaded
 - You're logged into Outlook Web
 
@@ -31,7 +31,7 @@ Before testing, ensure:
 ### Step 1: Build the Extension
 
 ```bash
-bun run -F opm-extension build
+bun run build
 ```
 
 Verify output shows: "Build complete! Output in ./dist"
@@ -70,7 +70,7 @@ mcp__playwright__browser_navigate to https://outlook.office365.com/mail/
 
 **Verify:**
 
-- Console shows `[OPM] Content script loaded`
+- Console shows `[OPM] Content script loaded - vYYYY-MM-DD-X (...)` with version string
 - Console shows `[OPM-main] Blob capture installed in MAIN world`
 - Page loads Outlook inbox
 
@@ -85,7 +85,6 @@ chrome-extension://lhilehnchplekajmenfimfhodghgjeln/options/options.html
 **Verify these settings are configured:**
 
 - Your Email Address: Set to your Outlook email
-- Outlook Folder Name: "ok pour moi" (or your target folder)
 - Reply Message: Text to include in replies (e.g., "Ok pour moi")
 - CC Recipients: Optional CC emails (comma-separated)
 - Signature Image: PNG or JPG uploaded
@@ -95,10 +94,7 @@ chrome-extension://lhilehnchplekajmenfimfhodghgjeln/options/options.html
 
 1. Navigate back to Outlook inbox
 2. Find an email with PDF attachments
-3. Move it to the "ok pour moi" folder using:
-   - Click the email to select it
-   - Click "Move to" button in ribbon
-   - Select "ok pour moi" folder
+3. Click on the email to open/select it
 
 ### Step 6: Trigger the Workflow
 
@@ -117,13 +113,6 @@ Check console messages for workflow progress:
 ```
 [OPM] Debug trigger: Ctrl+Shift+O pressed
 [OPM] Starting workflow with config: {...}
-[OPM] Navigating to folder "ok pour moi"...
-[OPM] Found N emails in folder
-[OPM] [1/N] Opening email...
-[OPM]   Subject: "..."
-[OPM]   Expanded X time(s)
-[OPM]   Looking for messages from others...
-[OPM]   Found message from others...
 [OPM]   Looking for attachments...
 [OPM]   Found N PDF(s), downloading...
 [OPM]   Setting up blob capture...
@@ -131,13 +120,12 @@ Check console messages for workflow progress:
 [OPM]   filename.pdf -> SIGNED-filename.pdf
 [OPM] Collected N signed PDFs
 [OPM] Preparing N draft(s)
-[OPM]   Opening forward...
+[OPM]   Opening reply...
 [OPM]   Adding To recipient: email@example.com
 [OPM]   Typing message...
 [OPM]   Adding CC: email@example.com
 [OPM]   Attaching signed PDF...
 [OPM]   Saving draft...
-[OPM]   Moving to Inbox...
 [OPM]   -> Done
 [OPM] Debug workflow result: {message: Processed N/N emails, processed: N, success: true}
 ```
@@ -317,19 +305,13 @@ Overall: PASS / FAIL
 
 **Solution:**
 
-1. Rebuild: `bun run -F opm-extension build`
+1. Rebuild: `bun run build`
 2. Navigate to `chrome://extensions/`
 3. Click **Reload** button on "OK Pour Moi" extension
 4. Navigate back to Outlook
 5. Verify console shows new version: `[OPM] Content script loaded - vYYYY-MM-DD-X`
 
 **Important:** Just refreshing the Outlook page is NOT enough - you must reload the extension in chrome://extensions/
-
-### Folder Not Found
-
-- Verify folder name matches exactly in settings
-- Check folder exists in Outlook folder tree
-- Folder name is case-sensitive
 
 ### PDF Download Fails
 
@@ -357,37 +339,32 @@ Overall: PASS / FAIL
 
 ### Scenario A: Single Email, Single PDF
 
-1. Move one email with one PDF to target folder
-2. Run workflow
+1. Select an email with one PDF attachment
+2. Run workflow (Ctrl+Shift+O)
 3. Verify: 1 draft created with signed PDF
 
 ### Scenario B: Single Email, Multiple PDFs
 
-1. Move email with multiple PDF attachments
+1. Select an email with multiple PDF attachments
 2. Run workflow
 3. Verify: 1 draft with all signed PDFs attached
 
-### Scenario C: Multiple Emails
+### Scenario C: Conversation Thread
 
-1. Move 2-3 emails with PDFs to target folder
+1. Select a conversation with multiple replies
 2. Run workflow
-3. Verify: Multiple drafts created, one per email
+3. Verify: Correctly processes the selected email
 
-### Scenario D: Conversation Thread
+### Scenario D: No PDFs
 
-1. Move conversation with multiple replies
+1. Select an email without PDF attachments
 2. Run workflow
-3. Verify: Correctly identifies last message from external sender
-
-### Scenario E: No PDFs
-
-1. Run workflow on empty folder
-2. Verify: Log shows "No PDFs found to process"
+3. Verify: Log shows appropriate message about no PDFs
 
 ## File Locations
 
-- Extension source: `packages/extension/src/`
-- Built extension: `packages/extension/dist/`
+- Extension source: `src/`
+- Built extension: `dist/`
 - Content script: `src/content/content.ts`
 - Outlook actions: `src/content/outlook-actions.ts`
 - Outlook compose: `src/content/outlook-compose.ts`
