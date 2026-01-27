@@ -62,10 +62,14 @@ If you see an old version or no version suffix, the extension wasn't reloaded.
 
 ### Step 3: Launch Browser and Navigate to Outlook
 
-Use the Playwright MCP tools to navigate:
+Use the Playwright MCP tools to navigate. The extension supports multiple Outlook domains:
 
 ```
+# Any of these domains work:
 mcp__playwright__browser_navigate to https://outlook.office365.com/mail/
+mcp__playwright__browser_navigate to https://outlook.cloud.microsoft/mail/
+mcp__playwright__browser_navigate to https://outlook.office.com/mail/
+mcp__playwright__browser_navigate to https://outlook.live.com/mail/
 ```
 
 **Verify:**
@@ -73,6 +77,8 @@ mcp__playwright__browser_navigate to https://outlook.office365.com/mail/
 - Console shows `[OPM] Content script loaded - vYYYY-MM-DD-X (...)` with version string
 - Console shows `[OPM-main] Blob capture installed in MAIN world`
 - Page loads Outlook inbox
+
+**Note:** Different organizations may use different domains. Enterprise accounts often use `outlook.cloud.microsoft` instead of `outlook.office365.com`.
 
 ### Step 4: Check Extension Configuration
 
@@ -313,6 +319,35 @@ Overall: PASS / FAIL
 
 **Important:** Just refreshing the Outlook page is NOT enough - you must reload the extension in chrome://extensions/
 
+### "No PDFs found in current conversation"
+
+This message appears when `collectSignedPdfs()` returns an empty array. Debug with:
+
+```javascript
+// Use browser_evaluate to check DOM state:
+
+// 1. Check if reading pane exists and has content
+document.querySelector('[role="main"]')?.textContent?.slice(0, 100)
+
+// 2. Check if sender elements are found
+document.querySelectorAll('[role="button"][aria-label^="From:"]').length
+
+// 3. Check if attachment listbox exists
+document.querySelector('[role="listbox"][aria-label*="attachment" i]')
+
+// 4. Check for PDF options in attachments
+[...document.querySelectorAll('[role="option"]')].filter(el =>
+  el.textContent?.toLowerCase().includes('.pdf')
+)
+```
+
+**Common causes:**
+
+1. **No email selected**: Click on an email in the list to open it in the reading pane
+2. **Content script not loaded**: Check console for `[OPM] Content script loaded` message
+3. **Wrong domain**: Verify the Outlook domain is supported (see Step 3)
+4. **DOM structure changed**: Outlook may have updated its HTML structure
+
 ### PDF Download Fails
 
 - Check for CORS errors in console
@@ -360,6 +395,42 @@ Overall: PASS / FAIL
 1. Select an email without PDF attachments
 2. Run workflow
 3. Verify: Log shows appropriate message about no PDFs
+
+## DOM Differences Between Outlook Domains
+
+Different Outlook domains may have subtle DOM differences. Key findings:
+
+### Sender Email Detection
+
+| Domain                    | Email Location                                             |
+| ------------------------- | ---------------------------------------------------------- |
+| `outlook.office365.com`   | `data-email` attribute on child element                    |
+| `outlook.cloud.microsoft` | `title` attribute on sender element (in message list only) |
+
+The extension handles both patterns. If email detection fails, the workflow still works because Outlook's Reply button handles recipients natively.
+
+### Debugging DOM Structure
+
+Use `browser_evaluate` to inspect the actual DOM:
+
+```javascript
+// Check sender button structure
+const senderBtn = document.querySelector('[role="button"][aria-label^="From:"]');
+console.log({
+  ariaLabel: senderBtn?.getAttribute("aria-label"),
+  dataEmail: senderBtn?.querySelector("[data-email]")?.dataset.email,
+  title: senderBtn?.getAttribute("title"),
+  innerHTML: senderBtn?.innerHTML.slice(0, 200),
+});
+
+// Check attachment structure
+const attachments = document.querySelector('[role="listbox"][aria-label*="attachment" i]');
+console.log({
+  found: !!attachments,
+  label: attachments?.getAttribute("aria-label"),
+  options: [...(attachments?.querySelectorAll('[role="option"]') || [])].map((o) => o.textContent),
+});
+```
 
 ## File Locations
 
