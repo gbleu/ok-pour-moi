@@ -1,4 +1,4 @@
-/* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks, promise/avoid-new, promise/always-return, prefer-destructuring, unicorn/prefer-add-event-listener */
+/* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks, promise/avoid-new, promise/always-return, unicorn/prefer-add-event-listener */
 import {
   getLocalStorage,
   getSyncStorage,
@@ -7,6 +7,23 @@ import {
 } from "../shared/storage.js";
 import { getElement } from "../shared/dom.js";
 import { getSignatureFormat } from "../shared/pdf.js";
+
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (): void => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Failed to read file"));
+      }
+    };
+    reader.onerror = (): void => {
+      reject(reader.error ?? new Error("File read error"));
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 async function loadSettings(): Promise<void> {
   const sync = await getSyncStorage();
@@ -39,45 +56,25 @@ function showStatus(type: "error" | "success", message: string): void {
 
 async function handleSignatureUpload(file: File): Promise<void> {
   const format = getSignatureFormat(file.name);
+  const dataUrl = await readFileAsDataURL(file);
+  const [, base64] = dataUrl.split(",");
 
-  return new Promise<void>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (): void => {
-      (async (): Promise<void> => {
-        const { result } = reader;
-        if (typeof result !== "string") {
-          reject(new Error("Failed to read file"));
-          return;
-        }
-        const base64 = result.split(",")[1];
-        if (base64 === undefined) {
-          reject(new Error("Failed to read file"));
-          return;
-        }
+  if (base64 === undefined) {
+    throw new Error("Failed to parse data URL");
+  }
 
-        try {
-          await setLocalStorage({
-            signatureImage: {
-              data: base64,
-              format,
-              name: file.name,
-              uploadedAt: Date.now(),
-            },
-          });
-          const preview = getElement<HTMLImageElement>("signaturePreview");
-          preview.src = result;
-          preview.classList.remove("hidden");
-          resolve();
-        } catch (error) {
-          reject(error instanceof Error ? error : new Error("Unknown error"));
-        }
-      })().catch(reject);
-    };
-    reader.onerror = (): void => {
-      reject(reader.error ?? new Error("File read error"));
-    };
-    reader.readAsDataURL(file);
+  await setLocalStorage({
+    signatureImage: {
+      data: base64,
+      format,
+      name: file.name,
+      uploadedAt: Date.now(),
+    },
   });
+
+  const preview = getElement<HTMLImageElement>("signaturePreview");
+  preview.src = dataUrl;
+  preview.classList.remove("hidden");
 }
 
 async function saveSettings(): Promise<void> {

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/background/service-worker.ts",
+    "src/content/content.ts",
+    "src/content/main-world.ts",
+    "src/options/options.ts",
+    "src/popup/popup.ts",
+    "e2e/**/*.ts"
+  ],
+  "ignore": ["e2e/mocks/**"],
+  "ignoreDependencies": ["@types/chrome", "jscpd"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "off",
+    "types": "off"
+  }
+}

@@ -9,7 +9,9 @@ export const TIMING = {
   UPLOAD_COMPLETE: 2000,
 } as const;
 
-export const sleep = async (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+export function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 export async function waitForElement(
   selector: string,
@@ -143,71 +145,33 @@ export function getButtonByName(
   return undefined;
 }
 
-export function simulateClick(element: Element): void {
+function createMouseOptions(element: Element, button: number, buttons: number): MouseEventInit {
   const rect = element.getBoundingClientRect();
-  const x = rect.left + rect.width / 2;
-  const y = rect.top + rect.height / 2;
+  const clientX = rect.left + rect.width / 2;
+  const clientY = rect.top + rect.height / 2;
+  return { bubbles: true, button, buttons, cancelable: true, clientX, clientY, view: window };
+}
 
-  const pointerOptions: PointerEventInit = {
-    bubbles: true,
-    button: 0,
-    buttons: 1,
-    cancelable: true,
-    clientX: x,
-    clientY: y,
+export function simulateClick(element: Element): void {
+  const mouseOpts = createMouseOptions(element, 0, 1);
+  const pointerOpts: PointerEventInit = {
+    ...mouseOpts,
     isPrimary: true,
     pointerId: 1,
     pointerType: "mouse",
-    view: window,
   };
 
-  const mouseOptions: MouseEventInit = {
-    bubbles: true,
-    button: 0,
-    buttons: 1,
-    cancelable: true,
-    clientX: x,
-    clientY: y,
-    view: window,
-  };
-
-  // Dispatch pointer events (React 17+ listens to these)
-  element.dispatchEvent(new PointerEvent("pointerdown", pointerOptions));
-  element.dispatchEvent(new MouseEvent("mousedown", mouseOptions));
-  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOptions, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
+  element.dispatchEvent(new PointerEvent("pointerdown", pointerOpts));
+  element.dispatchEvent(new MouseEvent("mousedown", mouseOpts));
+  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOpts, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOpts, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("click", { ...mouseOpts, buttons: 0 }));
 }
 
 export function simulateRightClick(element: Element): void {
-  const rect = element.getBoundingClientRect();
-  const x = rect.left + rect.width / 2;
-  const y = rect.top + rect.height / 2;
-
-  // Some applications need mousedown before contextmenu
-  element.dispatchEvent(
-    new MouseEvent("mousedown", {
-      bubbles: true,
-      button: 2,
-      buttons: 2,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      view: window,
-    }),
-  );
-
-  element.dispatchEvent(
-    new MouseEvent("contextmenu", {
-      bubbles: true,
-      button: 2,
-      buttons: 2,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      view: window,
-    }),
-  );
+  const opts = createMouseOptions(element, 2, 2);
+  element.dispatchEvent(new MouseEvent("mousedown", opts));
+  element.dispatchEvent(new MouseEvent("contextmenu", opts));
 }
 
 export function simulateKeyPress(

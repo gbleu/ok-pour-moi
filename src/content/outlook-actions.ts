@@ -12,34 +12,33 @@ import {
 import { extractEmail, extractLastname } from "../shared/pdf.js";
 import { escapeCssValue } from "../shared/css.js";
 
-export interface EmailSelection {
-  conversationId: string;
-  subject: string;
-}
-
 export interface MessageInfo {
   element: Element;
   senderLastname: string;
   senderEmail: string;
 }
 
-export async function selectEmail(index: number): Promise<EmailSelection> {
-  const emailItems = document.querySelectorAll("[data-convid]");
-  const emailItem = emailItems[index];
-  if (emailItem === undefined) {
-    throw new Error(`No email at index ${index}`);
+function textMatchesAny(text: string, patterns: (string | string[])[]): boolean {
+  const lower = text.toLowerCase();
+  return patterns.some((pattern) =>
+    Array.isArray(pattern)
+      ? pattern.every((word) => lower.includes(word))
+      : lower.includes(pattern),
+  );
+}
+
+async function findMenuItem(
+  patterns: (string | string[])[],
+  timeout = 2000,
+): Promise<Element | undefined> {
+  try {
+    return await waitForElement('[role="menuitem"]', {
+      match: (el) => textMatchesAny(el.textContent ?? "", patterns),
+      timeout,
+    });
+  } catch {
+    return undefined;
   }
-
-  simulateClick(emailItem);
-
-  const conversationId = emailItem instanceof HTMLElement ? (emailItem.dataset.convid ?? "") : "";
-  const subjectEl = await waitForElement('[role="main"] [role="heading"][aria-level="2"]');
-  const subject = (subjectEl.textContent ?? "Unknown")
-    .trim()
-    .replace(/Summarize$/, "")
-    .trim();
-
-  return { conversationId, subject };
 }
 
 export async function expandThread(): Promise<number> {
@@ -283,13 +282,10 @@ export async function downloadAttachment(option: Element): Promise<Uint8Array> {
   const blobPromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
 
   await sleep(TIMING.UI_SETTLE);
-  const downloadBtn = await waitForElement('[role="menuitem"]', {
-    match: (el) => {
-      const text = (el.textContent ?? "").toLowerCase();
-      return text.includes("download") || text.includes("télécharger");
-    },
-    timeout: 3000,
-  });
+  const downloadBtn = await findMenuItem(["download", "télécharger"], 3000);
+  if (downloadBtn === undefined) {
+    throw new Error("Download menu item not found");
+  }
   simulateClick(downloadBtn);
 
   const { url } = await blobPromise;
@@ -354,19 +350,7 @@ async function removeFirstAttachment(): Promise<boolean> {
   simulateClick(moreActionsBtn);
   await sleep(TIMING.MENU_ANIMATION);
 
-  let removeItem: Element | undefined;
-  try {
-    removeItem = await waitForElement('[role="menuitem"]', {
-      match: (el) => {
-        const text = (el.textContent ?? "").toLowerCase();
-        return text.includes("remove") || text.includes("delete") || text.includes("supprimer");
-      },
-      timeout: 2000,
-    });
-  } catch {
-    removeItem = undefined;
-  }
-
+  const removeItem = await findMenuItem(["remove", "delete", "supprimer"]);
   if (removeItem !== undefined) {
     simulateClick(removeItem);
     await sleep(TIMING.UI_SETTLE);
@@ -398,19 +382,10 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   simulateClick(attachBtn);
   await sleep(TIMING.MENU_ANIMATION);
 
-  let browseItem: Element | undefined;
-  try {
-    browseItem = await waitForElement('[role="menuitem"]', {
-      match: (el) => {
-        const text = (el.textContent ?? "").toLowerCase();
-        return text.includes("browse") && text.includes("computer");
-      },
-      timeout: 2000,
-    });
-  } catch {
-    browseItem = undefined;
-  }
-
+  const browseItem = await findMenuItem([
+    ["browse", "computer"],
+    ["parcourir", "ordinateur"],
+  ]);
   if (browseItem !== undefined) {
     simulateClick(browseItem);
     await sleep(TIMING.UI_SETTLE);
@@ -418,26 +393,10 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
 
   await sleep(TIMING.UI_SETTLE);
 
-  const fileInputs = document.querySelectorAll('input[type="file"]');
-  let attachmentInput: HTMLInputElement | undefined;
-
-  for (const input of fileInputs) {
-    if (!(input instanceof HTMLInputElement)) {
-      continue;
-    }
-    const accept = input.getAttribute("accept") ?? "";
-    if (!accept.startsWith("image/")) {
-      attachmentInput = input;
-      break;
-    }
-  }
-
-  if (attachmentInput === undefined && fileInputs.length > 0) {
-    const lastInput = fileInputs.item(fileInputs.length - 1);
-    if (lastInput instanceof HTMLInputElement) {
-      attachmentInput = lastInput;
-    }
-  }
+  const fileInputs = [...document.querySelectorAll<HTMLInputElement>('input[type="file"]')];
+  const attachmentInput =
+    fileInputs.find((input) => input.getAttribute("accept")?.startsWith("image/") !== true) ??
+    fileInputs.at(-1);
 
   if (attachmentInput === undefined) {
     throw new Error("Could not find file input for attachment");
