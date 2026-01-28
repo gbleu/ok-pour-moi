@@ -18,12 +18,19 @@ export interface MessageInfo {
   senderEmail: string;
 }
 
-function textMatchesAny(text: string, patterns: string[]): boolean {
+function textMatchesAny(text: string, patterns: (string | string[])[]): boolean {
   const lower = text.toLowerCase();
-  return patterns.some((pattern) => lower.includes(pattern));
+  return patterns.some((pattern) =>
+    Array.isArray(pattern)
+      ? pattern.every((word) => lower.includes(word))
+      : lower.includes(pattern),
+  );
 }
 
-async function findMenuItem(patterns: string[], timeout = 2000): Promise<Element | undefined> {
+async function findMenuItem(
+  patterns: (string | string[])[],
+  timeout = 2000,
+): Promise<Element | undefined> {
   try {
     return await waitForElement('[role="menuitem"]', {
       match: (el) => textMatchesAny(el.textContent ?? "", patterns),
@@ -375,7 +382,10 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   simulateClick(attachBtn);
   await sleep(TIMING.MENU_ANIMATION);
 
-  const browseItem = await findMenuItem(["browse this computer", "parcourir cet ordinateur"]);
+  const browseItem = await findMenuItem([
+    ["browse", "computer"],
+    ["parcourir", "ordinateur"],
+  ]);
   if (browseItem !== undefined) {
     simulateClick(browseItem);
     await sleep(TIMING.UI_SETTLE);
