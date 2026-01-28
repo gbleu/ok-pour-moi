@@ -5,6 +5,10 @@ import { generateAttachmentName, signPdf } from "../shared/pdf.js";
 
 console.log("[OPM] Service worker loaded");
 
+function formatError(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error";
+}
+
 async function handleSignPdf(request: {
   originalFilename: string;
   pdfBytes: number[];
@@ -52,6 +56,16 @@ async function handleGetSignature(): Promise<{
   };
 }
 
+function handleAsync<TResult>(
+  promise: Promise<TResult>,
+  sendResponse: (response: unknown) => void,
+): true {
+  promise.then(sendResponse).catch((error: unknown) => {
+    sendResponse({ error: formatError(error), success: false });
+  });
+  return true;
+}
+
 chrome.runtime.onMessage.addListener(
   (
     message: ContentToBackgroundMessage,
@@ -59,41 +73,14 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response: unknown) => void,
   ) => {
     if (message.type === "SIGN_PDF") {
-      handleSignPdf(message.payload)
-        .then(sendResponse)
-        .catch((error: unknown) => {
-          sendResponse({
-            error: error instanceof Error ? error.message : "Unknown error",
-            success: false,
-          });
-        });
-      return true;
+      return handleAsync(handleSignPdf(message.payload), sendResponse);
     }
-
     if (message.type === "GET_CONFIG") {
-      getSyncStorage()
-        .then(sendResponse)
-        .catch((error: unknown) => {
-          sendResponse({
-            error: error instanceof Error ? error.message : "Unknown error",
-            success: false,
-          });
-        });
-      return true;
+      return handleAsync(getSyncStorage(), sendResponse);
     }
-
     if (message.type === "GET_SIGNATURE") {
-      handleGetSignature()
-        .then(sendResponse)
-        .catch((error: unknown) => {
-          sendResponse({
-            error: error instanceof Error ? error.message : "Unknown error",
-            success: false,
-          });
-        });
-      return true;
+      return handleAsync(handleGetSignature(), sendResponse);
     }
-
     return false;
   },
 );

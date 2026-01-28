@@ -47,12 +47,15 @@ export function extractLastname(fromText: string): string {
     .replace(/<[^>]+>\s*$/, "")
     .trim();
   const parts = name.split(/\s+/).filter(Boolean);
+
   if (parts.length === 0) {
     return "Unknown";
   }
   if (parts.length === 1) {
     return parts[0] ?? "Unknown";
   }
+
+  // Check for leading uppercase parts (e.g., "DUPONT Jean" or "DE LA TOUR Pierre")
   const uppercaseParts: string[] = [];
   for (const part of parts) {
     if (part === part.toUpperCase() && part.length > 1) {
@@ -61,10 +64,8 @@ export function extractLastname(fromText: string): string {
       break;
     }
   }
-  if (uppercaseParts.length > 0) {
-    return uppercaseParts.join(" ");
-  }
-  return parts.at(-1) ?? "Unknown";
+
+  return uppercaseParts.length > 0 ? uppercaseParts.join(" ") : (parts.at(-1) ?? "Unknown");
 }
 
 export function extractEmail(fromText: string): string {
@@ -85,13 +86,18 @@ export interface SignaturePosition {
 
 export type SignatureFormat = "png" | "jpg";
 
+const EXTENSION_FORMAT_MAP: Record<string, SignatureFormat> = {
+  ".jpeg": "jpg",
+  ".jpg": "jpg",
+  ".png": "png",
+};
+
 export function getSignatureFormat(filename: string): SignatureFormat {
   const lower = filename.toLowerCase();
-  if (lower.endsWith(".png")) {
-    return "png";
-  }
-  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-    return "jpg";
+  for (const [ext, format] of Object.entries(EXTENSION_FORMAT_MAP)) {
+    if (lower.endsWith(ext)) {
+      return format;
+    }
   }
   throw new Error(
     `Unsupported signature format: "${filename}". Only .png, .jpg, .jpeg are supported.`,
