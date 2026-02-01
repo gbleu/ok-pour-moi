@@ -18,7 +18,7 @@
     "@playwright/test": "^1.58.0",
     "@types/bun": "1.3.8",
     "@types/chrome": "^0.1.36",
-    "jscpd": "^4.0.7",
+    "jscpd": "^4.0.8",
     "knip": "^5.82.1",
     "lefthook": "^2.0.16",
     "oxfmt": "^0.27.0",
