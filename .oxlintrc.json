@@ -22,7 +22,6 @@
     "import/prefer-default-export": "off",
     "import/consistent-type-specifier-style": "off",
     "import/max-dependencies": ["error", { "max": 20 }],
-    "import/no-nodejs-modules": "off",
     "import/no-relative-parent-imports": "off",
     "init-declarations": "off",
     "no-console": "off",
@@ -40,5 +39,13 @@
     "promise/prefer-await-to-then": "off",
     "typescript/promise-function-async": "off",
     "typescript/require-await": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["build.ts", "e2e/**/*.ts"],
+      "rules": {
+        "import/no-nodejs-modules": "off"
+      }
+    }
+  ]
 }
