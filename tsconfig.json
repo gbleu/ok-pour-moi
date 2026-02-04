@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "paths": {
+      "#shared/*": ["./src/shared/*"],
+      "#mocks/*": ["./e2e/mocks/*"]
+    },
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "Preserve",

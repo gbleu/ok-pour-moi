@@ -1,5 +1,5 @@
 import { type BrowserContext, type Page, chromium } from "@playwright/test";
-import { type MockConfig, createChromeMock } from "../mocks/chrome-api.js";
+import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout } from "node:timers/promises";

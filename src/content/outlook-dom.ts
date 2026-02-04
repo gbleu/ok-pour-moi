@@ -1,4 +1,4 @@
-import type { SignPdfResponse, WorkflowConfig } from "../shared/messages.js";
+import type { SignPdfResponse, WorkflowConfig } from "#shared/messages.js";
 import {
   downloadAttachment,
   expandMessage,

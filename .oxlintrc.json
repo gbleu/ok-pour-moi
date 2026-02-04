@@ -22,7 +22,6 @@
     "import/prefer-default-export": "off",
     "import/consistent-type-specifier-style": "off",
     "import/max-dependencies": ["error", { "max": 20 }],
-    "import/no-relative-parent-imports": "off",
     "init-declarations": "off",
     "no-console": "off",
     "no-await-in-loop": "off",
