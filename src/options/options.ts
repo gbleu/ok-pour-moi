@@ -4,9 +4,9 @@ import {
   getSyncStorage,
   setLocalStorage,
   setSyncStorage,
-} from "../shared/storage.js";
-import { getElement } from "../shared/dom.js";
-import { getSignatureFormat } from "../shared/pdf.js";
+} from "#shared/storage.js";
+import { getElement } from "#shared/dom.js";
+import { getSignatureFormat } from "#shared/pdf.js";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

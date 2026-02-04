@@ -1,7 +1,7 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
-import type { WorkflowConfig, WorkflowResult } from "../shared/messages.js";
-import { getLocalStorage, getSyncStorage } from "../shared/storage.js";
-import { getElement } from "../shared/dom.js";
+import type { WorkflowConfig, WorkflowResult } from "#shared/messages.js";
+import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
+import { getElement } from "#shared/dom.js";
 
 function showStatus(type: "error" | "info" | "ready" | "warning", message: string): void {
   const status = getElement<HTMLDivElement>("status");

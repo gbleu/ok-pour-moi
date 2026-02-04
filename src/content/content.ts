@@ -1,7 +1,7 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "../shared/messages.js";
+import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
 import { collectSignedPdfs } from "./outlook-dom.js";
-import { getSyncStorage } from "../shared/storage.js";
+import { getSyncStorage } from "#shared/storage.js";
 import { prepareDrafts } from "./outlook-compose.js";
 
 console.log("[OPM] Content script loaded - v2025-01-05-B (simplified: Reply + manual selection)");

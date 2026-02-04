@@ -38,5 +38,13 @@
     "promise/prefer-await-to-then": "off",
     "typescript/promise-function-async": "off",
     "typescript/require-await": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["build.ts", "e2e/**/*.ts"],
+      "rules": {
+        "import/no-nodejs-modules": "off"
+      }
+    }
+  ]
 }

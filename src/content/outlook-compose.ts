@@ -8,7 +8,7 @@ import {
   typeMessage,
 } from "./outlook-actions.js";
 import type { PdfItem } from "./outlook-dom.js";
-import type { WorkflowConfig } from "../shared/messages.js";
+import type { WorkflowConfig } from "#shared/messages.js";
 
 export async function prepareDrafts(
   items: PdfItem[],

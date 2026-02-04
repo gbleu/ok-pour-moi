@@ -1,7 +1,7 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type { ContentToBackgroundMessage, SignPdfResponse } from "../shared/messages.js";
-import { base64ToUint8Array, getLocalStorage, getSyncStorage } from "../shared/storage.js";
-import { generateAttachmentName, signPdf } from "../shared/pdf.js";
+import type { ContentToBackgroundMessage, SignPdfResponse } from "#shared/messages.js";
+import { base64ToUint8Array, getLocalStorage, getSyncStorage } from "#shared/storage.js";
+import { generateAttachmentName, signPdf } from "#shared/pdf.js";
 
 console.log("[OPM] Service worker loaded");
 

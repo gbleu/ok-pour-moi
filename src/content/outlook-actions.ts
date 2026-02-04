@@ -9,8 +9,8 @@ import {
   typeText,
   waitForElement,
 } from "./dom-utils.js";
-import { extractEmail, extractLastname } from "../shared/pdf.js";
-import { escapeCssValue } from "../shared/css.js";
+import { extractEmail, extractLastname } from "#shared/pdf.js";
+import { escapeCssValue } from "#shared/css.js";
 
 export interface MessageInfo {
   element: Element;
