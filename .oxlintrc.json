@@ -10,6 +10,14 @@
   },
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "promise", "import"],
   "ignorePatterns": ["**/fixtures/**"],
+  "overrides": [
+    {
+      "files": ["build.ts", "e2e/**/*.ts", "scripts/**/*.ts"],
+      "rules": {
+        "import/no-nodejs-modules": "off"
+      }
+    }
+  ],
   "rules": {
     "func-style": ["error", "declaration"],
     "id-length": ["error", { "exceptions": ["i", "j", "x", "y", "_"] }],
@@ -38,13 +46,5 @@
     "promise/prefer-await-to-then": "off",
     "typescript/promise-function-async": "off",
     "typescript/require-await": "off"
-  },
-  "overrides": [
-    {
-      "files": ["build.ts", "e2e/**/*.ts"],
-      "rules": {
-        "import/no-nodejs-modules": "off"
-      }
-    }
-  ]
+  }
 }

@@ -9,7 +9,7 @@ export const TIMING = {
   UPLOAD_COMPLETE: 2000,
 } as const;
 
-export function sleep(ms: number): Promise<void> {
+export async function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
@@ -57,47 +57,11 @@ export async function waitForElement(
   });
 }
 
-export async function waitForHidden(
-  element: Element,
-  timeout = TIMING.ELEMENT_VISIBLE,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const isHidden = (): boolean =>
-      !document.contains(element) || getComputedStyle(element).display === "none";
+function matchesName(el: Element, name: RegExp | string): boolean {
+  const searchText = [el.getAttribute("aria-label"), el.textContent, el.getAttribute("name")].join(
+    " ",
+  );
 
-    if (isHidden()) {
-      resolve();
-      return;
-    }
-
-    const observer = new MutationObserver(() => {
-      if (isHidden()) {
-        observer.disconnect();
-        resolve();
-      }
-    });
-
-    observer.observe(document.body, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    });
-
-    setTimeout(() => {
-      observer.disconnect();
-      reject(new Error("Timeout waiting for element to hide"));
-    }, timeout);
-  });
-}
-
-function getElementSearchText(el: Element): string {
-  const ariaLabel = el.getAttribute("aria-label") ?? "";
-  const textContent = el.textContent ?? "";
-  const nameAttr = el.getAttribute("name") ?? "";
-  return `${ariaLabel} ${textContent} ${nameAttr}`;
-}
-
-function matchesName(searchText: string, name: RegExp | string): boolean {
   return typeof name === "string"
     ? searchText.toLowerCase().includes(name.toLowerCase())
     : name.test(searchText);
@@ -111,25 +75,11 @@ export function getByRole(
   const elements = parent.querySelectorAll(`[role="${role}"]`);
 
   for (const el of elements) {
-    if (name === undefined || matchesName(getElementSearchText(el), name)) {
+    if (name === undefined || matchesName(el, name)) {
       return el;
     }
   }
   return undefined;
-}
-
-export function getAllByRole(
-  role: string,
-  options: { name?: RegExp | string; parent?: Document | Element } = {},
-): Element[] {
-  const { name, parent = document } = options;
-  const elements = parent.querySelectorAll(`[role="${role}"]`);
-
-  if (name === undefined) {
-    return [...elements];
-  }
-
-  return [...elements].filter((el) => matchesName(getElementSearchText(el), name));
 }
 
 export function getButtonByName(
@@ -138,40 +88,47 @@ export function getButtonByName(
 ): HTMLButtonElement | undefined {
   const buttons = parent.querySelectorAll("button");
   for (const btn of buttons) {
-    if (matchesName(getElementSearchText(btn), name)) {
+    if (matchesName(btn, name)) {
       return btn;
     }
   }
   return undefined;
 }
 
-function createMouseOptions(element: Element, button: number, buttons: number): MouseEventInit {
-  const rect = element.getBoundingClientRect();
-  const clientX = rect.left + rect.width / 2;
-  const clientY = rect.top + rect.height / 2;
-  return { bubbles: true, button, buttons, cancelable: true, clientX, clientY, view: window };
-}
-
 export function simulateClick(element: Element): void {
-  const mouseOpts = createMouseOptions(element, 0, 1);
-  const pointerOpts: PointerEventInit = {
-    ...mouseOpts,
+  const rect = element.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+
+  const pointerOptions: PointerEventInit = {
+    bubbles: true,
+    button: 0,
+    buttons: 1,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
     isPrimary: true,
     pointerId: 1,
     pointerType: "mouse",
+    view: window,
   };
 
-  element.dispatchEvent(new PointerEvent("pointerdown", pointerOpts));
-  element.dispatchEvent(new MouseEvent("mousedown", mouseOpts));
-  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOpts, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOpts, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("click", { ...mouseOpts, buttons: 0 }));
-}
+  const mouseOptions: MouseEventInit = {
+    bubbles: true,
+    button: 0,
+    buttons: 1,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+    view: window,
+  };
 
-export function simulateRightClick(element: Element): void {
-  const opts = createMouseOptions(element, 2, 2);
-  element.dispatchEvent(new MouseEvent("mousedown", opts));
-  element.dispatchEvent(new MouseEvent("contextmenu", opts));
+  // Dispatch pointer events (React 17+ listens to these)
+  element.dispatchEvent(new PointerEvent("pointerdown", pointerOptions));
+  element.dispatchEvent(new MouseEvent("mousedown", mouseOptions));
+  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOptions, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
 }
 
 export function simulateKeyPress(
