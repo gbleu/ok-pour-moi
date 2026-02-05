@@ -20,18 +20,17 @@ src/
 │   ├── outlook-compose.ts  # Create draft replies
 │   ├── outlook-dom.ts      # Find messages, attachments, sign PDFs
 │   ├── dom-utils.ts        # Low-level DOM utilities
-│   ├── main-world.ts       # Blob URL interception (MAIN world script)
 │   └── content.ts          # Entry point, message handling
 ├── background/        # Service worker
 │   └── service-worker.ts   # PDF signing, config storage
 ├── popup/             # Extension popup UI
 ├── options/           # Settings page
 └── shared/            # Shared types and utilities
-    ├── pdf.ts         # PDF signing with pdf-lib
-    ├── storage.ts     # Chrome storage API wrappers
+    ├── css.ts         # CSS utility (escape values)
+    ├── dom.ts         # DOM utility (getElement)
     ├── messages.ts    # Message types
-    ├── css.ts         # CSS value escaping utility
-    └── dom.ts         # DOM element getter utility
+    ├── pdf.ts         # PDF signing with pdf-lib
+    └── storage.ts     # Chrome storage API wrappers
 ```
 
 ### Workflow
@@ -52,7 +51,7 @@ src/
 
 ### Code Style
 
-- `setTimeout`: Use `import { setTimeout } from "node:timers/promises"` not `new Promise(r => setTimeout(r, ms))`
+- `setTimeout`: In Node scripts, use `import { setTimeout } from "node:timers/promises"` not `new Promise(r => setTimeout(r, ms))`. In browser code (`src/`), use the `sleep` helper from `dom-utils.ts`
 - Encoding: `utf8` not `utf-8` (unicorn/text-encoding-identifier-case)
 - Array destructuring: `const [, second] = arr` not `arr[1]` (prefer-destructuring)
 - Strict booleans: `!== undefined && !== ""` not truthy checks (strict-boolean-expressions)
