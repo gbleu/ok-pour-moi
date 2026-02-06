@@ -1,5 +1,6 @@
 import { TIMING, simulateKeyPress, sleep } from "./dom-utils.js";
 import {
+  addCcRecipients,
   attachFile,
   closeCompose,
   openReply,
@@ -26,6 +27,7 @@ export async function prepareDrafts(
 
     try {
       const composeBody = await openReply(item.conversationId);
+      await addCcRecipients(config.ccEmails);
       typeMessage(composeBody, config.replyMessage);
       await removeAllAttachments();
       await attachFile(item.signedPdf, item.filename);
