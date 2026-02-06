@@ -1,6 +1,7 @@
 import type { SignatureFormat, SignaturePosition } from "./pdf.js";
 
 export interface SyncStorage {
+  ccEmails: string[];
   myEmail: string;
   replyMessage: string;
   signaturePosition: SignaturePosition;
@@ -21,6 +22,7 @@ export interface LocalStorage {
 }
 
 const DEFAULT_SYNC_STORAGE: SyncStorage = {
+  ccEmails: [],
   myEmail: "",
   replyMessage: "",
   signaturePosition: { height: 50, width: 150, x: 100, y: 100 },

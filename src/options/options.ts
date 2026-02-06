@@ -30,6 +30,7 @@ async function loadSettings(): Promise<void> {
 
   getElement<HTMLInputElement>("myEmail").value = sync.myEmail;
   getElement<HTMLTextAreaElement>("replyMessage").value = sync.replyMessage;
+  getElement<HTMLInputElement>("ccEmails").value = sync.ccEmails.join(", ");
   getElement<HTMLInputElement>("sigX").value = String(sync.signaturePosition.x);
   getElement<HTMLInputElement>("sigY").value = String(sync.signaturePosition.y);
   getElement<HTMLInputElement>("sigWidth").value = String(sync.signaturePosition.width);
@@ -82,6 +83,10 @@ async function saveSettings(): Promise<void> {
 
   try {
     await setSyncStorage({
+      ccEmails: getElement<HTMLInputElement>("ccEmails")
+        .value.split(",")
+        .map((email) => email.trim())
+        .filter((email) => email !== ""),
       myEmail: getElement<HTMLInputElement>("myEmail").value.trim(),
       replyMessage: getElement<HTMLTextAreaElement>("replyMessage").value || "Hello, Ok pour moi.",
       signaturePosition: {
