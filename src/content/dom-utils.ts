@@ -44,11 +44,12 @@ export async function waitForElement(
       }
     });
 
-    observer.observe(parent instanceof Document ? document.body : parent, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    });
+    const observeTarget = parent instanceof Document ? document.body : parent;
+    const observerOptions: MutationObserverInit = { childList: true, subtree: true };
+    if (!(parent instanceof Document)) {
+      observerOptions.attributes = true;
+    }
+    observer.observe(observeTarget, observerOptions);
 
     setTimeout(() => {
       observer.disconnect();

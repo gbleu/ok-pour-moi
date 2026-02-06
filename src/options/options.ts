@@ -26,8 +26,7 @@ function readFileAsDataURL(file: File): Promise<string> {
 }
 
 async function loadSettings(): Promise<void> {
-  const sync = await getSyncStorage();
-  const local = await getLocalStorage();
+  const [sync, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
   getElement<HTMLInputElement>("myEmail").value = sync.myEmail;
   getElement<HTMLTextAreaElement>("replyMessage").value = sync.replyMessage;
