@@ -12,6 +12,8 @@ import {
 import { extractEmail, extractLastname } from "#shared/pdf.js";
 import { escapeCssValue } from "#shared/css.js";
 
+const isMac = navigator.userAgent.includes("Mac");
+
 export interface MessageInfo {
   element: Element;
   senderLastname: string;
@@ -88,12 +90,13 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
     const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
     const senderLastname = extractLastname(normalizedFrom);
     const senderEmail =
-      elementEmail ||
-      extractEmail(textContent) ||
-      (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
-      extractEmail(fromText);
+      elementEmail !== ""
+        ? elementEmail
+        : extractEmail(textContent) ||
+          (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
+          extractEmail(fromText);
 
-    if (senderEmail) {
+    if (senderEmail !== "") {
       return { element: el, senderEmail, senderLastname };
     }
   }
@@ -222,7 +225,7 @@ async function waitForWindowMessage<TMessage>(
 async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
   const messageId = `opm-blob-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  window.postMessage({ id: messageId, type: "OPM_GET_BLOB", url: blobUrl }, "*");
+  window.postMessage({ id: messageId, type: "OPM_GET_BLOB", url: blobUrl }, window.location.origin);
 
   const result = await waitForWindowMessage<BlobResultMessage>(
     (data) => isBlobResult(data, messageId),
@@ -232,7 +235,7 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
   if (result.error !== undefined && result.error !== "") {
     throw new Error(result.error);
   }
-  if (!result.data) {
+  if (result.data === undefined) {
     throw new Error("No blob data received");
   }
   return new Uint8Array(result.data);
@@ -408,7 +411,6 @@ export function typeMessage(composeBody: HTMLElement, message: string): void {
 }
 
 export async function saveDraft(): Promise<void> {
-  const isMac = navigator.userAgent.includes("Mac");
   simulateKeyPress("s", isMac ? { meta: true } : { ctrl: true });
   await sleep(TIMING.CONTENT_LOAD);
 }

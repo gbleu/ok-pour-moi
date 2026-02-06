@@ -10,6 +10,7 @@
   },
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
+    "https://outlook.cloud.microsoft/*",
     "https://outlook.office365.com/*",
     "https://outlook.office.com/*",
     "https://outlook.live.com/*",
@@ -26,6 +27,7 @@
   "content_scripts": [
     {
       "matches": [
+        "https://outlook.cloud.microsoft/mail/*",
         "https://outlook.office365.com/mail/*",
         "https://outlook.office.com/mail/*",
         "https://outlook.live.com/mail/*"
@@ -36,6 +38,7 @@
     },
     {
       "matches": [
+        "https://outlook.cloud.microsoft/mail/*",
         "https://outlook.office365.com/mail/*",
         "https://outlook.office.com/mail/*",
         "https://outlook.live.com/mail/*"

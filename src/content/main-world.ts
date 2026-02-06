@@ -24,7 +24,7 @@ URL.createObjectURL = (obj: Blob | MediaSource): string => {
   const url = originalCreateObjectURL(obj);
   if (obj instanceof Blob && obj.type === "application/pdf") {
     capturedBlobs.set(url, obj);
-    window.postMessage({ type: "OPM_BLOB_CAPTURED", url }, "*");
+    window.postMessage({ type: "OPM_BLOB_CAPTURED", url }, window.location.origin);
   }
   return url;
 };
@@ -33,13 +33,20 @@ async function handleBlobRequest(id: string, url: string): Promise<void> {
   const blob = capturedBlobs.get(url);
 
   if (blob === undefined) {
-    window.postMessage({ error: "Blob not found", id, type: "OPM_BLOB_RESULT" }, "*");
+    window.postMessage(
+      { error: "Blob not found", id, type: "OPM_BLOB_RESULT" },
+      window.location.origin,
+    );
     return;
   }
 
   try {
     const buffer = await blob.arrayBuffer();
-    window.postMessage({ data: [...new Uint8Array(buffer)], id, type: "OPM_BLOB_RESULT" }, "*");
+    window.postMessage(
+      { data: new Uint8Array(buffer), id, type: "OPM_BLOB_RESULT" },
+      window.location.origin,
+    );
+    capturedBlobs.delete(url);
   } catch (error: unknown) {
     window.postMessage(
       {
@@ -47,7 +54,7 @@ async function handleBlobRequest(id: string, url: string): Promise<void> {
         id,
         type: "OPM_BLOB_RESULT",
       },
-      "*",
+      window.location.origin,
     );
   }
 }
@@ -56,8 +63,7 @@ window.addEventListener("message", (event) => {
   if (event.source !== window || !isBlobMessage(event.data)) {
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  handleBlobRequest(event.data.id, event.data.url);
+  handleBlobRequest(event.data.id, event.data.url).catch(console.error);
 });
 
 export type MainWorldModule = true;

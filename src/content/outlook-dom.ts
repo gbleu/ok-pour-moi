@@ -66,14 +66,14 @@ export async function collectSignedPdfs(
 
     const response = await chrome.runtime.sendMessage<
       {
-        payload: { originalFilename: string; pdfBytes: number[]; senderLastname: string };
+        payload: { originalFilename: string; pdfBytes: Uint8Array; senderLastname: string };
         type: "SIGN_PDF";
       },
       SignPdfResponse
     >({
       payload: {
         originalFilename,
-        pdfBytes: [...pdfBytes],
+        pdfBytes,
         senderLastname: message.senderLastname,
       },
       type: "SIGN_PDF",

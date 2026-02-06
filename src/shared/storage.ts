@@ -1,7 +1,6 @@
 import type { SignatureFormat, SignaturePosition } from "./pdf.js";
 
 export interface SyncStorage {
-  [key: string]: unknown;
   myEmail: string;
   replyMessage: string;
   signaturePosition: SignaturePosition;
@@ -28,13 +27,14 @@ const DEFAULT_SYNC_STORAGE: SyncStorage = {
 };
 
 export async function getSyncStorage(): Promise<SyncStorage> {
-  const result = await chrome.storage.sync.get(DEFAULT_SYNC_STORAGE);
+  const defaults: Record<string, unknown> = { ...DEFAULT_SYNC_STORAGE };
+  const result = await chrome.storage.sync.get(defaults);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Chrome storage API returns unknown
   return result as unknown as SyncStorage;
 }
 
 export async function setSyncStorage(data: Partial<SyncStorage>): Promise<void> {
-  await chrome.storage.sync.set(data);
+  await chrome.storage.sync.set(data as Record<string, unknown>);
 }
 
 export async function getLocalStorage(): Promise<LocalStorage> {
@@ -54,5 +54,9 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 }
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
-  return btoa(String.fromCodePoint(...bytes));
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCodePoint(byte);
+  }
+  return btoa(binary);
 }

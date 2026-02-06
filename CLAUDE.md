@@ -7,6 +7,9 @@ bun install          # Install dependencies
 bun run build        # Build extension to ./dist
 bun run lint         # Lint (type-aware)
 bun run fmt          # Format
+bun run test         # Run unit tests
+bun run test:e2e     # Run e2e tests with Playwright
+bun run package      # Package extension
 ```
 
 ## Architecture
@@ -19,6 +22,7 @@ src/
 │   ├── outlook-actions.ts  # DOM interactions (click, type, download)
 │   ├── outlook-compose.ts  # Create draft replies
 │   ├── outlook-dom.ts      # Find messages, attachments, sign PDFs
+│   ├── main-world.ts       # MAIN world script (blob URL interception)
 │   ├── dom-utils.ts        # Low-level DOM utilities
 │   └── content.ts          # Entry point, message handling
 ├── background/        # Service worker
@@ -36,8 +40,8 @@ src/
 ### Workflow
 
 1. User selects conversation in Outlook Web
-2. Clicks extension popup → "Run"
-3. Content script finds PDF attachments from latest message
+2. Clicks extension popup → "Sign PDFs & Create Drafts"
+3. Content script finds PDF attachments from the last message sent by others
 4. Downloads PDF, sends to service worker for signing
 5. Creates reply draft with signed PDF attached
 

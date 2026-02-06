@@ -7,7 +7,7 @@ console.log("[OPM] Service worker loaded");
 
 async function handleSignPdf(request: {
   originalFilename: string;
-  pdfBytes: number[];
+  pdfBytes: Uint8Array;
   senderLastname: string;
 }): Promise<SignPdfResponse> {
   const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
@@ -20,14 +20,14 @@ async function handleSignPdf(request: {
 
   const signedPdf = await signPdf({
     format: local.signatureImage.format,
-    pdfBytes: new Uint8Array(request.pdfBytes),
+    pdfBytes: request.pdfBytes,
     position: config.signaturePosition,
     sigBytes,
   });
 
   return {
     filename: generateAttachmentName(request.senderLastname, new Date()),
-    signedPdf: [...signedPdf],
+    signedPdf,
     success: true,
   };
 }
@@ -61,9 +61,22 @@ function handleAsync(promise: Promise<unknown>, sendResponse: (response: unknown
 chrome.runtime.onMessage.addListener(
   (
     message: ContentToBackgroundMessage,
-    _sender: chrome.runtime.MessageSender,
+    sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void,
   ) => {
+    const allowedOrigins = [
+      "https://outlook.office.com",
+      "https://outlook.office365.com",
+      "https://outlook.live.com",
+      "https://outlook.cloud.microsoft",
+    ];
+    if (
+      sender.url === undefined ||
+      !allowedOrigins.some((origin) => sender.url?.startsWith(origin) === true)
+    ) {
+      return;
+    }
+
     if (message.type === "SIGN_PDF") {
       handleAsync(handleSignPdf(message.payload), sendResponse);
       return true;
