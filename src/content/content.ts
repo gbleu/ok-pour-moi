@@ -47,6 +47,7 @@ document.addEventListener("keydown", (event) => {
     (async (): Promise<void> => {
       const sync = await getSyncStorage();
       const config: WorkflowConfig = {
+        ccEmails: sync.ccEmails,
         myEmail: sync.myEmail,
         replyMessage: sync.replyMessage,
         signaturePosition: sync.signaturePosition,

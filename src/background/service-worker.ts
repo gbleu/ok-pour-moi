@@ -5,19 +5,14 @@ import { generateAttachmentName, signPdf } from "#shared/pdf.js";
 
 console.log("[OPM] Service worker loaded");
 
-function formatError(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 async function handleSignPdf(request: {
   originalFilename: string;
-  pdfBytes: number[];
+  pdfBytes: Uint8Array;
   senderLastname: string;
 }): Promise<SignPdfResponse> {
-  const config = await getSyncStorage();
-  const local = await getLocalStorage();
+  const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
-  if (local.signatureImage === null) {
+  if (!local.signatureImage) {
     return { error: "No signature configured", success: false };
   }
 
@@ -25,16 +20,14 @@ async function handleSignPdf(request: {
 
   const signedPdf = await signPdf({
     format: local.signatureImage.format,
-    pdfBytes: new Uint8Array(request.pdfBytes),
+    pdfBytes: request.pdfBytes,
     position: config.signaturePosition,
     sigBytes,
   });
 
-  const filename = generateAttachmentName(request.senderLastname, new Date());
-
   return {
-    filename,
-    signedPdf: [...signedPdf],
+    filename: generateAttachmentName(request.senderLastname, new Date()),
+    signedPdf,
     success: true,
   };
 }
@@ -45,42 +38,60 @@ async function handleGetSignature(): Promise<{
   format?: string;
   success: boolean;
 }> {
-  const local = await getLocalStorage();
-  if (local.signatureImage === null) {
+  const { signatureImage } = await getLocalStorage();
+  if (!signatureImage) {
     return { error: "No signature configured", success: false };
   }
   return {
-    data: local.signatureImage.data,
-    format: local.signatureImage.format,
+    data: signatureImage.data,
+    format: signatureImage.format,
     success: true,
   };
 }
 
-function handleAsync<TResult>(
-  promise: Promise<TResult>,
-  sendResponse: (response: unknown) => void,
-): true {
+function handleAsync(promise: Promise<unknown>, sendResponse: (response: unknown) => void): void {
   promise.then(sendResponse).catch((error: unknown) => {
-    sendResponse({ error: formatError(error), success: false });
+    sendResponse({
+      error: error instanceof Error ? error.message : "Unknown error",
+      success: false,
+    });
   });
-  return true;
 }
 
 chrome.runtime.onMessage.addListener(
   (
     message: ContentToBackgroundMessage,
-    _sender: chrome.runtime.MessageSender,
+    sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void,
   ) => {
+    const allowedOrigins = [
+      "https://outlook.office.com",
+      "https://outlook.office365.com",
+      "https://outlook.live.com",
+      "https://outlook.cloud.microsoft",
+    ];
+    if (
+      sender.url === undefined ||
+      !allowedOrigins.some((origin) => sender.url?.startsWith(origin) === true)
+    ) {
+      return;
+    }
+
     if (message.type === "SIGN_PDF") {
-      return handleAsync(handleSignPdf(message.payload), sendResponse);
+      handleAsync(handleSignPdf(message.payload), sendResponse);
+      return true;
     }
+
     if (message.type === "GET_CONFIG") {
-      return handleAsync(getSyncStorage(), sendResponse);
+      handleAsync(getSyncStorage(), sendResponse);
+      return true;
     }
+
     if (message.type === "GET_SIGNATURE") {
-      return handleAsync(handleGetSignature(), sendResponse);
+      handleAsync(handleGetSignature(), sendResponse);
+      return true;
     }
+
     return false;
   },
 );

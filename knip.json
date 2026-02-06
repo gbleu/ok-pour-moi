@@ -6,10 +6,11 @@
     "src/content/main-world.ts",
     "src/options/options.ts",
     "src/popup/popup.ts",
+    "scripts/*.ts",
     "e2e/**/*.ts"
   ],
   "ignore": ["e2e/mocks/**"],
-  "ignoreDependencies": ["@types/chrome", "jscpd"],
+  "ignoreDependencies": ["@types/chrome"],
   "ignoreExportsUsedInFile": true,
   "rules": {
     "exports": "off",

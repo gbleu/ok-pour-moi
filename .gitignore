@@ -10,4 +10,4 @@ verification-screenshots
 test-results
 .gitignore
 playwright-report
-package-lock.json
+ok-pour-moi-v*.zip
