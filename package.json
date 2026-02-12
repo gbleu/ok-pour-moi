@@ -20,7 +20,7 @@
     "@types/chrome": "^0.1.36",
     "jscpd": "^4.0.8",
     "knip": "^5.83.1",
-    "lefthook": "^2.1.0",
+    "lefthook": "^2.1.1",
     "oxfmt": "^0.28.0",
     "oxlint": "1.43.0",
     "oxlint-tsgolint": "^0.12.0"
