@@ -21,7 +21,7 @@
     "jscpd": "^4.0.8",
     "knip": "^5.83.1",
     "lefthook": "^2.1.1",
-    "oxfmt": "^0.28.0",
+    "oxfmt": "^0.32.0",
     "oxlint": "1.43.0",
     "oxlint-tsgolint": "^0.12.0"
   },
