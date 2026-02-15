@@ -1,28 +1,22 @@
-import type { SignatureFormat, SignaturePosition } from "./pdf.js";
+import type { SignaturePosition } from "./pdf.js";
 
 export interface WorkflowConfig {
+  ccEmails: string[];
   myEmail: string;
   replyMessage: string;
   signaturePosition: SignaturePosition;
 }
 
-export interface WorkflowProgress {
-  current: number;
-  currentSubject: string;
-  phase: "collecting" | "signing" | "drafting";
-  total: number;
-}
-
 export interface SignPdfRequest {
   originalFilename: string;
-  pdfBytes: number[];
+  pdfBytes: Uint8Array;
   senderLastname: string;
 }
 
 export interface SignPdfResponse {
   error?: string;
   filename?: string;
-  signedPdf?: number[];
+  signedPdf?: Uint8Array;
   success: boolean;
 }
 
@@ -41,13 +35,3 @@ export type PopupToContentMessage =
   | { config: WorkflowConfig; type: "START_WORKFLOW" }
   | { type: "GET_EMAIL_COUNT" }
   | { type: "CANCEL_WORKFLOW" };
-
-export type BackgroundResponse<TData> =
-  | { data: TData; success: true }
-  | { error: string; success: false };
-
-export interface SignatureData {
-  data: string;
-  format: SignatureFormat;
-  name: string;
-}

@@ -12,38 +12,17 @@ import {
 import { extractEmail, extractLastname } from "#shared/pdf.js";
 import { escapeCssValue } from "#shared/css.js";
 
+const isMac = navigator.userAgent.includes("Mac");
+
 export interface MessageInfo {
   element: Element;
   senderLastname: string;
   senderEmail: string;
 }
 
-function textMatchesAny(text: string, patterns: (string | string[])[]): boolean {
-  const lower = text.toLowerCase();
-  return patterns.some((pattern) =>
-    Array.isArray(pattern)
-      ? pattern.every((word) => lower.includes(word))
-      : lower.includes(pattern),
-  );
-}
-
-async function findMenuItem(
-  patterns: (string | string[])[],
-  timeout = 2000,
-): Promise<Element | undefined> {
-  try {
-    return await waitForElement('[role="menuitem"]', {
-      match: (el) => textMatchesAny(el.textContent ?? "", patterns),
-      timeout,
-    });
-  } catch {
-    return undefined;
-  }
-}
-
 export async function expandThread(): Promise<number> {
   const readingPane = document.querySelector('[role="main"]');
-  if (readingPane === null) {
+  if (!readingPane) {
     return 0;
   }
 
@@ -52,7 +31,7 @@ export async function expandThread(): Promise<number> {
     await sleep(TIMING.CONTENT_LOAD);
     const seeMoreBtn = getButtonByName("See more messages", readingPane);
 
-    if (seeMoreBtn === undefined || getComputedStyle(seeMoreBtn).display === "none") {
+    if (!seeMoreBtn || getComputedStyle(seeMoreBtn).display === "none") {
       misses += 1;
       continue;
     }
@@ -85,7 +64,7 @@ function isOwnMessage(
 
 export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefined {
   const readingPane = document.querySelector('[role="main"]');
-  if (readingPane === null) {
+  if (!readingPane) {
     return undefined;
   }
 
@@ -104,26 +83,22 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
     const elementEmail =
       emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
 
-    // Also check title attribute (used by cloud.microsoft domain)
-    const titleElement = el.querySelector("[title*='@']");
-    const titleEmail = titleElement?.getAttribute("title") ?? "";
-
     if (isOwnMessage(myEmail, { elementEmail, fromText, textContent })) {
       continue;
     }
 
-    const senderLastname = extractLastname(
-      fromText.includes("From:") ? fromText : `From: ${fromText}`,
-    );
+    const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
+    const senderLastname = extractLastname(normalizedFrom);
     const senderEmail =
-      elementEmail ||
-      titleEmail ||
-      extractEmail(textContent) ||
-      (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
-      extractEmail(fromText);
+      elementEmail !== ""
+        ? elementEmail
+        : extractEmail(textContent) ||
+          (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
+          extractEmail(fromText);
 
-    // Return even without email - Reply will work via Outlook's native handling
-    return { element: el, senderEmail, senderLastname };
+    if (senderEmail !== "") {
+      return { element: el, senderEmail, senderLastname };
+    }
   }
 
   return undefined;
@@ -134,8 +109,8 @@ function findAncestor(
   predicate: (ancestor: Element) => boolean,
   maxDepth = 10,
 ): Element | undefined {
-  let current: Element | null = element.parentElement;
-  for (let depth = 0; depth < maxDepth && current !== null; depth += 1) {
+  let current = element.parentElement;
+  for (let depth = 0; depth < maxDepth && current; depth += 1) {
     if (predicate(current)) {
       return current;
     }
@@ -147,15 +122,15 @@ function findAncestor(
 export async function expandMessage(messageButton: Element): Promise<void> {
   const clickTarget =
     findAncestor(messageButton, (ancestor) => {
-      const ariaLabel = ancestor.getAttribute("aria-label") ?? "";
-      if (ariaLabel.startsWith("From:")) {
+      const ariaLabel = ancestor.getAttribute("aria-label");
+      if (ariaLabel !== null && ariaLabel.startsWith("From:")) {
         return false;
       }
       const style = window.getComputedStyle(ancestor);
       return ancestor.hasAttribute("tabindex") || style.cursor === "pointer";
     }) ?? messageButton.closest('[data-is-focusable="true"], [role="listitem"], [role="article"]');
 
-  if (clickTarget !== null && clickTarget !== messageButton) {
+  if (clickTarget && clickTarget !== messageButton) {
     simulateClick(clickTarget);
   }
 
@@ -166,7 +141,7 @@ export async function expandMessage(messageButton: Element): Promise<void> {
         messageButton,
         (ancestor) =>
           ancestor.querySelector('[role="listbox"][aria-label*="attachment" i]') !== null,
-      ) !== undefined
+      )
     ) {
       return;
     }
@@ -233,7 +208,7 @@ async function waitForWindowMessage<TMessage>(
     }, timeout);
 
     function handler(event: MessageEvent): void {
-      if (!predicate(event.data)) {
+      if (event.source !== window || !predicate(event.data)) {
         return;
       }
       window.removeEventListener("message", handler);
@@ -248,17 +223,17 @@ async function waitForWindowMessage<TMessage>(
 async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
   const messageId = `opm-blob-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  window.postMessage({ id: messageId, type: "OPM_GET_BLOB", url: blobUrl }, "*");
+  window.postMessage({ id: messageId, type: "OPM_GET_BLOB", url: blobUrl }, window.location.origin);
 
   const result = await waitForWindowMessage<BlobResultMessage>(
-    (data): data is BlobResultMessage => isBlobResult(data, messageId),
+    (data) => isBlobResult(data, messageId),
     30_000,
   );
 
-  if (result.error !== undefined) {
+  if (result.error !== undefined && result.error !== "") {
     throw new Error(result.error);
   }
-  if (!result.data) {
+  if (result.data === undefined) {
     throw new Error("No blob data received");
   }
   return new Uint8Array(result.data);
@@ -267,8 +242,9 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
 async function waitForAttachmentUrl(maxAttempts = 20): Promise<string> {
   for (let idx = 0; idx < maxAttempts; idx += 1) {
     const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
-    if (match?.[1] !== undefined) {
-      return decodeURIComponent(match[1]);
+    const attachmentId = match?.[1];
+    if (attachmentId !== undefined && attachmentId !== "") {
+      return decodeURIComponent(attachmentId);
     }
     await sleep(100);
   }
@@ -282,10 +258,13 @@ export async function downloadAttachment(option: Element): Promise<Uint8Array> {
   const blobPromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
 
   await sleep(TIMING.UI_SETTLE);
-  const downloadBtn = await findMenuItem(["download", "télécharger"], 3000);
-  if (downloadBtn === undefined) {
-    throw new Error("Download menu item not found");
-  }
+  const downloadBtn = await waitForElement('[role="menuitem"]', {
+    match: (el) => {
+      const text = (el.textContent ?? "").toLowerCase();
+      return text.includes("download") || text.includes("télécharger");
+    },
+    timeout: 3000,
+  });
   simulateClick(downloadBtn);
 
   const { url } = await blobPromise;
@@ -300,7 +279,7 @@ export async function downloadAttachment(option: Element): Promise<Uint8Array> {
 export async function openReply(conversationId?: string): Promise<HTMLElement> {
   if (conversationId !== undefined && conversationId !== "") {
     const emailItem = document.querySelector(`[data-convid="${escapeCssValue(conversationId)}"]`);
-    if (emailItem !== null) {
+    if (emailItem) {
       simulateClick(emailItem);
       await sleep(TIMING.UI_SETTLE);
     }
@@ -316,42 +295,56 @@ export async function openReply(conversationId?: string): Promise<HTMLElement> {
   return composeBody;
 }
 
+async function findMenuItem(
+  predicate: (text: string) => boolean,
+  timeout = 2000,
+): Promise<Element | undefined> {
+  try {
+    return await waitForElement('[role="menuitem"]', {
+      match: (el) => predicate((el.textContent ?? "").toLowerCase()),
+      timeout,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
 async function removeFirstAttachment(): Promise<boolean> {
-  // Find compose area by locating the textbox and its container
   const composeBody = document.querySelector('div[role="textbox"][contenteditable="true"]');
-  if (composeBody === null) {
+  if (!composeBody) {
     return false;
   }
 
-  // Find the compose container (form or dialog ancestor)
   const composeContainer =
     composeBody.closest('[role="dialog"], [role="form"], form') ??
     composeBody.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;
-  if (composeContainer === null || composeContainer === undefined) {
+  if (!composeContainer) {
     return false;
   }
 
-  // Only look for attachment listbox within compose area
   const listbox = composeContainer.querySelector('[role="listbox"][aria-label*="attachment" i]');
-  if (listbox === null) {
+  if (!listbox) {
     return false;
   }
 
   const [attachment] = listbox.querySelectorAll('[role="option"]');
-  if (attachment === undefined) {
+  if (!attachment) {
     return false;
   }
 
   const moreActionsBtn = attachment.querySelector('button[aria-label*="action" i]');
-  if (moreActionsBtn === null) {
+  if (!moreActionsBtn) {
     return false;
   }
 
   simulateClick(moreActionsBtn);
   await sleep(TIMING.MENU_ANIMATION);
 
-  const removeItem = await findMenuItem(["remove", "delete", "supprimer"]);
-  if (removeItem !== undefined) {
+  const removeItem = await findMenuItem(
+    (text) => text.includes("remove") || text.includes("delete") || text.includes("supprimer"),
+  );
+
+  if (removeItem) {
     simulateClick(removeItem);
     await sleep(TIMING.UI_SETTLE);
   } else {
@@ -369,10 +362,8 @@ export async function removeAllAttachments(): Promise<void> {
 }
 
 export async function attachFile(pdfBytes: Uint8Array, filename: string): Promise<void> {
-  // Create a copy of the buffer that's properly typed
-  const arrayBuffer = new ArrayBuffer(pdfBytes.byteLength);
-  new Uint8Array(arrayBuffer).set(pdfBytes);
-  const file = new File([arrayBuffer], filename, { type: "application/pdf" });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Uint8Array is a valid BlobPart
+  const file = new File([pdfBytes as BlobPart], filename, { type: "application/pdf" });
   const dataTransfer = new DataTransfer();
   dataTransfer.items.add(file);
 
@@ -382,10 +373,10 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   simulateClick(attachBtn);
   await sleep(TIMING.MENU_ANIMATION);
 
-  const browseItem = await findMenuItem([
-    ["browse", "computer"],
-    ["parcourir", "ordinateur"],
-  ]);
+  const browseItem = await findMenuItem(
+    (text) => text.includes("browse") && text.includes("computer"),
+  );
+
   if (browseItem !== undefined) {
     simulateClick(browseItem);
     await sleep(TIMING.UI_SETTLE);
@@ -393,12 +384,17 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
 
   await sleep(TIMING.UI_SETTLE);
 
-  const fileInputs = [...document.querySelectorAll<HTMLInputElement>('input[type="file"]')];
-  const attachmentInput =
-    fileInputs.find((input) => input.getAttribute("accept")?.startsWith("image/") !== true) ??
-    fileInputs.at(-1);
+  const fileInputs = [...document.querySelectorAll('input[type="file"]')].filter(
+    (input): input is HTMLInputElement => input instanceof HTMLInputElement,
+  );
 
-  if (attachmentInput === undefined) {
+  const attachmentInput =
+    fileInputs.find((input) => {
+      const accept = input.getAttribute("accept");
+      return accept === null || !accept.startsWith("image/");
+    }) ?? fileInputs.at(-1);
+
+  if (!attachmentInput) {
     throw new Error("Could not find file input for attachment");
   }
 
@@ -407,13 +403,36 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   await sleep(TIMING.UPLOAD_COMPLETE);
 }
 
+export async function addCcRecipients(emails: string[]): Promise<void> {
+  if (emails.length === 0) {
+    return;
+  }
+
+  const ccBtn = getButtonByName(/\bCc\b/);
+  if (ccBtn) {
+    simulateClick(ccBtn);
+    await sleep(TIMING.UI_SETTLE);
+  }
+
+  const ccInput = await waitForElement('input[aria-label*="Cc" i]', { timeout: 3000 });
+  if (!(ccInput instanceof HTMLInputElement)) {
+    throw new Error("CC input is not an HTMLInputElement");
+  }
+
+  for (const email of emails) {
+    typeText(ccInput, email);
+    await sleep(TIMING.MENU_ANIMATION);
+    simulateKeyPress("Enter");
+    await sleep(TIMING.MENU_ANIMATION);
+  }
+}
+
 export function typeMessage(composeBody: HTMLElement, message: string): void {
   composeBody.focus();
   typeText(composeBody, message);
 }
 
 export async function saveDraft(): Promise<void> {
-  const isMac = navigator.userAgent.includes("Mac");
   simulateKeyPress("s", isMac ? { meta: true } : { ctrl: true });
   await sleep(TIMING.CONTENT_LOAD);
 }
@@ -423,24 +442,24 @@ export async function closeCompose(): Promise<void> {
   await sleep(TIMING.UI_SETTLE);
 
   const dialog = document.querySelector('[role="dialog"]');
-  if (dialog !== null) {
+  if (dialog) {
     const cancelBtn = [...dialog.querySelectorAll("button")].find((btn) =>
       (btn.textContent ?? "").toLowerCase().includes("cancel"),
     );
-    if (cancelBtn !== undefined) {
+    if (cancelBtn) {
       simulateClick(cancelBtn);
       await sleep(TIMING.UI_SETTLE);
     }
   }
 
   const homeTab = getByRole("tab", { name: "Home" });
-  if (homeTab !== undefined) {
+  if (homeTab) {
     simulateClick(homeTab);
     await sleep(TIMING.UI_SETTLE);
   }
 
   for (let idx = 0; idx < 20; idx += 1) {
-    if (document.querySelector('[role="textbox"][contenteditable="true"]') === null) {
+    if (!document.querySelector('[role="textbox"][contenteditable="true"]')) {
       break;
     }
     await sleep(200);
