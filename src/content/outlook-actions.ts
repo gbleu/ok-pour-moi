@@ -227,19 +227,21 @@ async function waitForWindowMessage<TMessage>(
   timeout: number,
 ): Promise<TMessage> {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      window.removeEventListener("message", handler);
-      reject(new Error("Message timeout"));
-    }, timeout);
+    const timerRef: { current: ReturnType<typeof setTimeout> | undefined } = { current: undefined };
 
     function handler(event: MessageEvent): void {
       if (!predicate(event.data)) {
         return;
       }
       window.removeEventListener("message", handler);
-      clearTimeout(timer);
+      clearTimeout(timerRef.current);
       resolve(event.data);
     }
+
+    timerRef.current = setTimeout(() => {
+      window.removeEventListener("message", handler);
+      reject(new Error("Message timeout"));
+    }, timeout);
 
     window.addEventListener("message", handler);
   });
