@@ -62,9 +62,9 @@ export async function waitForElement(
 }
 
 function matchesName(el: Element, name: RegExp | string): boolean {
-  const searchText = [el.getAttribute("aria-label"), el.textContent, el.getAttribute("name")].join(
-    " ",
-  );
+  const searchText = [el.getAttribute("aria-label"), el.textContent, el.getAttribute("name")]
+    .filter(Boolean)
+    .join(" ");
 
   return typeof name === "string"
     ? searchText.toLowerCase().includes(name.toLowerCase())

@@ -149,22 +149,21 @@ export async function expandMessage(messageButton: Element): Promise<void> {
 }
 
 export function findAttachmentListbox(messageButton: Element): Element | undefined {
-  let result: Element | undefined;
-  findAncestor(messageButton, (ancestor) => {
-    const listboxes = ancestor.querySelectorAll('[role="listbox"][aria-label*="attachment" i]');
+  let current = messageButton.parentElement;
+  for (let depth = 0; depth < 10 && current; depth += 1) {
+    const listboxes = current.querySelectorAll('[role="listbox"][aria-label*="attachment" i]');
     for (const listbox of listboxes) {
       if (
         // eslint-disable-next-line no-bitwise -- compareDocumentPosition returns bitmask
         (messageButton.compareDocumentPosition(listbox) & Node.DOCUMENT_POSITION_FOLLOWING) !==
         0
       ) {
-        result = listbox;
-        return true;
+        return listbox;
       }
     }
-    return false;
-  });
-  return result;
+    current = current.parentElement;
+  }
+  return undefined;
 }
 
 export function getPdfOptions(attachmentListbox: Element): Element[] {
@@ -178,7 +177,7 @@ interface BlobCapturedMessage {
 }
 
 interface BlobResultMessage {
-  data?: number[];
+  data?: Uint8Array;
   error?: string;
   id: string;
   type: "OPM_BLOB_RESULT";
@@ -368,7 +367,7 @@ export async function removeAllAttachments(): Promise<void> {
 }
 
 export async function attachFile(pdfBytes: Uint8Array, filename: string): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Uint8Array is a valid BlobPart
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- TS lib typing issue: Uint8Array<ArrayBufferLike> not assignable to BlobPart
   const file = new File([pdfBytes as BlobPart], filename, { type: "application/pdf" });
   const dataTransfer = new DataTransfer();
   dataTransfer.items.add(file);
@@ -380,7 +379,9 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   await sleep(TIMING.MENU_ANIMATION);
 
   const browseItem = await findMenuItem(
-    (text) => text.includes("browse") && text.includes("computer"),
+    (text) =>
+      (text.includes("browse") && text.includes("computer")) ||
+      (text.includes("parcourir") && text.includes("ordinateur")),
   );
 
   if (browseItem !== undefined) {

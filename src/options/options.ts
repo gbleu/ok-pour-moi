@@ -86,7 +86,7 @@ async function saveSettings(): Promise<void> {
       ccEmails: getElement<HTMLInputElement>("ccEmails")
         .value.split(",")
         .map((email) => email.trim())
-        .filter((email) => email !== ""),
+        .filter((email) => email !== "" && email.includes("@")),
       myEmail: getElement<HTMLInputElement>("myEmail").value.trim(),
       replyMessage: getElement<HTMLTextAreaElement>("replyMessage").value || "Hello, Ok pour moi.",
       signaturePosition: {

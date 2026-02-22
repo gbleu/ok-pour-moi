@@ -32,6 +32,7 @@ Click the extension icon → "Options" to configure:
 - **Signature image**: PNG or JPG of your signature
 - **Signature position**: X, Y coordinates and dimensions
 - **Reply message**: Text for the reply draft
+- **CC recipients** (optional): Comma-separated email addresses
 
 ## Usage
 

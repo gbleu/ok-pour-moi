@@ -9,14 +9,14 @@ export interface WorkflowConfig {
 
 export interface SignPdfRequest {
   originalFilename: string;
-  pdfBytes: Uint8Array;
+  pdfBytes: number[];
   senderLastname: string;
 }
 
 export interface SignPdfResponse {
   error?: string;
   filename?: string;
-  signedPdf?: Uint8Array;
+  signedPdf?: number[];
   success: boolean;
 }
 
