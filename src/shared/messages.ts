@@ -1,7 +1,6 @@
 import type { SignaturePosition } from "./pdf.js";
 
 export interface WorkflowConfig {
-  ccEmails: string[];
   myEmail: string;
   replyMessage: string;
   signaturePosition: SignaturePosition;

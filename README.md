@@ -32,7 +32,6 @@ Click the extension icon → "Options" to configure:
 - **Signature image**: PNG or JPG of your signature
 - **Signature position**: X, Y coordinates and dimensions
 - **Reply message**: Text for the reply draft
-- **CC recipients** (optional): Comma-separated email addresses
 
 ## Usage
 
@@ -93,6 +92,10 @@ Ready to publish to Chrome Web Store! See [CHROME_STORE_GUIDE.md](./CHROME_STORE
 - ✅ Icon assets (16x16, 48x48, 128x128)
 
 See [PRIVACY.md](./PRIVACY.md) for our privacy policy.
+
+## TODO
+
+- Configurable CC recipients on reply drafts (requires Outlook DOM investigation per locale/version)
 
 ## Architecture
 

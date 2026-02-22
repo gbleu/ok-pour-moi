@@ -410,30 +410,6 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   await sleep(TIMING.UPLOAD_COMPLETE);
 }
 
-export async function addCcRecipients(emails: string[]): Promise<void> {
-  if (emails.length === 0) {
-    return;
-  }
-
-  const ccBtn = getButtonByName(/\bCc\b/);
-  if (ccBtn) {
-    simulateClick(ccBtn);
-    await sleep(TIMING.UI_SETTLE);
-  }
-
-  const ccInput = await waitForElement('input[aria-label*="Cc" i]', { timeout: 3000 });
-  if (!(ccInput instanceof HTMLInputElement)) {
-    throw new Error("CC input is not an HTMLInputElement");
-  }
-
-  for (const email of emails) {
-    typeText(ccInput, email);
-    await sleep(TIMING.MENU_ANIMATION);
-    simulateKeyPress("Enter");
-    await sleep(TIMING.MENU_ANIMATION);
-  }
-}
-
 export function typeMessage(composeBody: HTMLElement, message: string): void {
   composeBody.focus();
   typeText(composeBody, message);

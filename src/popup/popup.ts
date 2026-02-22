@@ -34,7 +34,6 @@ async function checkConfig(): Promise<{ config?: WorkflowConfig; error?: string;
 
   return {
     config: {
-      ccEmails: sync.ccEmails,
       myEmail: sync.myEmail,
       replyMessage: sync.replyMessage,
       signaturePosition: sync.signaturePosition,
