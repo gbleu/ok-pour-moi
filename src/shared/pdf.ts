@@ -38,7 +38,10 @@ export function getTargetMonthAndYear(date: Date = new Date()): {
 export function generateAttachmentName(senderLastname: string, date: Date = new Date()): string {
   const { monthIndex, year } = getTargetMonthAndYear(date);
   const month = FRENCH_MONTHS[monthIndex];
-  return `${senderLastname.toUpperCase()} - ${month}${year % 100}.pdf`;
+  const prefix = senderLastname.trim();
+  return prefix === ""
+    ? `${month}${year % 100}.pdf`
+    : `${prefix.toUpperCase()} - ${month}${year % 100}.pdf`;
 }
 
 export function extractLastname(fromText: string): string {

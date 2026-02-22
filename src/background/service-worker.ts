@@ -5,19 +5,14 @@ import { generateAttachmentName, signPdf } from "#shared/pdf.js";
 
 console.log("[OPM] Service worker loaded");
 
-function formatError(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 async function handleSignPdf(request: {
   originalFilename: string;
   pdfBytes: number[];
   senderLastname: string;
 }): Promise<SignPdfResponse> {
-  const config = await getSyncStorage();
-  const local = await getLocalStorage();
+  const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
-  if (local.signatureImage === null) {
+  if (!local.signatureImage) {
     return { error: "No signature configured", success: false };
   }
 
@@ -30,10 +25,8 @@ async function handleSignPdf(request: {
     sigBytes,
   });
 
-  const filename = generateAttachmentName(request.senderLastname, new Date());
-
   return {
-    filename,
+    filename: generateAttachmentName(request.senderLastname, new Date()),
     signedPdf: [...signedPdf],
     success: true,
   };
@@ -45,42 +38,61 @@ async function handleGetSignature(): Promise<{
   format?: string;
   success: boolean;
 }> {
-  const local = await getLocalStorage();
-  if (local.signatureImage === null) {
+  const { signatureImage } = await getLocalStorage();
+  if (!signatureImage) {
     return { error: "No signature configured", success: false };
   }
   return {
-    data: local.signatureImage.data,
-    format: local.signatureImage.format,
+    data: signatureImage.data,
+    format: signatureImage.format,
     success: true,
   };
 }
 
-function handleAsync<TResult>(
-  promise: Promise<TResult>,
-  sendResponse: (response: unknown) => void,
-): true {
+function handleAsync(promise: Promise<unknown>, sendResponse: (response: unknown) => void): void {
   promise.then(sendResponse).catch((error: unknown) => {
-    sendResponse({ error: formatError(error), success: false });
+    sendResponse({
+      error: error instanceof Error ? error.message : "Unknown error",
+      success: false,
+    });
   });
-  return true;
 }
+
+const ALLOWED_ORIGINS = [
+  "https://outlook.office.com",
+  "https://outlook.office365.com",
+  "https://outlook.live.com",
+  "https://outlook.cloud.microsoft",
+];
 
 chrome.runtime.onMessage.addListener(
   (
     message: ContentToBackgroundMessage,
-    _sender: chrome.runtime.MessageSender,
+    sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void,
   ) => {
+    if (
+      sender.url === undefined ||
+      !ALLOWED_ORIGINS.some((origin) => sender.url?.startsWith(origin) === true)
+    ) {
+      return false;
+    }
+
     if (message.type === "SIGN_PDF") {
-      return handleAsync(handleSignPdf(message.payload), sendResponse);
+      handleAsync(handleSignPdf(message.payload), sendResponse);
+      return true;
     }
+
     if (message.type === "GET_CONFIG") {
-      return handleAsync(getSyncStorage(), sendResponse);
+      handleAsync(getSyncStorage(), sendResponse);
+      return true;
     }
+
     if (message.type === "GET_SIGNATURE") {
-      return handleAsync(handleGetSignature(), sendResponse);
+      handleAsync(handleGetSignature(), sendResponse);
+      return true;
     }
+
     return false;
   },
 );

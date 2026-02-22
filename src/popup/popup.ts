@@ -19,8 +19,7 @@ function setProgress(show: boolean, value = 0, text = ""): void {
 }
 
 async function checkConfig(): Promise<{ config?: WorkflowConfig; error?: string; valid: boolean }> {
-  const sync = await getSyncStorage();
-  const local = await getLocalStorage();
+  const [sync, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
   if (sync.myEmail === "") {
     return { error: "Email not configured", valid: false };

@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "bun run build.ts",
+    "package": "bun run scripts/package.ts",
+    "store:assets": "bun run scripts/create-store-assets.ts",
     "fmt": "oxfmt",
     "lint": "oxlint --type-aware --type-check",
     "test": "bun test",

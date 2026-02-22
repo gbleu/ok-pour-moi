@@ -2,6 +2,14 @@
 
 Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, signs them, and creates reply drafts.
 
+## Features
+
+- ✅ **Manifest V3 Compliant** - Ready for Chrome Web Store 2026
+- ✅ **Sign PDF Attachments** - Add your signature to PDFs in Outlook Web
+- ✅ **Auto-create Reply Drafts** - Automatically create drafts with signed PDFs
+- ✅ **Customizable Signature** - Position and size your signature
+- ✅ **Privacy-First** - All processing happens locally, no data transmission
+
 ## Setup
 
 ### 1. Install dependencies and build
@@ -24,7 +32,6 @@ Click the extension icon → "Options" to configure:
 - **Signature image**: PNG or JPG of your signature
 - **Signature position**: X, Y coordinates and dimensions
 - **Reply message**: Text for the reply draft
-- **CC emails** (optional): Comma-separated addresses
 
 ## Usage
 
@@ -41,12 +48,54 @@ The extension will:
 ## Development
 
 ```bash
-bun run build    # Build to ./dist
-bun run lint     # Type-aware linting
-bun run fmt      # Format code
-bun run test     # Unit tests
-bun run test:e2e # E2E tests
+bun run build       # Build to ./dist
+bun run lint        # Type-aware linting
+bun run fmt         # Format code
+bun run test        # Unit tests
+bun run test:e2e    # E2E tests
 ```
+
+## Chrome Web Store Submission
+
+Ready to publish to Chrome Web Store! See [CHROME_STORE_GUIDE.md](./CHROME_STORE_GUIDE.md) for detailed submission instructions.
+
+### Quick Start
+
+1. **Build the extension:**
+
+   ```bash
+   bun run build
+   ```
+
+2. **Package for submission:**
+
+   ```bash
+   bun run package
+   ```
+
+   This creates `ok-pour-moi-v1.0.0.zip` ready for upload.
+
+3. **Upload to Chrome Web Store:**
+   - Go to [Developer Console](https://chrome.google.com/webstore/devconsole)
+   - Upload the ZIP file
+   - Follow the [submission guide](./CHROME_STORE_GUIDE.md)
+
+### Compliance Status
+
+- ✅ Manifest V3 implementation
+- ✅ Service worker architecture (no persistent background page)
+- ✅ Chrome storage API for state management
+- ✅ `activeTab` permission (least privilege)
+- ✅ No remote code execution
+- ✅ Privacy policy included
+- ✅ All dependencies bundled locally
+- ✅ Icon assets (16x16, 48x48, 128x128)
+
+See [PRIVACY.md](./PRIVACY.md) for our privacy policy.
+
+## TODO
+
+- Configurable CC recipients on reply drafts (requires Outlook DOM investigation per locale/version)
 
 ## Architecture
 
