@@ -33,5 +33,4 @@ export type ContentToBackgroundMessage =
 
 export type PopupToContentMessage =
   | { config: WorkflowConfig; type: "START_WORKFLOW" }
-  | { type: "GET_EMAIL_COUNT" }
-  | { type: "CANCEL_WORKFLOW" };
+  | { type: "GET_EMAIL_COUNT" };

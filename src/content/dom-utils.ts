@@ -36,10 +36,13 @@ export async function waitForElement(
       return;
     }
 
+    const timerRef: { current: ReturnType<typeof setTimeout> | undefined } = { current: undefined };
+
     const observer = new MutationObserver(() => {
       const el = check();
       if (el !== undefined) {
         observer.disconnect();
+        clearTimeout(timerRef.current);
         resolve(el);
       }
     });
@@ -51,7 +54,7 @@ export async function waitForElement(
     }
     observer.observe(observeTarget, observerOptions);
 
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       observer.disconnect();
       reject(new Error(`Timeout waiting for ${selector}`));
     }, timeout);

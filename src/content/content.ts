@@ -4,7 +4,7 @@ import { collectSignedPdfs } from "./outlook-dom.js";
 import { getSyncStorage } from "#shared/storage.js";
 import { prepareDrafts } from "./outlook-compose.js";
 
-console.log("[OPM] Content script loaded - v2025-01-05-B (simplified: Reply + manual selection)");
+console.log("[OPM] Content script loaded");
 
 async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
   console.log("[OPM] Starting workflow with config:", config);
@@ -45,13 +45,7 @@ document.addEventListener("keydown", (event) => {
   if (event.ctrlKey && event.shiftKey && ["O", "o"].includes(event.key)) {
     console.log("[OPM] Debug trigger: Ctrl+Shift+O pressed");
     (async (): Promise<void> => {
-      const sync = await getSyncStorage();
-      const config: WorkflowConfig = {
-        ccEmails: sync.ccEmails,
-        myEmail: sync.myEmail,
-        replyMessage: sync.replyMessage,
-        signaturePosition: sync.signaturePosition,
-      };
+      const config = await getSyncStorage();
       const result = await runWorkflow(config);
       console.log("[OPM] Debug workflow result:", result);
     })().catch((error: unknown) => {

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0078d4"/><stop offset="100%" stop-color="#005a9e"/></linearGradient></defs>
-  <rect width="128" height="128" fill="url(#bg)" rx="24"/>
-  <circle cx="42" cy="64" r="28" stroke="white" stroke-width="5" fill="none"/>
-  <path d="M28 64 L38 74 L56 52" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="96" y="86" font-family="system-ui, -apple-system, sans-serif" font-size="60" fill="white" text-anchor="middle" font-weight="800">K</text>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4CAF50"/><stop offset="100%" stop-color="#388E3C"/></linearGradient></defs>
+  <circle cx="64" cy="64" r="64" fill="url(#bg)"/>
+  <path d="M32 66 L52 86 L96 42" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

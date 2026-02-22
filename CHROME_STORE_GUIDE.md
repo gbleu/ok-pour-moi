@@ -34,9 +34,9 @@ Located in `icons/` directory:
 - ✅ `icon48.png` - 48×48 pixels
 - ✅ `icon128.png` - 128×128 pixels
 
-### Store Listing Assets (Need to Create)
+### Store Listing Assets
 
-Create these assets before submission:
+Located in `store-assets/` directory:
 
 #### 1. Store Icon (128×128 px)
 

@@ -67,15 +67,7 @@ Ready to publish to Chrome Web Store! See [CHROME_STORE_GUIDE.md](./CHROME_STORE
    bun run build
    ```
 
-2. **Create store assets (placeholders):**
-
-   ```bash
-   bun run store:assets
-   ```
-
-   Replace placeholders in `store-assets/` with actual screenshots and promotional images.
-
-3. **Package for submission:**
+2. **Package for submission:**
 
    ```bash
    bun run package
@@ -83,7 +75,7 @@ Ready to publish to Chrome Web Store! See [CHROME_STORE_GUIDE.md](./CHROME_STORE
 
    This creates `ok-pour-moi-v1.0.0.zip` ready for upload.
 
-4. **Upload to Chrome Web Store:**
+3. **Upload to Chrome Web Store:**
    - Go to [Developer Console](https://chrome.google.com/webstore/devconsole)
    - Upload the ZIP file
    - Follow the [submission guide](./CHROME_STORE_GUIDE.md)

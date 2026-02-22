@@ -1,6 +1,6 @@
 # Privacy Policy for OK Pour Moi
 
-**Last Updated:** January 8, 2026
+**Last Updated:** February 22, 2026
 
 ## Overview
 

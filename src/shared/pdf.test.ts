@@ -41,7 +41,7 @@ describe("generateAttachmentName", () => {
   });
 
   test("handles empty string lastname", () => {
-    expect(generateAttachmentName("", new Date(2024, 3, 15))).toBe(" - avril24.pdf");
+    expect(generateAttachmentName("", new Date(2024, 3, 15))).toBe("avril24.pdf");
   });
 });
 

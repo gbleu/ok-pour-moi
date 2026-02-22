@@ -1,4 +1,4 @@
-/* eslint-disable max-lines, promise/avoid-new, no-bitwise, no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
+/* eslint-disable max-lines, promise/avoid-new, no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
 import {
   TIMING,
   getButtonByName,
@@ -149,18 +149,22 @@ export async function expandMessage(messageButton: Element): Promise<void> {
 }
 
 export function findAttachmentListbox(messageButton: Element): Element | undefined {
-  return findAncestor(messageButton, (ancestor) => {
+  let result: Element | undefined;
+  findAncestor(messageButton, (ancestor) => {
     const listboxes = ancestor.querySelectorAll('[role="listbox"][aria-label*="attachment" i]');
     for (const listbox of listboxes) {
       if (
+        // eslint-disable-next-line no-bitwise -- compareDocumentPosition returns bitmask
         (messageButton.compareDocumentPosition(listbox) & Node.DOCUMENT_POSITION_FOLLOWING) !==
         0
       ) {
+        result = listbox;
         return true;
       }
     }
     return false;
   });
+  return result;
 }
 
 export function getPdfOptions(attachmentListbox: Element): Element[] {
