@@ -51,15 +51,6 @@ async function createPackage(): Promise<boolean> {
   console.log(`\n🔍 Verifying package structure...`);
 
   const listResult = await $`unzip -l ${zipFilename}`.text();
-  const files = listResult
-    .split("\n")
-    .filter(
-      (line) =>
-        line.trim() !== "" &&
-        !line.includes("Archive:") &&
-        !line.includes("Length") &&
-        !line.includes("----"),
-    );
 
   // Check for manifest.json at root
   if (listResult.includes(" manifest.json")) {
@@ -83,11 +74,6 @@ async function createPackage(): Promise<boolean> {
       console.log(`   ✓ ${dir} included`);
     }
   }
-
-  // Count files
-  const fileCount =
-    files.filter((line) => !line.includes("Archive:") && line.trim().length > 0).length - 2; // Subtract header lines
-  console.log(`   Files: ~${fileCount}`);
 
   console.log(`\n📤 Ready to upload to Chrome Web Store:`);
   console.log(`   https://chrome.google.com/webstore/devconsole`);

@@ -9,7 +9,7 @@ export const TIMING = {
   UPLOAD_COMPLETE: 2000,
 } as const;
 
-export async function sleep(ms: number): Promise<void> {
+export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 

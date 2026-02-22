@@ -62,6 +62,26 @@ function isOwnMessage(
   );
 }
 
+function extractSenderEmail(el: Element, textContent: string, fromText: string): string {
+  const emailElement = el.querySelector("[data-email]");
+  const elementEmail =
+    emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
+  if (elementEmail !== "") {
+    return elementEmail;
+  }
+
+  const titleEmail = el.querySelector("[title*='@']")?.getAttribute("title") ?? "";
+  if (titleEmail !== "") {
+    return titleEmail;
+  }
+
+  return (
+    extractEmail(textContent) ||
+    (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
+    extractEmail(fromText)
+  );
+}
+
 export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (!readingPane) {
@@ -87,17 +107,10 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
       continue;
     }
 
-    const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
-    const senderLastname = extractLastname(normalizedFrom);
-    const senderEmail =
-      elementEmail !== ""
-        ? elementEmail
-        : extractEmail(textContent) ||
-          (el instanceof HTMLElement ? extractEmail(el.textContent ?? "") : "") ||
-          extractEmail(fromText);
-
+    const senderEmail = extractSenderEmail(el, textContent, fromText);
     if (senderEmail !== "") {
-      return { element: el, senderEmail, senderLastname };
+      const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
+      return { element: el, senderEmail, senderLastname: extractLastname(normalizedFrom) };
     }
   }
 
@@ -235,7 +248,7 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
     30_000,
   );
 
-  if (result.error !== undefined && result.error !== "") {
+  if (result.error !== undefined) {
     throw new Error(result.error);
   }
   if (result.data === undefined) {
