@@ -118,11 +118,11 @@ export async function signPdf(opts: {
   const sigImage =
     format === "png" ? await pdfDoc.embedPng(sigBytes) : await pdfDoc.embedJpg(sigBytes);
 
-  const pages = pdfDoc.getPages();
-  const target = pages.at(-1);
-  if (!target) {
+  const pageCount = pdfDoc.getPageCount();
+  if (pageCount === 0) {
     throw new Error("PDF has no pages");
   }
+  const target = pdfDoc.getPage(pageCount - 1);
 
   target.drawImage(sigImage, position);
 

@@ -54,9 +54,10 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 }
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
+  const CHUNK = 0x80_00;
   let binary = "";
-  for (const byte of bytes) {
-    binary += String.fromCodePoint(byte);
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCodePoint(...bytes.subarray(i, i + CHUNK));
   }
   return btoa(binary);
 }

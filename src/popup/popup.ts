@@ -1,5 +1,5 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
-import type { WorkflowConfig, WorkflowResult } from "#shared/messages.js";
+import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { getElement } from "#shared/dom.js";
 
@@ -70,13 +70,11 @@ async function runWorkflow(): Promise<void> {
   runBtn.disabled = true;
 
   try {
-    const tab = await checkOutlookTab();
+    const [tab, { valid, config, error }] = await Promise.all([checkOutlookTab(), checkConfig()]);
     if (tab?.id === undefined) {
       showStatus("error", "Open Outlook Web mail first");
       return;
     }
-
-    const { valid, config, error } = await checkConfig();
     if (!valid || config === undefined) {
       showStatus("error", error ?? "Invalid configuration");
       return;
@@ -85,10 +83,10 @@ async function runWorkflow(): Promise<void> {
     showStatus("info", "Starting workflow...");
     setProgress(true, 0, "Initializing...");
 
-    const result = await chrome.tabs.sendMessage<
-      { config: WorkflowConfig; type: "START_WORKFLOW" },
-      WorkflowResult
-    >(tab.id, { config, type: "START_WORKFLOW" });
+    const result = await chrome.tabs.sendMessage<PopupToContentMessage, WorkflowResult>(tab.id, {
+      config,
+      type: "START_WORKFLOW",
+    });
 
     setProgress(false);
 
@@ -113,13 +111,11 @@ async function runWorkflow(): Promise<void> {
 async function init(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
 
-  const tab = await checkOutlookTab();
+  const [tab, { valid, error }] = await Promise.all([checkOutlookTab(), checkConfig()]);
   if (tab === undefined) {
     showStatus("warning", "Open Outlook Web to use this extension");
     return;
   }
-
-  const { valid, error } = await checkConfig();
   if (!valid) {
     showStatus("warning", `${error} - click Settings to configure`);
     return;

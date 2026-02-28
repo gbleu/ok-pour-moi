@@ -1,4 +1,8 @@
-import type { SignPdfResponse, WorkflowConfig } from "#shared/messages.js";
+import type {
+  ContentToBackgroundMessage,
+  SignPdfResponse,
+  WorkflowConfig,
+} from "#shared/messages.js";
 import {
   downloadAttachment,
   expandMessage,
@@ -64,13 +68,7 @@ export async function collectSignedPdfs(
   try {
     const pdfBytes = await downloadAttachment(firstPdf);
 
-    const response = await chrome.runtime.sendMessage<
-      {
-        payload: { originalFilename: string; pdfBytes: number[]; senderLastname: string };
-        type: "SIGN_PDF";
-      },
-      SignPdfResponse
-    >({
+    const response = await chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
       payload: {
         originalFilename,
         pdfBytes: [...pdfBytes],

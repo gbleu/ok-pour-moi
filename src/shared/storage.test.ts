@@ -25,6 +25,24 @@ describe("uint8ArrayToBase64", () => {
   });
 });
 
+describe("uint8ArrayToBase64 large input", () => {
+  test("handles arrays larger than JS argument limit", () => {
+    // Given - 200KB array (exceeds typical ~65k-125k argument limit)
+    const large = new Uint8Array(200_000);
+    for (let i = 0; i < large.length; i += 1) {
+      large[i] = i % 256;
+    }
+
+    // When
+    const base64 = uint8ArrayToBase64(large);
+    const roundTripped = base64ToUint8Array(base64);
+
+    // Then
+    expect(base64.length).toBeGreaterThan(0);
+    expect(roundTripped).toEqual(large);
+  });
+});
+
 describe("roundtrip conversion", () => {
   test("preserves data in both directions", () => {
     const originalBase64 = "VGVzdCBkYXRhIGZvciByb3VuZHRyaXA=";

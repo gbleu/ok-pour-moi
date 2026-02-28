@@ -63,13 +63,6 @@ function isOwnMessage(
 }
 
 function extractSenderEmail(el: Element, textContent: string, fromText: string): string {
-  const emailElement = el.querySelector("[data-email]");
-  const elementEmail =
-    emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
-  if (elementEmail !== "") {
-    return elementEmail;
-  }
-
   const titleEmail = el.querySelector("[title*='@']")?.getAttribute("title") ?? "";
   if (titleEmail !== "") {
     return titleEmail;
@@ -107,7 +100,7 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
       continue;
     }
 
-    const senderEmail = extractSenderEmail(el, textContent, fromText);
+    const senderEmail = elementEmail || extractSenderEmail(el, textContent, fromText);
     if (senderEmail !== "") {
       const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
       return { element: el, senderEmail, senderLastname: extractLastname(normalizedFrom) };
@@ -399,7 +392,6 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
 
   if (browseItem !== undefined) {
     simulateClick(browseItem);
-    await sleep(TIMING.UI_SETTLE);
   }
 
   await sleep(TIMING.UI_SETTLE);
