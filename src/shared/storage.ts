@@ -54,9 +54,5 @@ export function base64ToUint8Array(base64: string): Uint8Array {
 }
 
 export function uint8ArrayToBase64(bytes: Uint8Array): string {
-  let binary = "";
-  for (const byte of bytes) {
-    binary += String.fromCodePoint(byte);
-  }
-  return btoa(binary);
+  return btoa(String.fromCodePoint(...bytes));
 }
