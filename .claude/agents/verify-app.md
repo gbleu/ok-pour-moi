@@ -14,9 +14,8 @@ The OPM (Ok Pour Moi) extension automates PDF signing in Outlook Web:
 
 1. User manually selects an email with PDF attachments
 2. Triggers the workflow via keyboard shortcut or popup
-3. Downloads and signs PDFs with a signature image
-4. Creates reply drafts with signed PDFs attached
-5. Adds CC recipients and a reply message
+3. Downloads the first PDF and signs it with a signature image
+4. Creates a reply draft with the signed PDF attached and a reply message
 
 ## Prerequisites
 
@@ -52,13 +51,13 @@ mcp__playwright__browser_click on "Reload" button
 
 **How to verify new code is running:**
 
-The content script logs a version string on load. Check console for:
+The content script logs on load. Check console for:
 
 ```
-[OPM] Content script loaded - vYYYY-MM-DD-X
+[OPM] Content script loaded
 ```
 
-If you see an old version or no version suffix, the extension wasn't reloaded.
+If you don't see this message, the extension wasn't reloaded.
 
 ### Step 3: Launch Browser and Navigate to Outlook
 
@@ -74,8 +73,7 @@ mcp__playwright__browser_navigate to https://outlook.live.com/mail/
 
 **Verify:**
 
-- Console shows `[OPM] Content script loaded - vYYYY-MM-DD-X (...)` with version string
-- Console shows `[OPM-main] Blob capture installed in MAIN world`
+- Console shows `[OPM] Content script loaded`
 - Page loads Outlook inbox
 
 **Note:** Different organizations may use different domains. Enterprise accounts often use `outlook.cloud.microsoft` instead of `outlook.office365.com`.
@@ -92,7 +90,6 @@ chrome-extension://lhilehnchplekajmenfimfhodghgjeln/options/options.html
 
 - Your Email Address: Set to your Outlook email
 - Reply Message: Text to include in replies (e.g., "Ok pour moi")
-- CC Recipients: Optional CC emails (comma-separated)
 - Signature Image: PNG or JPG uploaded
 - Signature Position: X, Y, Width, Height values set
 
@@ -119,20 +116,8 @@ Check console messages for workflow progress:
 ```
 [OPM] Debug trigger: Ctrl+Shift+O pressed
 [OPM] Starting workflow with config: {...}
-[OPM]   Looking for attachments...
-[OPM]   Found N PDF(s), downloading...
-[OPM]   Setting up blob capture...
-[OPM]   Captured PDF blob: X bytes
-[OPM]   filename.pdf -> SIGNED-filename.pdf
 [OPM] Collected N signed PDFs
-[OPM] Preparing N draft(s)
-[OPM]   Opening reply...
-[OPM]   Adding To recipient: email@example.com
-[OPM]   Typing message...
-[OPM]   Adding CC: email@example.com
-[OPM]   Attaching signed PDF...
-[OPM]   Saving draft...
-[OPM]   -> Done
+[OPM] [1/N] "Subject"
 [OPM] Debug workflow result: {message: Processed N/N emails, processed: N, success: true}
 ```
 
@@ -148,12 +133,10 @@ Before checking the draft, review the console logs from the workflow to understa
 
 ```javascript
 // Check console logs for:
-[OPM]   Found N PDF(s), downloading...
-[OPM]   Captured PDF blob: X bytes
-[OPM]   filename.pdf -> SIGNED-filename.pdf
+[OPM] Starting workflow with config: {...}
+[OPM] Collected N signed PDFs
+[OPM] [1/N] "Subject"
 ```
-
-**CRITICAL:** If multiple PDFs were found, note which one was processed first. This helps identify if the wrong PDF was signed.
 
 #### 8.2 Check To Field
 
@@ -171,35 +154,7 @@ Expected: To field contains sender email (e.g., "sender@example.com")
 **How to verify in snapshot:**
 Look for recipient pill/button with an email address in the To area.
 
-#### 8.3 Check CC Field (MOST IMPORTANT)
-
-**You MUST verify CC recipients are actually present in the field, not just that a CC label exists.**
-
-**FAIL CONDITIONS:**
-
-- CC field shows only "Cc" label with no recipient pills/emails below it
-- CC field is missing entirely
-- CC field contains wrong emails
-
-**PASS CONDITIONS:**
-
-- CC field shows recipient pill(s) with the configured email(s) (e.g., "romain.bleugé@gmail.com")
-
-**How to verify in snapshot:**
-
-```yaml
-# FAIL - only label, no recipients:
-generic "Cc" [ref=...]:
-  # Empty or no child elements
-
-# PASS - has recipient pill:
-generic "Cc" [ref=...]:
-  - button "romain.bleugé@gmail.com" [ref=...]
-```
-
-**Common mistake:** Don't confuse the CC _label_ with actual CC _recipients_. The label "Cc" being present does NOT mean recipients are added.
-
-#### 8.4 Check Attachments
+#### 8.3 Check Attachments
 
 Look for the attachment listbox in the snapshot. Verify WHICH PDF was attached.
 
@@ -208,7 +163,7 @@ Look for the attachment listbox in the snapshot. Verify WHICH PDF was attached.
 - More than one attachment (original should be removed, only signed PDF should remain)
 - Zero attachments
 - Wrong PDF attached (e.g., "Document PDF test.pdf" instead of the actual invoice)
-- Filename doesn't match expected pattern "LASTNAME - filename.pdf"
+- Filename doesn't match expected pattern "LASTNAME - monthYY.pdf" (e.g., "DUPONT - janvier24.pdf")
 
 **How to verify:**
 
@@ -219,14 +174,14 @@ Look for the attachment listbox in the snapshot. Verify WHICH PDF was attached.
 ```yaml
 # FAIL - wrong PDF:
 listbox "file attachments":
-  - option "BLEU - Document PDF test.pdf"  # This is the test PDF, not the invoice!
+  - option "Document PDF test.pdf"  # Unsigned original!
 
-# PASS - correct PDF:
+# PASS - correct signed PDF:
 listbox "file attachments":
-  - option "BLEU - Facture_dec_2024_Grégory_BLEU.pdf"  # The actual invoice
+  - option "DUPONT - février25.pdf"  # Named with LASTNAME - monthYY pattern
 ```
 
-#### 8.5 Check Message Body
+#### 8.4 Check Message Body
 
 Verify the reply message text is present.
 
@@ -246,15 +201,9 @@ Expected: Body contains "Ok pour moi" (or configured message)
 ```
 === DRAFT VERIFICATION ===
 
-Console Logs:
-- PDFs found: N
-- First PDF processed: filename.pdf (X bytes)
-- Second PDF processed: filename2.pdf (Y bytes)
-
 Draft Contents:
 - To field: PASS (sender@example.com) / FAIL (empty or wrong email)
-- CC field: PASS (romain.bleugé@gmail.com pill visible) / FAIL (only label, no recipients)
-- Attachments: PASS (1: correct invoice PDF) / FAIL (wrong PDF or count)
+- Attachments: PASS (1: LASTNAME - monthYY.pdf) / FAIL (wrong PDF or count)
 - Message body: PASS (contains "Ok pour moi") / FAIL (empty or missing)
 
 Overall: PASS / FAIL
@@ -262,10 +211,9 @@ Overall: PASS / FAIL
 
 **CRITICAL RULES:**
 
-1. CC "label" being visible ≠ CC recipients being added
-2. Check console logs to identify which PDF was signed
-3. Verify the CORRECT PDF is attached (not a test document)
-4. Do NOT report PASS if any verification fails
+1. Verify the CORRECT PDF is attached (not the unsigned original)
+2. Attachment filename should follow "LASTNAME - monthYY.pdf" pattern
+3. Do NOT report PASS if any verification step fails
 
 ### Step 9: Verify Signed PDF
 
@@ -288,8 +236,7 @@ Workflow Execution: PASS/FAIL
 
 Draft Verification:
 - To field: PASS (sender@example.com) / FAIL (empty)
-- CC field: PASS (cc@example.com) / FAIL (empty) / SKIP (CC disabled)
-- Attachments: PASS (1: LASTNAME - monthYY.pdf) / FAIL (N attachments found)
+- Attachments: PASS (1: LASTNAME - monthYY.pdf) / FAIL (wrong count or name)
 - Message body: PASS / FAIL
 
 Overall: PASS / FAIL
@@ -305,7 +252,7 @@ Overall: PASS / FAIL
 
 **Symptoms:**
 
-- Console shows old version string (e.g., `[OPM] Content script loaded` without version)
+- Console doesn't show `[OPM] Content script loaded`
 - Expected log messages are missing
 - Code changes have no effect
 
@@ -315,7 +262,7 @@ Overall: PASS / FAIL
 2. Navigate to `chrome://extensions/`
 3. Click **Reload** button on "OK Pour Moi" extension
 4. Navigate back to Outlook
-5. Verify console shows new version: `[OPM] Content script loaded - vYYYY-MM-DD-X`
+5. Verify console shows `[OPM] Content script loaded`
 
 **Important:** Just refreshing the Outlook page is NOT enough - you must reload the extension in chrome://extensions/
 
@@ -351,7 +298,7 @@ document.querySelector('[role="listbox"][aria-label*="attachment" i]')
 ### PDF Download Fails
 
 - Check for CORS errors in console
-- Verify blob capture is installed: `[OPM-main] Blob capture installed`
+- Verify main-world script is loaded (blob URL interception)
 - Try refreshing the page
 
 ### Signature Not Applied
@@ -359,11 +306,6 @@ document.querySelector('[role="listbox"][aria-label*="attachment" i]')
 - Check signature image is uploaded in options
 - Verify signature position values are reasonable (x, y within page bounds)
 - Check for PDF-lib errors in console
-
-### CC Button Not Found
-
-- Wait longer for compose window to load
-- Check if Outlook UI has changed
 
 ### Draft Not Saved
 
@@ -382,7 +324,7 @@ document.querySelector('[role="listbox"][aria-label*="attachment" i]')
 
 1. Select an email with multiple PDF attachments
 2. Run workflow
-3. Verify: 1 draft with all signed PDFs attached
+3. Verify: 1 draft with the first PDF signed and attached
 
 ### Scenario C: Conversation Thread
 

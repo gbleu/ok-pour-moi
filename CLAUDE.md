@@ -19,22 +19,22 @@ Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, sign
 ```
 src/
 ├── content/           # Content scripts (injected into Outlook)
-│   ├── outlook-actions.ts  # DOM interactions (click, type, download)
+│   ├── outlook-actions.ts  # Outlook DOM operations (messages, attachments, replies)
 │   ├── outlook-compose.ts  # Create draft replies
-│   ├── outlook-dom.ts      # Find messages, attachments, sign PDFs
+│   ├── outlook-dom.ts      # PDF collection workflow orchestrator
 │   ├── main-world.ts       # MAIN world script (blob URL interception)
 │   ├── dom-utils.ts        # Low-level DOM utilities
 │   └── content.ts          # Entry point, message handling
 ├── background/        # Service worker
-│   └── service-worker.ts   # PDF signing, config storage
+│   └── service-worker.ts   # PDF signing, message routing
 ├── popup/             # Extension popup UI
 ├── options/           # Settings page
 └── shared/            # Shared types and utilities
     ├── css.ts         # CSS utility (escape values)
     ├── dom.ts         # DOM utility (getElement)
     ├── messages.ts    # Message types
-    ├── pdf.ts         # PDF signing with pdf-lib
-    └── storage.ts     # Chrome storage API wrappers
+    ├── pdf.ts         # PDF signing, name extraction, attachment naming
+    └── storage.ts     # Chrome storage API wrappers, base64 encoding
 ```
 
 ### Workflow
