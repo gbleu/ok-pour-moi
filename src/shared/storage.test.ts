@@ -35,12 +35,11 @@ describe("uint8ArrayToBase64 large input", () => {
 
     // When
     const base64 = uint8ArrayToBase64(large);
+    const roundTripped = base64ToUint8Array(base64);
 
     // Then
-    expect({
-      nonEmpty: base64.length > 0,
-      roundtrips: base64ToUint8Array(base64).length === large.length,
-    }).toEqual({ nonEmpty: true, roundtrips: true });
+    expect(base64.length).toBeGreaterThan(0);
+    expect(roundTripped).toEqual(large);
   });
 });
 
