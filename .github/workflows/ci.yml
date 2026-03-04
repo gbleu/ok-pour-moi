@@ -68,7 +68,7 @@ jobs:
       - run: bun install
       - name: Install Playwright browsers
         run: bunx playwright install chromium
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
