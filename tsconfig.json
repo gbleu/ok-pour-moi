@@ -4,6 +4,7 @@
       "#shared/*": ["./src/shared/*"],
       "#mocks/*": ["./e2e/mocks/*"]
     },
+    "types": ["bun", "chrome"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "Preserve",
