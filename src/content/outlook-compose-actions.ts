@@ -32,6 +32,8 @@ async function removeFirstAttachment(): Promise<boolean> {
     return false;
   }
 
+  // Outlook nests the compose textbox ~5 levels deep within the compose pane. closest() covers
+  // Standard dialog/form wrappers; the parentElement chain is a fallback for inline compose mode.
   const composeContainer =
     composeBody.closest('[role="dialog"], [role="form"], form') ??
     composeBody.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;

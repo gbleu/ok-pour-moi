@@ -9,31 +9,24 @@ async function runWorkflow(config: SyncStorage): Promise<WorkflowResult> {
     const items = await collectSignedPdfs(config);
 
     if (items.length === 0) {
-      return {
-        message: "No PDFs found in current conversation",
-        processed: 0,
-        success: true,
-      };
+      return { message: "No PDFs found in current conversation", success: true };
     }
 
     const successCount = await prepareDrafts(items, config);
 
     return {
       message: `Processed ${successCount}/${items.length} emails`,
-      processed: successCount,
       success: true,
     };
   } catch (error) {
     console.error("[OPM] Workflow error:", error);
     return {
       message: error instanceof Error ? error.message : "Unknown error",
-      processed: 0,
       success: false,
     };
   }
 }
 
-// Debug trigger: press Ctrl+Shift+O to start workflow
 document.addEventListener("keydown", (event) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
     (async (): Promise<void> => {
@@ -60,7 +53,6 @@ chrome.runtime.onMessage.addListener(
       .catch((error: unknown) => {
         sendResponse({
           message: error instanceof Error ? error.message : "Unknown error",
-          processed: 0,
           success: false,
         });
       });

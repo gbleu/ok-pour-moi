@@ -12,7 +12,6 @@ export type SignPdfResponse =
 
 export interface WorkflowResult {
   message: string;
-  processed: number;
   success: boolean;
 }
 

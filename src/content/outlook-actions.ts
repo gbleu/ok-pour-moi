@@ -112,6 +112,7 @@ function findAncestor(
 export async function expandMessage(messageButton: Element): Promise<void> {
   const clickTarget =
     findAncestor(messageButton, (ancestor) => {
+      // Walk past From: header elements — they're nested inside the clickable message container
       const ariaLabel = ancestor.getAttribute("aria-label");
       if (ariaLabel !== null && ariaLabel.startsWith("From:")) {
         return false;

@@ -61,4 +61,5 @@ window.addEventListener("message", (event) => {
   postBlobResult(event.data.id, event.data.url).catch(console.error);
 });
 
+// Sentinel export — ensures bundler treats this as a module (required for Chrome MAIN world injection)
 export type MainWorldModule = true;

@@ -16,20 +16,27 @@ export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignP
     return { error: "No signature configured", success: false };
   }
 
-  const sigBytes = base64ToUint8Array(local.signatureImage.data);
+  try {
+    const sigBytes = base64ToUint8Array(local.signatureImage.data);
 
-  const signedPdf = await signPdf({
-    format: local.signatureImage.format,
-    pdfBytes: new Uint8Array(request.pdfBytes),
-    position: config.signaturePosition,
-    sigBytes,
-  });
+    const signedPdf = await signPdf({
+      format: local.signatureImage.format,
+      pdfBytes: new Uint8Array(request.pdfBytes),
+      position: config.signaturePosition,
+      sigBytes,
+    });
 
-  return {
-    filename: generateAttachmentName(request.senderLastname, new Date()),
-    signedPdf: [...signedPdf],
-    success: true,
-  };
+    return {
+      filename: generateAttachmentName(request.senderLastname, new Date()),
+      signedPdf: [...signedPdf],
+      success: true,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Signing failed",
+      success: false,
+    };
+  }
 }
 
 function respondWithPromise(
