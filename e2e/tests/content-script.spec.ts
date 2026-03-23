@@ -2,10 +2,8 @@ import { dirname, join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 
-const FIXTURE_PATH = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../fixtures/outlook-message.html",
-);
+const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "../fixtures");
+const FIXTURE_PATH = join(FIXTURES_DIR, "outlook-message.html");
 
 test.describe("Content Script DOM Queries", () => {
   test("findLastMessageFromOthers skips own messages", async ({ page }) => {
@@ -92,5 +90,63 @@ test.describe("Content Script DOM Queries", () => {
       .textContent();
 
     expect(subject?.trim()).toBe("Quarterly Report Review");
+  });
+
+  test("returns not found when only own messages exist", async ({ page }) => {
+    // Given: page with only own messages
+    await page.goto(`file://${join(FIXTURES_DIR, "outlook-only-own-messages.html")}`);
+
+    // When: searching for last message from others
+    const result = await page.evaluate(() => {
+      const readingPane = document.querySelector('[role="main"]');
+      if (!readingPane) {
+        return { found: false };
+      }
+
+      const senderElements = [
+        ...readingPane.querySelectorAll<HTMLElement>(
+          '[role="button"][aria-label^="From:"], button[name^="From:"]',
+        ),
+      ];
+
+      for (const el of senderElements.toReversed()) {
+        const textContent = el.textContent?.trim() ?? "";
+        const isOwnMessage = ["you", "moi"].includes(textContent.toLowerCase());
+        if (!isOwnMessage) {
+          return { found: true };
+        }
+      }
+      return { found: false };
+    });
+
+    // Then
+    expect(result.found).toBe(false);
+  });
+
+  test("handles message without subject heading", async ({ page }) => {
+    // Given: page with no heading element
+    await page.goto(`file://${join(FIXTURES_DIR, "outlook-no-subject.html")}`);
+
+    // When
+    const heading = await page.locator('[role="main"] [role="heading"][aria-level="2"]').count();
+
+    // Then
+    expect(heading).toBe(0);
+  });
+
+  test("finds multiple attachment listboxes across messages", async ({ page }) => {
+    // Given: page with attachments in multiple messages
+    await page.goto(`file://${FIXTURE_PATH}`);
+
+    // When
+    const listboxCount = await page.evaluate(() => {
+      const listboxes = document.querySelectorAll(
+        '[role="main"] [role="listbox"][aria-label*="attachment" i]',
+      );
+      return listboxes.length;
+    });
+
+    // Then: outlook-message.html has 2 messages with attachments
+    expect(listboxCount).toBe(2);
   });
 });

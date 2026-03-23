@@ -6,7 +6,8 @@ import { setTimeout } from "node:timers/promises";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PATH_TO_EXTENSION = join(__dirname, "../../dist");
-const CHROME_PATH = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const CHROME_PATH_MACOS = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const isCI = Boolean(process.env.CI);
 
 export async function createExtensionContext(): Promise<{
   close: () => Promise<void>;
@@ -23,7 +24,7 @@ export async function createExtensionContext(): Promise<{
       "--disable-crashpad-for-testing",
       "--disable-gpu-watchdog",
     ],
-    executablePath: CHROME_PATH,
+    executablePath: isCI ? undefined : CHROME_PATH_MACOS,
     headless: false,
   });
 

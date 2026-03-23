@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mock Outlook Message - Only Own Messages</title>
+  </head>
+  <body>
+    <div role="main">
+      <div role="heading" aria-level="2">Self Notes</div>
+
+      <div role="listitem" class="message" data-is-focusable="true">
+        <button role="button" aria-label="From: Me" name="From: Me">
+          <span>Moi</span>
+        </button>
+        <div class="message-body">
+          <p>Note to self about the project.</p>
+        </div>
+        <div role="listbox" aria-label="Attachments">
+          <div role="option" class="attachment">my-notes.pdf (100 KB)</div>
+        </div>
+      </div>
+
+      <div role="listitem" class="message" data-is-focusable="true">
+        <button role="button" aria-label="From: Me" name="From: Me">
+          <span>You</span>
+        </button>
+        <div class="message-body">
+          <p>Follow-up note.</p>
+        </div>
+      </div>
+    </div>
+
+    <button name="Reply" aria-label="Reply">Reply</button>
+  </body>
+</html>

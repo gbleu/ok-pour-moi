@@ -2,7 +2,8 @@
   "compilerOptions": {
     "paths": {
       "#shared/*": ["./src/shared/*"],
-      "#mocks/*": ["./e2e/mocks/*"]
+      "#mocks/*": ["./e2e/mocks/*"],
+      "#helpers/*": ["./e2e/helpers/*"]
     },
     "types": ["bun", "chrome"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
