@@ -21,7 +21,7 @@ export default defineConfig({
             "--disable-gpu-watchdog",
             "--disable-dev-shm-usage",
           ],
-          executablePath: process.env.CHROME_PATH ?? (isCI ? undefined : CHROME_PATH_MACOS),
+          executablePath: isCI ? undefined : CHROME_PATH_MACOS,
         },
       },
     },

@@ -1,5 +1,7 @@
 import test, { expect } from "#helpers/extension-fixture.js";
 
+test.skip(Boolean(process.env.CI), "Extension tests require real Chrome");
+
 test.describe("Origin Validation", () => {
   test("service worker rejects messages from non-Outlook origins", async ({
     context,

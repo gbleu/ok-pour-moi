@@ -24,7 +24,7 @@ export async function createExtensionContext(): Promise<{
       "--disable-crashpad-for-testing",
       "--disable-gpu-watchdog",
     ],
-    executablePath: process.env.CHROME_PATH ?? chromium.executablePath(),
+    executablePath: chromium.executablePath(),
     headless: false,
     ignoreDefaultArgs: [
       "--disable-extensions",

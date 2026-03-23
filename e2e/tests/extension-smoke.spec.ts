@@ -1,5 +1,9 @@
 import test, { expect } from "#helpers/extension-fixture.js";
 
+// Extension tests require real Chrome with extension support — skip on CI where Playwright's
+// Chromium can't serve chrome-extension:// pages. Tracked for future Docker-based solution.
+test.skip(Boolean(process.env.CI), "Extension tests require real Chrome");
+
 test.describe("Extension Loading", () => {
   test("service worker registers successfully", async ({ context }) => {
     const worker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));

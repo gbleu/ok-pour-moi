@@ -1,5 +1,7 @@
 import test, { expect } from "#helpers/extension-fixture.js";
 
+test.skip(Boolean(process.env.CI), "Extension tests require real Chrome");
+
 test.describe("PDF Signing Workflow", () => {
   test("reports no attachments when none present", async ({ setupOutlookPage }) => {
     const page = await setupOutlookPage("outlook-no-attachments.html");
