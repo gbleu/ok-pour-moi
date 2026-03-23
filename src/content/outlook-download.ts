@@ -1,17 +1,6 @@
 /* eslint-disable promise/avoid-new, unicorn/prefer-global-this */
+import type { BlobCapturedMessage, BlobResultMessage } from "./blob-protocol.js";
 import { TIMING, simulateClick, simulateKeyPress, sleep, waitForElement } from "./dom-utils.js";
-
-interface BlobCapturedMessage {
-  type: "OPM_BLOB_CAPTURED";
-  url: string;
-}
-
-interface BlobResultMessage {
-  data?: Uint8Array;
-  error?: string;
-  id: string;
-  type: "OPM_BLOB_RESULT";
-}
 
 function isBlobCaptured(data: unknown): data is BlobCapturedMessage {
   return (
@@ -65,11 +54,8 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
     30_000,
   );
 
-  if (result.error !== undefined) {
+  if ("error" in result) {
     throw new Error(result.error);
-  }
-  if (result.data === undefined) {
-    throw new Error("No blob data received");
   }
   return new Uint8Array(result.data);
 }

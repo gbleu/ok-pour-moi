@@ -1,12 +1,7 @@
 /* eslint-disable unicorn/prefer-global-this */
+import type { BlobRequestMessage } from "./blob-protocol.js";
 
-interface BlobMessage {
-  id: string;
-  type: "OPM_GET_BLOB";
-  url: string;
-}
-
-function isBlobMessage(data: unknown): data is BlobMessage {
+function isBlobMessage(data: unknown): data is BlobRequestMessage {
   return (
     typeof data === "object" &&
     data !== null &&

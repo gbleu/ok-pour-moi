@@ -6,6 +6,7 @@ import type {
 } from "#shared/messages.js";
 import { base64ToUint8Array, getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { generateAttachmentName, signPdf } from "#shared/pdf.js";
+import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 
 async function signPdfFromRequest(request: SignPdfRequest): Promise<SignPdfResponse> {
   const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
@@ -42,13 +43,6 @@ function respondWithPromise(
   });
 }
 
-const ALLOWED_ORIGINS = [
-  "https://outlook.office.com",
-  "https://outlook.office365.com",
-  "https://outlook.live.com",
-  "https://outlook.cloud.microsoft",
-];
-
 chrome.runtime.onMessage.addListener(
   (
     message: ContentToBackgroundMessage,
@@ -57,7 +51,7 @@ chrome.runtime.onMessage.addListener(
   ) => {
     if (
       sender.url === undefined ||
-      !ALLOWED_ORIGINS.some((origin) => sender.url?.startsWith(origin) === true)
+      !OUTLOOK_ORIGINS.some((origin) => sender.url?.startsWith(origin) === true)
     ) {
       return false;
     }

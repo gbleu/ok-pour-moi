@@ -33,8 +33,10 @@ export async function prepareDrafts(items: PdfItem[], config: WorkflowConfig): P
     }
   }
 
-  if (errors.length > 0 && successCount === 0) {
-    throw new Error(`All drafts failed: ${errors.join("; ")}`);
+  if (errors.length > 0) {
+    throw new Error(
+      `${successCount}/${items.length} drafts succeeded. Failures: ${errors.join("; ")}`,
+    );
   }
 
   return successCount;
