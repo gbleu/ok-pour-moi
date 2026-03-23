@@ -12,7 +12,14 @@ async function runWorkflow(config: SyncStorage): Promise<WorkflowResult> {
       return { message: "No PDFs found in current conversation", success: true };
     }
 
-    const successCount = await prepareDrafts(items, config);
+    const { successCount, errors } = await prepareDrafts(items, config);
+
+    if (errors.length > 0) {
+      return {
+        message: `${successCount}/${items.length} drafts. Failures: ${errors.join("; ")}`,
+        success: false,
+      };
+    }
 
     return {
       message: `Processed ${successCount}/${items.length} emails`,

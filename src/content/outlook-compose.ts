@@ -9,7 +9,12 @@ import {
 import type { PdfItem } from "./outlook-dom.js";
 import type { SyncStorage } from "#shared/storage.js";
 
-export async function prepareDrafts(items: PdfItem[], config: SyncStorage): Promise<number> {
+export interface DraftResult {
+  errors: string[];
+  successCount: number;
+}
+
+export async function prepareDrafts(items: PdfItem[], config: SyncStorage): Promise<DraftResult> {
   let successCount = 0;
   const errors: string[] = [];
 
@@ -33,11 +38,5 @@ export async function prepareDrafts(items: PdfItem[], config: SyncStorage): Prom
     }
   }
 
-  if (errors.length > 0) {
-    throw new Error(
-      `${successCount}/${items.length} drafts succeeded. Failures: ${errors.join("; ")}`,
-    );
-  }
-
-  return successCount;
+  return { errors, successCount };
 }
