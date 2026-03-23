@@ -25,7 +25,7 @@ export async function createExtensionContext(): Promise<{
       "--disable-gpu-watchdog",
     ],
     executablePath: chromium.executablePath(),
-    headless: false,
+    headless: true,
     ignoreDefaultArgs: [
       "--disable-extensions",
       "--disable-component-extensions-with-background-pages",
