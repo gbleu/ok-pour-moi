@@ -63,6 +63,7 @@ test.describe("Extension Loading", () => {
     await page.fill("#myEmail", "test@example.com");
     await page.fill("#replyMessage", "Hello, Ok pour moi.");
     await page.click("#save");
+    await page.getByText("Settings saved!").waitFor({ timeout: 5000 });
 
     await page.reload();
     await page.waitForSelector("#myEmail");

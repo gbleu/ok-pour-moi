@@ -43,17 +43,15 @@ test.describe("Origin Validation", () => {
     const page = await setupOutlookPage("outlook-message.html");
 
     // Chrome content scripts run in an isolated world, so verify via console log instead.
-    const consoleMessages: string[] = [];
-    page.on("console", (msg) => {
-      consoleMessages.push(msg.text());
+    // Reload to capture console messages from content script injection.
+    const consolePromise = page.waitForEvent("console", {
+      predicate: (msg) => msg.text().includes("[OPM]"),
+      timeout: 5000,
     });
-
-    // Reload to capture console messages from content script
     await page.reload({ waitUntil: "domcontentloaded" });
-    // Give content script time to execute
-    await page.waitForTimeout(1000);
+    const message = await consolePromise;
 
-    expect(consoleMessages.some((msg) => msg.includes("[OPM]"))).toBe(true);
+    expect(message.text()).toContain("[OPM]");
 
     await page.close();
   });

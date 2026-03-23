@@ -1,11 +1,19 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { getElement } from "./dom.js";
 
 describe("getElement", () => {
-  test("throws when element does not exist", () => {
+  const originalDocument = globalThis.document;
+
+  beforeEach(() => {
     // eslint-disable-next-line unicorn/no-null, @typescript-eslint/no-unsafe-type-assertion -- Mimicking DOM API which returns null
     globalThis.document = { querySelector: () => null } as unknown as Document;
+  });
 
+  afterEach(() => {
+    globalThis.document = originalDocument;
+  });
+
+  test("throws when element does not exist", () => {
     expect(() => getElement("nonexistent")).toThrow("Element #nonexistent not found");
   });
 

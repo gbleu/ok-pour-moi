@@ -1,8 +1,8 @@
 import { type BrowserContext, type Page, chromium } from "@playwright/test";
 import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
 import { dirname, join } from "node:path";
+import { mkdtemp, rm } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,7 +42,10 @@ export async function createExtensionContext(): Promise<{
   const [, extensionId = ""] = serviceWorker.url().match(/chrome-extension:\/\/([^/]+)/) ?? [];
 
   return {
-    close: async () => context.close(),
+    close: async () => {
+      await context.close();
+      await rm(userDataDir, { force: true, recursive: true });
+    },
     context,
     extensionId,
     getPopupPage: async () => {
