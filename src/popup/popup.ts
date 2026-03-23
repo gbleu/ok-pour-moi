@@ -1,6 +1,6 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
-import type { PopupToContentMessage, WorkflowResult } from "#shared/messages.js";
-import { type SyncStorage, getLocalStorage, getSyncStorage } from "#shared/storage.js";
+import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
+import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { getElement } from "#shared/dom.js";
 
@@ -20,7 +20,7 @@ function setProgress(show: boolean, value = 0, text = ""): void {
 }
 
 async function loadConfig(): Promise<
-  { config: SyncStorage; valid: true } | { error: string; valid: false }
+  { config: WorkflowConfig; valid: true } | { error: string; valid: false }
 > {
   const [sync, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
@@ -35,7 +35,14 @@ async function loadConfig(): Promise<
     return { error: "Signature image not uploaded", valid: false };
   }
 
-  return { config: sync, valid: true };
+  return {
+    config: {
+      myEmail: sync.myEmail,
+      replyMessage: sync.replyMessage,
+      signaturePosition: sync.signaturePosition,
+    },
+    valid: true,
+  };
 }
 
 function isOutlookMailUrl(url: string): boolean {

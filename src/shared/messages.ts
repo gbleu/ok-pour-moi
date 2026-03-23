@@ -1,14 +1,23 @@
-import type { SyncStorage } from "./storage.js";
+import type { SignaturePosition } from "./pdf.js";
+
+/** JSON-serialized Uint8Array for Chrome message transport (Uint8Array is not directly serializable) */
+type SerializedBytes = number[];
+
+export interface WorkflowConfig {
+  myEmail: string;
+  replyMessage: string;
+  signaturePosition: SignaturePosition;
+}
 
 export interface SignPdfRequest {
   originalFilename: string;
-  pdfBytes: number[];
+  pdfBytes: SerializedBytes;
   senderLastname: string;
 }
 
 export type SignPdfResponse =
   | { error: string; success: false }
-  | { filename: string; signedPdf: number[]; success: true };
+  | { filename: string; signedPdf: SerializedBytes; success: true };
 
 export interface WorkflowResult {
   message: string;
@@ -21,6 +30,6 @@ export interface ContentToBackgroundMessage {
 }
 
 export interface PopupToContentMessage {
-  config: SyncStorage;
+  config: WorkflowConfig;
   type: "START_WORKFLOW";
 }

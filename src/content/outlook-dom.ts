@@ -1,4 +1,8 @@
-import type { ContentToBackgroundMessage, SignPdfResponse } from "#shared/messages.js";
+import type {
+  ContentToBackgroundMessage,
+  SignPdfResponse,
+  WorkflowConfig,
+} from "#shared/messages.js";
 import {
   expandMessage,
   expandThread,
@@ -6,7 +10,6 @@ import {
   findLastMessageFromOthers,
   getPdfOptions,
 } from "./outlook-actions.js";
-import type { SyncStorage } from "#shared/storage.js";
 import { downloadAttachment } from "./outlook-download.js";
 
 export interface PdfItem {
@@ -38,7 +41,8 @@ function getConversationContext(): { conversationId: string; subject: string } |
   return { conversationId, subject };
 }
 
-export async function collectSignedPdfs(config: SyncStorage): Promise<PdfItem[]> {
+// Returns [] when no PDF is found (missing DOM state). Throws on signing failure (real error).
+export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem[]> {
   const context = getConversationContext();
   if (!context) {
     return [];

@@ -7,14 +7,17 @@ import {
   saveDraft,
 } from "./outlook-compose-actions.js";
 import type { PdfItem } from "./outlook-dom.js";
-import type { SyncStorage } from "#shared/storage.js";
+import type { WorkflowConfig } from "#shared/messages.js";
 
 export interface DraftResult {
   errors: string[];
   successCount: number;
 }
 
-export async function prepareDrafts(items: PdfItem[], config: SyncStorage): Promise<DraftResult> {
+export async function prepareDrafts(
+  items: PdfItem[],
+  config: WorkflowConfig,
+): Promise<DraftResult> {
   let successCount = 0;
   const errors: string[] = [];
 

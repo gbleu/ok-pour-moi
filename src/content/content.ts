@@ -1,10 +1,10 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type { PopupToContentMessage, WorkflowResult } from "#shared/messages.js";
-import { type SyncStorage, getSyncStorage } from "#shared/storage.js";
+import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
 import { collectSignedPdfs } from "./outlook-dom.js";
+import { getSyncStorage } from "#shared/storage.js";
 import { prepareDrafts } from "./outlook-compose.js";
 
-async function runWorkflow(config: SyncStorage): Promise<WorkflowResult> {
+async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
   try {
     const items = await collectSignedPdfs(config);
 
