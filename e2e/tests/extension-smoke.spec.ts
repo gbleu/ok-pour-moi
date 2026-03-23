@@ -1,5 +1,9 @@
 import test, { expect } from "#helpers/extension-fixture.js";
 
+// Extension loading tests require a real Chrome browser with extension support.
+// Skip on CI where Chromium's persistent context doesn't reliably serve extension pages.
+test.skip(Boolean(process.env.CI), "Extension loading tests require headed Chrome");
+
 test.describe("Extension Loading", () => {
   test("service worker registers successfully", async ({ context }) => {
     const worker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));
