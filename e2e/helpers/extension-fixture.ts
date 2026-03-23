@@ -24,8 +24,8 @@ export default base.extend<ExtensionFixtures>({
     await ext.close();
   },
   extensionId: async ({ context }, use) => {
-    const [firstWorker] = context.serviceWorkers();
-    const url = firstWorker?.url() ?? "";
+    const worker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));
+    const url = worker?.url() ?? "";
     const [, id = ""] = url.match(/chrome-extension:\/\/([^/]+)/) ?? [];
     await use(id);
   },

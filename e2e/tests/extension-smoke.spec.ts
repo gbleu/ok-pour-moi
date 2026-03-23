@@ -2,12 +2,9 @@ import test, { expect } from "#helpers/extension-fixture.js";
 
 test.describe("Extension Loading", () => {
   test("service worker registers successfully", async ({ context }) => {
-    const workers = context.serviceWorkers();
-    expect(workers.length).toBeGreaterThan(0);
-    const [firstWorker] = workers;
-    expect(firstWorker?.url()).toMatch(
-      /chrome-extension:\/\/[^/]+\/background\/service-worker\.js/,
-    );
+    const worker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));
+    expect(worker).toBeDefined();
+    expect(worker?.url()).toMatch(/chrome-extension:\/\/[^/]+\/background\/service-worker\.js/);
   });
 
   test("popup renders initial state", async ({ getPopupPage }) => {

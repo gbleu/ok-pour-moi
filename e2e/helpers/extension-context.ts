@@ -2,12 +2,11 @@ import { type BrowserContext, type Page, chromium } from "@playwright/test";
 import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { setTimeout } from "node:timers/promises";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PATH_TO_EXTENSION = join(__dirname, "../../dist");
-const CHROME_PATH_MACOS = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const isCI = Boolean(process.env.CI);
 
 export async function createExtensionContext(): Promise<{
   close: () => Promise<void>;
@@ -15,7 +14,8 @@ export async function createExtensionContext(): Promise<{
   extensionId: string;
   getPopupPage: () => Promise<Page>;
 }> {
-  const context = await chromium.launchPersistentContext("", {
+  const userDataDir = await mkdtemp(join(tmpdir(), "opm-test-"));
+  const context = await chromium.launchPersistentContext(userDataDir, {
     args: [
       `--disable-extensions-except=${PATH_TO_EXTENSION}`,
       `--load-extension=${PATH_TO_EXTENSION}`,
@@ -24,16 +24,20 @@ export async function createExtensionContext(): Promise<{
       "--disable-crashpad-for-testing",
       "--disable-gpu-watchdog",
     ],
-    executablePath: isCI ? undefined : CHROME_PATH_MACOS,
+    executablePath: chromium.executablePath(),
     headless: false,
+    ignoreDefaultArgs: [
+      "--disable-extensions",
+      "--disable-component-extensions-with-background-pages",
+    ],
   });
 
-  // Wait a bit for the extension to initialize
-  await setTimeout(1000);
-
-  const [firstWorker] = context.serviceWorkers();
-  const serviceWorker =
-    firstWorker ?? (await context.waitForEvent("serviceworker", { timeout: 10_000 }));
+  // Wait for our extension's service worker (filter out Chrome's built-in component extensions)
+  let serviceWorker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));
+  serviceWorker ??= await context.waitForEvent("serviceworker", {
+    predicate: (sw) => sw.url().includes("service-worker"),
+    timeout: 10_000,
+  });
 
   const [, extensionId = ""] = serviceWorker.url().match(/chrome-extension:\/\/([^/]+)/) ?? [];
 

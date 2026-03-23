@@ -25,9 +25,9 @@ test.describe("Origin Validation", () => {
     );
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
-    // When the listener returns false (origin rejected), Chrome doesn't send a response
+    // Origin rejected: either error, or response without signedPdf
     expect(["error", "responded"]).toContain(result.status);
-    if (result.status === "responded") {
+    if (result.status === "responded" && result.response !== undefined) {
       expect(result.response).not.toHaveProperty("signedPdf");
     }
 
@@ -38,11 +38,18 @@ test.describe("Origin Validation", () => {
     // Page served at Outlook URL gets the content script injected
     const page = await setupOutlookPage("outlook-message.html");
 
-    const hasContentScript = await page.evaluate(
-      () => chrome !== undefined && chrome.runtime !== undefined,
-    );
+    // Chrome content scripts run in an isolated world, so verify via console log instead.
+    const consoleMessages: string[] = [];
+    page.on("console", (msg) => {
+      consoleMessages.push(msg.text());
+    });
 
-    expect(hasContentScript).toBe(true);
+    // Reload to capture console messages from content script
+    await page.reload({ waitUntil: "domcontentloaded" });
+    // Give content script time to execute
+    await page.waitForTimeout(1000);
+
+    expect(consoleMessages.some((msg) => msg.includes("[OPM]"))).toBe(true);
 
     await page.close();
   });

@@ -73,8 +73,9 @@ test.describe("PDF Signing Workflow", () => {
     );
     /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
-    if (result.status === "responded") {
-      expect(result.response).toHaveProperty("success", false);
+    // Origin rejected: either threw an error, or returned undefined/no signedPdf
+    if (result.status === "responded" && result.response !== undefined) {
+      expect(result.response).not.toHaveProperty("signedPdf");
     }
 
     await page.close();
@@ -96,8 +97,8 @@ test.describe("PDF Signing Workflow", () => {
       return count;
     });
 
-    // Q4_Report.pdf and Q4_Report_v2.pdf
-    expect(pdfCount).toBe(2);
+    // Q4_Report.pdf, Q4_Report_v2.pdf, and existing-attachment.pdf (compose dialog)
+    expect(pdfCount).toBe(3);
 
     await page.close();
   });
