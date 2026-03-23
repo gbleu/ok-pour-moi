@@ -99,6 +99,24 @@ export async function removeAllAttachments(): Promise<void> {
   }
 }
 
+function findFileInput(): HTMLInputElement {
+  const fileInputs = [...document.querySelectorAll('input[type="file"]')].filter(
+    (input): input is HTMLInputElement => input instanceof HTMLInputElement,
+  );
+
+  const attachmentInput =
+    fileInputs.find((input) => {
+      const accept = input.getAttribute("accept");
+      return accept === null || !accept.startsWith("image/");
+    }) ?? fileInputs.at(-1);
+
+  if (!attachmentInput) {
+    throw new Error("Could not find file input for attachment");
+  }
+
+  return attachmentInput;
+}
+
 export async function attachFile(pdfBytes: Uint8Array, filename: string): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- TS lib typing issue: Uint8Array<ArrayBufferLike> not assignable to BlobPart
   const file = new File([pdfBytes as BlobPart], filename, { type: "application/pdf" });
@@ -123,22 +141,9 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
 
   await sleep(TIMING.UI_SETTLE);
 
-  const fileInputs = [...document.querySelectorAll('input[type="file"]')].filter(
-    (input): input is HTMLInputElement => input instanceof HTMLInputElement,
-  );
-
-  const attachmentInput =
-    fileInputs.find((input) => {
-      const accept = input.getAttribute("accept");
-      return accept === null || !accept.startsWith("image/");
-    }) ?? fileInputs.at(-1);
-
-  if (!attachmentInput) {
-    throw new Error("Could not find file input for attachment");
-  }
-
-  attachmentInput.files = dataTransfer.files;
-  attachmentInput.dispatchEvent(new Event("change", { bubbles: true }));
+  const input = findFileInput();
+  input.files = dataTransfer.files;
+  input.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(TIMING.UPLOAD_COMPLETE);
 }
 
