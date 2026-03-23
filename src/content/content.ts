@@ -55,25 +55,15 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
-    if (message.type === "START_WORKFLOW") {
-      runWorkflow(message.config)
-        .then(sendResponse)
-        .catch((error: unknown) => {
-          sendResponse({
-            message: error instanceof Error ? error.message : "Unknown error",
-            processed: 0,
-            success: false,
-          });
+    runWorkflow(message.config)
+      .then(sendResponse)
+      .catch((error: unknown) => {
+        sendResponse({
+          message: error instanceof Error ? error.message : "Unknown error",
+          processed: 0,
+          success: false,
         });
-      return true;
-    }
-
-    if (message.type === "GET_EMAIL_COUNT") {
-      const count = document.querySelectorAll("[data-convid]").length;
-      sendResponse({ message: `Found ${count} emails`, processed: count, success: true });
-      return false;
-    }
-
-    return false;
+      });
+    return true;
   },
 );

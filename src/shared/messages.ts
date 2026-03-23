@@ -27,6 +27,7 @@ export interface ContentToBackgroundMessage {
   type: "SIGN_PDF";
 }
 
-export type PopupToContentMessage =
-  | { config: WorkflowConfig; type: "START_WORKFLOW" }
-  | { type: "GET_EMAIL_COUNT" };
+export interface PopupToContentMessage {
+  config: WorkflowConfig;
+  type: "START_WORKFLOW";
+}

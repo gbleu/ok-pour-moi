@@ -60,15 +60,14 @@ const EXTENSION_FORMAT_MAP: Record<string, SignatureFormat> = {
 };
 
 export function getSignatureFormat(filename: string): SignatureFormat {
-  const lower = filename.toLowerCase();
-  for (const [ext, format] of Object.entries(EXTENSION_FORMAT_MAP)) {
-    if (lower.endsWith(ext)) {
-      return format;
-    }
+  const ext = filename.toLowerCase().match(/\.\w+$/)?.[0] ?? "";
+  const format = EXTENSION_FORMAT_MAP[ext];
+  if (format === undefined) {
+    throw new Error(
+      `Unsupported signature format: "${filename}". Only .png, .jpg, .jpeg are supported.`,
+    );
   }
-  throw new Error(
-    `Unsupported signature format: "${filename}". Only .png, .jpg, .jpeg are supported.`,
-  );
+  return format;
 }
 
 export async function signPdf(opts: {
