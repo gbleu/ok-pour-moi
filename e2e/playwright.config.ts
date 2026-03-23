@@ -1,8 +1,6 @@
 import { defineConfig } from "@playwright/test";
 
 const isCI = Boolean(process.env.CI);
-
-// On CI, use Playwright's bundled Chromium; locally use system Chrome
 const CHROME_PATH_MACOS = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 // eslint-disable-next-line import/no-default-export
@@ -23,7 +21,7 @@ export default defineConfig({
             "--disable-gpu-watchdog",
             "--disable-dev-shm-usage",
           ],
-          executablePath: isCI ? undefined : CHROME_PATH_MACOS,
+          executablePath: process.env.CHROME_PATH ?? (isCI ? undefined : CHROME_PATH_MACOS),
         },
       },
     },

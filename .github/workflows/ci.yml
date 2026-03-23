@@ -66,13 +66,18 @@ jobs:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-      - name: Install Playwright browsers
-        run: bunx playwright install chromium
+      - name: Install Google Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update && sudo apt-get install -y google-chrome-stable
       - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
-      - run: bun run test:e2e
+      - run: xvfb-run bun run test:e2e
+        env:
+          CHROME_PATH: /usr/bin/google-chrome-stable
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
