@@ -12,12 +12,9 @@ export interface SignPdfRequest {
   senderLastname: string;
 }
 
-export interface SignPdfResponse {
-  error?: string;
-  filename?: string;
-  signedPdf?: number[];
-  success: boolean;
-}
+export type SignPdfResponse =
+  | { error: string; success: false }
+  | { filename: string; signedPdf: number[]; success: true };
 
 export interface WorkflowResult {
   message: string;
@@ -25,10 +22,10 @@ export interface WorkflowResult {
   success: boolean;
 }
 
-export type ContentToBackgroundMessage =
-  | { payload: SignPdfRequest; type: "SIGN_PDF" }
-  | { type: "GET_CONFIG" }
-  | { type: "GET_SIGNATURE" };
+export interface ContentToBackgroundMessage {
+  payload: SignPdfRequest;
+  type: "SIGN_PDF";
+}
 
 export type PopupToContentMessage =
   | { config: WorkflowConfig; type: "START_WORKFLOW" }

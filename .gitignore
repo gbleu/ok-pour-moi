@@ -11,3 +11,4 @@ test-results
 playwright-report
 ok-pour-moi-v*.zip
 .claude/worktrees
+.desloppify

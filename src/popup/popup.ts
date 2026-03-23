@@ -65,7 +65,7 @@ async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
   return outlookTabs[0];
 }
 
-async function runWorkflow(): Promise<void> {
+async function dispatchWorkflow(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
   runBtn.disabled = true;
 
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   getElement<HTMLButtonElement>("run-btn").addEventListener("click", () => {
-    runWorkflow().catch((error: unknown) => {
+    dispatchWorkflow().catch((error: unknown) => {
       console.error("[OPM] Workflow error:", error);
     });
   });

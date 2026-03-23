@@ -29,7 +29,7 @@ URL.createObjectURL = (obj: Blob | MediaSource): string => {
   return url;
 };
 
-async function handleBlobRequest(id: string, url: string): Promise<void> {
+async function postBlobResult(id: string, url: string): Promise<void> {
   const blob = capturedBlobs.get(url);
 
   if (blob === undefined) {
@@ -63,7 +63,7 @@ window.addEventListener("message", (event) => {
   if (event.source !== window || !isBlobMessage(event.data)) {
     return;
   }
-  handleBlobRequest(event.data.id, event.data.url).catch(console.error);
+  postBlobResult(event.data.id, event.data.url).catch(console.error);
 });
 
 export type MainWorldModule = true;

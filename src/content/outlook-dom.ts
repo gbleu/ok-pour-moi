@@ -4,13 +4,13 @@ import type {
   WorkflowConfig,
 } from "#shared/messages.js";
 import {
-  downloadAttachment,
   expandMessage,
   expandThread,
   findAttachmentListbox,
   findLastMessageFromOthers,
   getPdfOptions,
 } from "./outlook-actions.js";
+import { downloadAttachment } from "./outlook-download.js";
 
 export interface PdfItem {
   conversationId: string;
@@ -21,13 +21,10 @@ export interface PdfItem {
   subject: string;
 }
 
-export async function collectSignedPdfs(
-  config: WorkflowConfig,
-  onProgress?: (current: number, total: number, subject: string) => void,
-): Promise<PdfItem[]> {
+function getConversationContext(): { conversationId: string; subject: string } | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (!readingPane) {
-    return [];
+    return undefined;
   }
 
   const subjectEl = readingPane.querySelector('[role="heading"][aria-level="2"]');
@@ -41,7 +38,16 @@ export async function collectSignedPdfs(
   );
   const conversationId = selectedEmail?.dataset.convid ?? "";
 
-  onProgress?.(1, 1, subject);
+  return { conversationId, subject };
+}
+
+export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem[]> {
+  const context = getConversationContext();
+  if (!context) {
+    return [];
+  }
+
+  const { subject, conversationId } = context;
 
   await expandThread();
 
@@ -77,9 +83,8 @@ export async function collectSignedPdfs(
       type: "SIGN_PDF",
     });
 
-    if (!response.success || !response.signedPdf || response.filename === undefined) {
-      console.error(`[OPM] Signing failed: ${response.error}`);
-      return [];
+    if (!response.success) {
+      throw new Error(`Signing failed: ${response.error}`);
     }
 
     return [
@@ -93,7 +98,6 @@ export async function collectSignedPdfs(
       },
     ];
   } catch (error) {
-    console.error(`[OPM] Download failed:`, error);
-    return [];
+    throw error instanceof Error ? error : new Error("Download failed");
   }
 }

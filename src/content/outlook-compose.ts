@@ -6,23 +6,17 @@ import {
   removeAllAttachments,
   saveDraft,
   typeMessage,
-} from "./outlook-actions.js";
+} from "./outlook-compose-actions.js";
 import type { PdfItem } from "./outlook-dom.js";
 import type { WorkflowConfig } from "#shared/messages.js";
 
-export async function prepareDrafts(
-  items: PdfItem[],
-  config: WorkflowConfig,
-  onProgress?: (current: number, total: number, subject: string) => void,
-): Promise<number> {
+export async function prepareDrafts(items: PdfItem[], config: WorkflowConfig): Promise<number> {
   let successCount = 0;
+  const errors: string[] = [];
 
   for (const [idx, item] of items.entries()) {
     simulateKeyPress("Escape");
     await sleep(TIMING.MENU_ANIMATION);
-
-    console.log(`[OPM] [${idx + 1}/${items.length}] "${item.subject}"`);
-    onProgress?.(idx + 1, items.length, item.subject);
 
     try {
       const composeBody = await openReply(item.conversationId);
@@ -35,8 +29,12 @@ export async function prepareDrafts(
       await sleep(TIMING.UI_SETTLE);
       successCount += 1;
     } catch (error) {
-      console.error(`[OPM] Failed:`, error);
+      errors.push(`[${idx + 1}] ${error instanceof Error ? error.message : "Unknown error"}`);
     }
+  }
+
+  if (errors.length > 0 && successCount === 0) {
+    throw new Error(`All drafts failed: ${errors.join("; ")}`);
   }
 
   return successCount;

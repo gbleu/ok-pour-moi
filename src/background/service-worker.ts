@@ -1,15 +1,13 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type { ContentToBackgroundMessage, SignPdfResponse } from "#shared/messages.js";
+import type {
+  ContentToBackgroundMessage,
+  SignPdfRequest,
+  SignPdfResponse,
+} from "#shared/messages.js";
 import { base64ToUint8Array, getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { generateAttachmentName, signPdf } from "#shared/pdf.js";
 
-console.log("[OPM] Service worker loaded");
-
-async function handleSignPdf(request: {
-  originalFilename: string;
-  pdfBytes: number[];
-  senderLastname: string;
-}): Promise<SignPdfResponse> {
+async function signPdfFromRequest(request: SignPdfRequest): Promise<SignPdfResponse> {
   const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
   if (!local.signatureImage) {
@@ -32,24 +30,10 @@ async function handleSignPdf(request: {
   };
 }
 
-async function handleGetSignature(): Promise<{
-  data?: string;
-  error?: string;
-  format?: string;
-  success: boolean;
-}> {
-  const { signatureImage } = await getLocalStorage();
-  if (!signatureImage) {
-    return { error: "No signature configured", success: false };
-  }
-  return {
-    data: signatureImage.data,
-    format: signatureImage.format,
-    success: true,
-  };
-}
-
-function handleAsync(promise: Promise<unknown>, sendResponse: (response: unknown) => void): void {
+function respondWithPromise(
+  promise: Promise<unknown>,
+  sendResponse: (response: unknown) => void,
+): void {
   promise.then(sendResponse).catch((error: unknown) => {
     sendResponse({
       error: error instanceof Error ? error.message : "Unknown error",
@@ -79,17 +63,7 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (message.type === "SIGN_PDF") {
-      handleAsync(handleSignPdf(message.payload), sendResponse);
-      return true;
-    }
-
-    if (message.type === "GET_CONFIG") {
-      handleAsync(getSyncStorage(), sendResponse);
-      return true;
-    }
-
-    if (message.type === "GET_SIGNATURE") {
-      handleAsync(handleGetSignature(), sendResponse);
+      respondWithPromise(signPdfFromRequest(message.payload), sendResponse);
       return true;
     }
 

@@ -4,13 +4,8 @@ import { collectSignedPdfs } from "./outlook-dom.js";
 import { getSyncStorage } from "#shared/storage.js";
 import { prepareDrafts } from "./outlook-compose.js";
 
-console.log("[OPM] Content script loaded");
-
 async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
-  console.log("[OPM] Starting workflow with config:", config);
-
   try {
-    // User has already selected the conversation - collect PDFs from current view
     const items = await collectSignedPdfs(config);
 
     if (items.length === 0) {
@@ -20,8 +15,6 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
         success: true,
       };
     }
-
-    console.log(`[OPM] Collected ${items.length} signed PDFs`);
 
     const successCount = await prepareDrafts(items, config);
 
@@ -43,11 +36,9 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
 // Debug trigger: press Ctrl+Shift+O to start workflow
 document.addEventListener("keydown", (event) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
-    console.log("[OPM] Debug trigger: Ctrl+Shift+O pressed");
     (async (): Promise<void> => {
       const config = await getSyncStorage();
-      const result = await runWorkflow(config);
-      console.log("[OPM] Debug workflow result:", result);
+      await runWorkflow(config);
     })().catch((error: unknown) => {
       console.error("[OPM] Debug workflow error:", error);
     });
@@ -57,9 +48,13 @@ document.addEventListener("keydown", (event) => {
 chrome.runtime.onMessage.addListener(
   (
     message: PopupToContentMessage,
-    _sender: chrome.runtime.MessageSender,
+    sender: chrome.runtime.MessageSender,
     sendResponse: (response: WorkflowResult) => void,
   ) => {
+    if (sender.id !== chrome.runtime.id) {
+      return false;
+    }
+
     if (message.type === "START_WORKFLOW") {
       runWorkflow(message.config)
         .then(sendResponse)

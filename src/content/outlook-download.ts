@@ -1,0 +1,113 @@
+/* eslint-disable promise/avoid-new, unicorn/prefer-global-this */
+import { TIMING, simulateClick, simulateKeyPress, sleep, waitForElement } from "./dom-utils.js";
+
+interface BlobCapturedMessage {
+  type: "OPM_BLOB_CAPTURED";
+  url: string;
+}
+
+interface BlobResultMessage {
+  data?: Uint8Array;
+  error?: string;
+  id: string;
+  type: "OPM_BLOB_RESULT";
+}
+
+function isBlobCaptured(data: unknown): data is BlobCapturedMessage {
+  return (
+    typeof data === "object" && data !== null && "type" in data && data.type === "OPM_BLOB_CAPTURED"
+  );
+}
+
+function isBlobResult(data: unknown, id: string): data is BlobResultMessage {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "type" in data &&
+    data.type === "OPM_BLOB_RESULT" &&
+    "id" in data &&
+    data.id === id
+  );
+}
+
+async function waitForWindowMessage<TMessage>(
+  predicate: (data: unknown) => data is TMessage,
+  timeout: number,
+): Promise<TMessage> {
+  return new Promise((resolve, reject) => {
+    const timerRef: { current: ReturnType<typeof setTimeout> | undefined } = { current: undefined };
+
+    function handler(event: MessageEvent): void {
+      if (event.source !== window || !predicate(event.data)) {
+        return;
+      }
+      window.removeEventListener("message", handler);
+      clearTimeout(timerRef.current);
+      resolve(event.data);
+    }
+
+    timerRef.current = setTimeout(() => {
+      window.removeEventListener("message", handler);
+      reject(new Error("Message timeout"));
+    }, timeout);
+
+    window.addEventListener("message", handler);
+  });
+}
+
+async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
+  const messageId = `opm-blob-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  window.postMessage({ id: messageId, type: "OPM_GET_BLOB", url: blobUrl }, window.location.origin);
+
+  const result = await waitForWindowMessage<BlobResultMessage>(
+    (data) => isBlobResult(data, messageId),
+    30_000,
+  );
+
+  if (result.error !== undefined) {
+    throw new Error(result.error);
+  }
+  if (result.data === undefined) {
+    throw new Error("No blob data received");
+  }
+  return new Uint8Array(result.data);
+}
+
+async function waitForAttachmentUrl(maxAttempts = 20): Promise<string> {
+  for (let idx = 0; idx < maxAttempts; idx += 1) {
+    const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
+    const attachmentId = match?.[1];
+    if (attachmentId !== undefined && attachmentId !== "") {
+      return decodeURIComponent(attachmentId);
+    }
+    await sleep(100);
+  }
+  throw new Error("Attachment ID not found in URL");
+}
+
+export async function downloadAttachment(option: Element): Promise<Uint8Array> {
+  simulateClick(option);
+  await waitForAttachmentUrl();
+
+  // Subscribe before triggering download to avoid missing the OPM_BLOB_CAPTURED message
+  const blobPromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
+
+  await sleep(TIMING.UI_SETTLE);
+  const downloadBtn = await waitForElement('[role="menuitem"]', {
+    match: (el) => {
+      const text = (el.textContent ?? "").toLowerCase();
+      return text.includes("download") || text.includes("télécharger");
+    },
+    timeout: 3000,
+  });
+  simulateClick(downloadBtn);
+
+  const { url } = await blobPromise;
+  const pdfBytes = await getBlobFromMainWorld(url);
+
+  simulateKeyPress("Escape");
+  await sleep(TIMING.MENU_ANIMATION);
+
+  return pdfBytes;
+}
