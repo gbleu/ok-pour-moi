@@ -1,10 +1,4 @@
-import type { SignaturePosition } from "./pdf.js";
-
-export interface WorkflowConfig {
-  myEmail: string;
-  replyMessage: string;
-  signaturePosition: SignaturePosition;
-}
+import type { SyncStorage } from "./storage.js";
 
 export interface SignPdfRequest {
   originalFilename: string;
@@ -28,6 +22,6 @@ export interface ContentToBackgroundMessage {
 }
 
 export interface PopupToContentMessage {
-  config: WorkflowConfig;
+  config: SyncStorage;
   type: "START_WORKFLOW";
 }

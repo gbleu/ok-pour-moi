@@ -92,11 +92,6 @@ async function saveSettings(): Promise<void> {
       },
     });
 
-    const fileInput = getElement<HTMLInputElement>("signatureFile");
-    if (fileInput.files?.[0] !== undefined) {
-      await storeSignatureFile(fileInput.files[0]);
-    }
-
     showStatus("success", "Settings saved!");
   } catch (error) {
     showStatus(

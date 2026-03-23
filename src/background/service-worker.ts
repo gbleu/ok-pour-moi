@@ -4,9 +4,10 @@ import type {
   SignPdfRequest,
   SignPdfResponse,
 } from "#shared/messages.js";
-import { base64ToUint8Array, getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { generateAttachmentName, signPdf } from "#shared/pdf.js";
+import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
+import { base64ToUint8Array } from "#shared/encoding.js";
 
 async function signPdfFromRequest(request: SignPdfRequest): Promise<SignPdfResponse> {
   const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);

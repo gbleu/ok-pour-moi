@@ -7,9 +7,9 @@ import {
   saveDraft,
 } from "./outlook-compose-actions.js";
 import type { PdfItem } from "./outlook-dom.js";
-import type { WorkflowConfig } from "#shared/messages.js";
+import type { SyncStorage } from "#shared/storage.js";
 
-export async function prepareDrafts(items: PdfItem[], config: WorkflowConfig): Promise<number> {
+export async function prepareDrafts(items: PdfItem[], config: SyncStorage): Promise<number> {
   let successCount = 0;
   const errors: string[] = [];
 
