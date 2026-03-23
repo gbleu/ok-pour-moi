@@ -37,8 +37,12 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
 document.addEventListener("keydown", (event) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
     (async (): Promise<void> => {
-      const config = await getSyncStorage();
-      await runWorkflow(config);
+      const sync = await getSyncStorage();
+      await runWorkflow({
+        myEmail: sync.myEmail,
+        replyMessage: sync.replyMessage,
+        signaturePosition: sync.signaturePosition,
+      });
     })().catch((error: unknown) => {
       console.error("[OPM] Debug workflow error:", error);
     });

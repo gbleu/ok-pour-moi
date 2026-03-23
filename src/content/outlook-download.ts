@@ -64,7 +64,7 @@ async function waitForAttachmentUrl(maxAttempts = 20): Promise<void> {
   for (let idx = 0; idx < maxAttempts; idx += 1) {
     const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
     const attachmentId = match?.[1];
-    if (attachmentId !== undefined && attachmentId !== "") {
+    if (attachmentId !== undefined) {
       return;
     }
     await sleep(100);
