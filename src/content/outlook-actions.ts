@@ -1,5 +1,5 @@
 /* eslint-disable no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
-import { TIMING, getButtonByName, simulateClick, sleep } from "./dom-utils.js";
+import { TIMING, getButtonByName, simulateClick, sleep } from "./outlook-automation.js";
 import { extractEmail, extractLastname } from "#shared/sender.js";
 
 export interface MessageInfo {

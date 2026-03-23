@@ -1,4 +1,4 @@
-import { TIMING, simulateKeyPress, sleep, typeText } from "./dom-utils.js";
+import { TIMING, simulateKeyPress, sleep, typeText } from "./outlook-automation.js";
 import {
   attachFile,
   closeCompose,

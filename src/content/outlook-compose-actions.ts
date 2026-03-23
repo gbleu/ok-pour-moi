@@ -6,7 +6,7 @@ import {
   simulateKeyPress,
   sleep,
   waitForElement,
-} from "./dom-utils.js";
+} from "./outlook-automation.js";
 
 function isMac(): boolean {
   return navigator.userAgent.includes("Mac");

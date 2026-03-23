@@ -1,6 +1,12 @@
 /* eslint-disable promise/avoid-new, unicorn/prefer-global-this */
 import type { BlobCapturedMessage, BlobResultMessage } from "./blob-protocol.js";
-import { TIMING, simulateClick, simulateKeyPress, sleep, waitForElement } from "./dom-utils.js";
+import {
+  TIMING,
+  simulateClick,
+  simulateKeyPress,
+  sleep,
+  waitForElement,
+} from "./outlook-automation.js";
 
 function isBlobCaptured(data: unknown): data is BlobCapturedMessage {
   return (
@@ -60,7 +66,7 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
   return new Uint8Array(result.data);
 }
 
-async function waitForAttachmentUrl(maxAttempts = 20): Promise<void> {
+async function waitUntilAttachmentReady(maxAttempts = 20): Promise<void> {
   for (let idx = 0; idx < maxAttempts; idx += 1) {
     const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
     const attachmentId = match?.[1];
@@ -74,7 +80,7 @@ async function waitForAttachmentUrl(maxAttempts = 20): Promise<void> {
 
 export async function downloadAttachment(option: Element): Promise<Uint8Array> {
   simulateClick(option);
-  await waitForAttachmentUrl();
+  await waitUntilAttachmentReady();
 
   // Subscribe before triggering download to avoid missing the OPM_BLOB_CAPTURED message
   const blobPromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
