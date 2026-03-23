@@ -8,10 +8,15 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { $ } from "bun";
 
 function getVersion(): string {
-  const manifestContent = readFileSync("manifest.json", "utf8");
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Manifest structure is known
-  const manifest = JSON.parse(manifestContent) as { version: string };
-  return manifest.version;
+  try {
+    const manifestContent = readFileSync("manifest.json", "utf8");
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Manifest structure is known
+    const manifest = JSON.parse(manifestContent) as { version: string };
+    return manifest.version;
+  } catch {
+    console.error("Failed to read manifest.json — ensure it exists and contains valid JSON.");
+    process.exit(1);
+  }
 }
 
 async function createPackage(): Promise<boolean> {

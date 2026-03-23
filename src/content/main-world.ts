@@ -58,7 +58,18 @@ window.addEventListener("message", (event) => {
   if (event.source !== window || !isBlobMessage(event.data)) {
     return;
   }
-  postBlobResult(event.data.id, event.data.url).catch(console.error);
+  const { id, url } = event.data;
+  // eslint-disable-next-line promise/prefer-await-to-callbacks -- Event listener cannot be async
+  postBlobResult(id, url).catch((error: unknown) => {
+    window.postMessage(
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+        id,
+        type: "OPM_BLOB_RESULT",
+      },
+      window.location.origin,
+    );
+  });
 });
 
 // Sentinel export — ensures bundler treats this as a module (required for Chrome MAIN world injection)
