@@ -47,14 +47,18 @@ export default base.extend<ExtensionTestFixtures, ExtensionWorkerFixtures>({
   getOptionsPage: async ({ extensionContext, extensionId }, use) => {
     await use(async () => {
       const page = await extensionContext.newPage();
-      await page.goto(`chrome-extension://${extensionId}/options/options.html`);
+      await page.goto(`chrome-extension://${extensionId}/options/options.html`, {
+        waitUntil: "domcontentloaded",
+      });
       return page;
     });
   },
   getPopupPage: async ({ extensionContext, extensionId }, use) => {
     await use(async () => {
       const page = await extensionContext.newPage();
-      await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
+      await page.goto(`chrome-extension://${extensionId}/popup/popup.html`, {
+        waitUntil: "domcontentloaded",
+      });
       return page;
     });
   },
@@ -68,7 +72,9 @@ export default base.extend<ExtensionTestFixtures, ExtensionWorkerFixtures>({
         route.fulfill({ body: html, contentType: "text/html" }),
       );
 
-      await page.goto("https://outlook.office365.com/mail/inbox");
+      await page.goto("https://outlook.office365.com/mail/inbox", {
+        waitUntil: "domcontentloaded",
+      });
       return page;
     });
   },

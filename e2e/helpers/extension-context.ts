@@ -47,7 +47,9 @@ export async function createExtensionContext(): Promise<{
     extensionId,
     getPopupPage: async () => {
       const page = await context.newPage();
-      await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
+      await page.goto(`chrome-extension://${extensionId}/popup/popup.html`, {
+        waitUntil: "domcontentloaded",
+      });
       return page;
     },
   };

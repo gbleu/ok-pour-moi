@@ -47,7 +47,9 @@ test.describe("PDF Signing Workflow", () => {
     extensionId,
   }) => {
     const page = await context.newPage();
-    await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
+    await page.goto(`chrome-extension://${extensionId}/popup/popup.html`, {
+      waitUntil: "domcontentloaded",
+    });
 
     await page.evaluate(async () => {
       await chrome.storage.local.clear();

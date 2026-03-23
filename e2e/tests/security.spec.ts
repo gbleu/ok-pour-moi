@@ -7,7 +7,9 @@ test.describe("Origin Validation", () => {
   }) => {
     // Extension pages have chrome-extension:// origin, not an Outlook origin
     const page = await context.newPage();
-    await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
+    await page.goto(`chrome-extension://${extensionId}/popup/popup.html`, {
+      waitUntil: "domcontentloaded",
+    });
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment -- Chrome API returns untyped response in page.evaluate */
     const result: { response?: Record<string, unknown>; status: string } = await page.evaluate(
