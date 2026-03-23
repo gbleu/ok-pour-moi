@@ -30,7 +30,7 @@ function isBlobResult(data: unknown, id: string): data is BlobResultMessage {
   );
 }
 
-async function waitForWindowMessage<TMessage>(
+function waitForWindowMessage<TMessage>(
   predicate: (data: unknown) => data is TMessage,
   timeout: number,
 ): Promise<TMessage> {
@@ -74,12 +74,12 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
   return new Uint8Array(result.data);
 }
 
-async function waitForAttachmentUrl(maxAttempts = 20): Promise<string> {
+async function waitForAttachmentUrl(maxAttempts = 20): Promise<void> {
   for (let idx = 0; idx < maxAttempts; idx += 1) {
     const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
     const attachmentId = match?.[1];
     if (attachmentId !== undefined && attachmentId !== "") {
-      return decodeURIComponent(attachmentId);
+      return;
     }
     await sleep(100);
   }

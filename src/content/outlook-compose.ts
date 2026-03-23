@@ -1,11 +1,10 @@
-import { TIMING, simulateKeyPress, sleep } from "./dom-utils.js";
+import { TIMING, simulateKeyPress, sleep, typeText } from "./dom-utils.js";
 import {
   attachFile,
   closeCompose,
   openReply,
   removeAllAttachments,
   saveDraft,
-  typeMessage,
 } from "./outlook-compose-actions.js";
 import type { PdfItem } from "./outlook-dom.js";
 import type { WorkflowConfig } from "#shared/messages.js";
@@ -20,7 +19,8 @@ export async function prepareDrafts(items: PdfItem[], config: WorkflowConfig): P
 
     try {
       const composeBody = await openReply(item.conversationId);
-      typeMessage(composeBody, config.replyMessage);
+      composeBody.focus();
+      typeText(composeBody, config.replyMessage);
       await removeAllAttachments();
       await attachFile(item.signedPdf, item.filename);
       await saveDraft();

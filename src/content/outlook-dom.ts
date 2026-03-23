@@ -71,33 +71,29 @@ export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem
   const originalFilename =
     (firstPdf.textContent ?? "").match(/^(.+\.pdf)/i)?.[1] ?? "attachment.pdf";
 
-  try {
-    const pdfBytes = await downloadAttachment(firstPdf);
+  const pdfBytes = await downloadAttachment(firstPdf);
 
-    const response = await chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
-      payload: {
-        originalFilename,
-        pdfBytes: [...pdfBytes],
-        senderLastname: message.senderLastname,
-      },
-      type: "SIGN_PDF",
-    });
+  const response = await chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
+    payload: {
+      originalFilename,
+      pdfBytes: [...pdfBytes],
+      senderLastname: message.senderLastname,
+    },
+    type: "SIGN_PDF",
+  });
 
-    if (!response.success) {
-      throw new Error(`Signing failed: ${response.error}`);
-    }
-
-    return [
-      {
-        conversationId,
-        filename: response.filename,
-        senderEmail: message.senderEmail,
-        senderLastname: message.senderLastname,
-        signedPdf: new Uint8Array(response.signedPdf),
-        subject,
-      },
-    ];
-  } catch (error) {
-    throw error instanceof Error ? error : new Error("Download failed");
+  if (!response.success) {
+    throw new Error(`Signing failed: ${response.error}`);
   }
+
+  return [
+    {
+      conversationId,
+      filename: response.filename,
+      senderEmail: message.senderEmail,
+      senderLastname: message.senderLastname,
+      signedPdf: new Uint8Array(response.signedPdf),
+      subject,
+    },
+  ];
 }

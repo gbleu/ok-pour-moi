@@ -13,7 +13,7 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-export async function waitForElement(
+export function waitForElement(
   selector: string,
   options: { match?: (el: Element) => boolean; parent?: Document | Element; timeout?: number } = {},
 ): Promise<Element> {

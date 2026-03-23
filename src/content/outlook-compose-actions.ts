@@ -5,7 +5,6 @@ import {
   simulateClick,
   simulateKeyPress,
   sleep,
-  typeText,
   waitForElement,
 } from "./dom-utils.js";
 
@@ -94,7 +93,7 @@ export async function openReply(conversationId?: string): Promise<HTMLElement> {
 
 export async function removeAllAttachments(): Promise<void> {
   while (await removeFirstAttachment()) {
-    // Continue removing until no more attachments
+    /* Empty */
   }
 }
 
@@ -139,11 +138,6 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
   attachmentInput.files = dataTransfer.files;
   attachmentInput.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(TIMING.UPLOAD_COMPLETE);
-}
-
-export function typeMessage(composeBody: HTMLElement, message: string): void {
-  composeBody.focus();
-  typeText(composeBody, message);
 }
 
 export async function saveDraft(): Promise<void> {
