@@ -72,7 +72,7 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
 
 async function waitUntilAttachmentReady(maxAttempts = 20): Promise<void> {
   for (let idx = 0; idx < maxAttempts; idx += 1) {
-    const match = window.location.pathname.match(/\/sxs\/([^/]+)$/);
+    const match = /\/sxs\/([^/]+)$/.exec(window.location.pathname);
     const attachmentId = match?.[1];
     if (attachmentId !== undefined) {
       return;

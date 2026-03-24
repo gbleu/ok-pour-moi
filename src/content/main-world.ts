@@ -1,6 +1,7 @@
+import { getErrorMessage } from "#shared/errors.js";
+
 /* eslint-disable unicorn/prefer-global-this */
 import type { BlobRequestMessage } from "./blob-protocol.js";
-import { getErrorMessage } from "#shared/errors.js";
 
 function isBlobMessage(data: unknown): data is BlobRequestMessage {
   return (
@@ -55,7 +56,7 @@ async function postBlobResult(id: string, url: string): Promise<void> {
   }
 }
 
-window.addEventListener("message", (event) => {
+window.addEventListener("message", (event: MessageEvent) => {
   if (event.source !== window || !isBlobMessage(event.data)) {
     return;
   }

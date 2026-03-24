@@ -1,9 +1,9 @@
-/* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
-import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
-import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
-import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { getElement } from "#shared/dom.js";
 import { getErrorMessage } from "#shared/errors.js";
+/* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
+import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
+import { OUTLOOK_ORIGINS } from "#shared/origins.js";
+import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 
 function showStatus(type: "error" | "info" | "ready" | "warning", message: string): void {
   const status = getElement<HTMLDivElement>("status");
@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("[OPM] Workflow error:", error);
     });
   });
-  getElement<HTMLAnchorElement>("settings-link").addEventListener("click", (event) => {
+  getElement<HTMLAnchorElement>("settings-link").addEventListener("click", (event: MouseEvent) => {
     event.preventDefault();
     chrome.runtime.openOptionsPage().catch((error: unknown) => {
       console.error("[OPM] Options page error:", error);

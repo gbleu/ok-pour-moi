@@ -26,10 +26,10 @@ export function extractLastname(fromText: string): string {
 }
 
 export function extractEmail(fromText: string): string {
-  const angleMatch = fromText.match(/<([^>]+@[^>]+)>/);
+  const angleMatch = /<([^>]+@[^>]+)>/.exec(fromText);
   if (angleMatch?.[1] !== undefined) {
     return angleMatch[1];
   }
-  const emailMatch = fromText.match(/[\w.+-]+@[\w.-]+\.\w+/);
+  const emailMatch = /[\w.+-]+@[\w.-]+\.\w+/.exec(fromText);
   return emailMatch?.[0] ?? "";
 }

@@ -1,11 +1,12 @@
-/* eslint-disable no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
-import { TIMING, getButtonByName, simulateClick, sleep } from "./outlook-automation.js";
 import { extractEmail, extractLastname } from "#shared/sender.js";
 
+/* eslint-disable no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
+import { TIMING, getButtonByName, simulateClick, sleep } from "./outlook-automation.js";
+
 export interface MessageInfo {
-  element: Element;
-  senderLastname: string;
-  senderEmail: string;
+  readonly element: Element;
+  readonly senderLastname: string;
+  readonly senderEmail: string;
 }
 
 export async function expandThread(): Promise<void> {
@@ -34,7 +35,7 @@ function isOwnMessage(
     elementEmail,
     fromText,
     textContent,
-  }: { elementEmail: string; fromText: string; textContent: string },
+  }: Readonly<{ elementEmail: string; fromText: string; textContent: string }>,
 ): boolean {
   const myEmailLower = myEmail.toLowerCase();
   const textLower = textContent.toLowerCase();
@@ -72,7 +73,7 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
   for (const el of senderElements.toReversed()) {
     const ariaLabel = el.getAttribute("aria-label") ?? "";
     const nameAttr = el.getAttribute("name") ?? "";
-    const textContent = el.textContent?.trim() ?? "";
+    const textContent = (el.textContent ?? "").trim();
 
     const fromText = [ariaLabel, nameAttr].find((text) => text.startsWith("From:")) ?? textContent;
 
@@ -114,7 +115,7 @@ export async function expandMessage(messageButton: Element): Promise<void> {
     findAncestor(messageButton, (ancestor) => {
       // Walk past From: header elements — they're nested inside the clickable message container
       const ariaLabel = ancestor.getAttribute("aria-label");
-      if (ariaLabel !== null && ariaLabel.startsWith("From:")) {
+      if (ariaLabel?.startsWith("From:") === true) {
         return false;
       }
       const style = window.getComputedStyle(ancestor);

@@ -1,3 +1,5 @@
+import { getErrorMessage } from "#shared/errors.js";
+
 import { TIMING, simulateKeyPress, sleep, typeText } from "./outlook-automation.js";
 import {
   attachFile,
@@ -6,14 +8,13 @@ import {
   removeAllAttachments,
   saveDraft,
 } from "./outlook-compose-actions.js";
-import { getErrorMessage } from "#shared/errors.js";
 export interface SignedPdfItem {
-  conversationId: string;
-  filename: string;
-  senderEmail: string;
-  senderLastname: string;
-  signedPdf: Uint8Array;
-  subject: string;
+  readonly conversationId: string;
+  readonly filename: string;
+  readonly senderEmail: string;
+  readonly senderLastname: string;
+  readonly signedPdf: Uint8Array;
+  readonly subject: string;
 }
 
 export interface DraftResult {
@@ -22,7 +23,7 @@ export interface DraftResult {
 }
 
 export async function prepareDrafts(
-  items: SignedPdfItem[],
+  items: readonly SignedPdfItem[],
   replyMessage: string,
 ): Promise<DraftResult> {
   let successCount = 0;

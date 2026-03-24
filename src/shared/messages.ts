@@ -1,35 +1,35 @@
 import type { SignaturePosition } from "./pdf.js";
 
 /** JSON-serialized Uint8Array for Chrome message transport (Uint8Array is not directly serializable) */
-type SerializedBytes = number[];
+type SerializedBytes = readonly number[];
 
 export interface WorkflowConfig {
-  myEmail: string;
-  replyMessage: string;
-  signaturePosition: SignaturePosition;
+  readonly myEmail: string;
+  readonly replyMessage: string;
+  readonly signaturePosition: SignaturePosition;
 }
 
 export interface SignPdfRequest {
-  originalFilename: string;
-  pdfBytes: SerializedBytes;
-  senderLastname: string;
+  readonly originalFilename: string;
+  readonly pdfBytes: SerializedBytes;
+  readonly senderLastname: string;
 }
 
 export type SignPdfResponse =
-  | { error: string; success: false }
-  | { filename: string; signedPdf: SerializedBytes; success: true };
+  | { readonly error: string; readonly success: false }
+  | { readonly filename: string; readonly signedPdf: SerializedBytes; readonly success: true };
 
 export interface WorkflowResult {
-  message: string;
-  success: boolean;
+  readonly message: string;
+  readonly success: boolean;
 }
 
 export interface ContentToBackgroundMessage {
-  payload: SignPdfRequest;
-  type: "SIGN_PDF";
+  readonly payload: SignPdfRequest;
+  readonly type: "SIGN_PDF";
 }
 
 export interface PopupToContentMessage {
-  config: WorkflowConfig;
-  type: "START_WORKFLOW";
+  readonly config: WorkflowConfig;
+  readonly type: "START_WORKFLOW";
 }

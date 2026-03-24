@@ -1,9 +1,13 @@
+import type { BrowserContext, Page } from "@playwright/test";
+
 import test, { expect } from "#helpers/extension-fixture.js";
 
 test.skip(Boolean(process.env.CI), "Extension tests require real Chrome");
 
 test.describe("PDF Signing Workflow", () => {
-  test("reports no attachments when none present", async ({ setupOutlookPage }) => {
+  test("reports no attachments when none present", async ({
+    setupOutlookPage,
+  }: Readonly<{ setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>> }>) => {
     const page = await setupOutlookPage("outlook-no-attachments.html");
 
     const attachmentCount = await page.evaluate(() => {
@@ -20,7 +24,9 @@ test.describe("PDF Signing Workflow", () => {
     await page.close();
   });
 
-  test("skips non-PDF attachments", async ({ setupOutlookPage }) => {
+  test("skips non-PDF attachments", async ({
+    setupOutlookPage,
+  }: Readonly<{ setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>> }>) => {
     const page = await setupOutlookPage("outlook-non-pdf-only.html");
 
     const result = await page.evaluate(() => {
@@ -31,7 +37,7 @@ test.describe("PDF Signing Workflow", () => {
         const options = lb.querySelectorAll('[role="option"]');
         for (const opt of options) {
           totalCount += 1;
-          if ((opt.textContent ?? "").toLowerCase().includes(".pdf")) {
+          if (opt.textContent.toLowerCase().includes(".pdf")) {
             pdfCount += 1;
           }
         }
@@ -47,7 +53,7 @@ test.describe("PDF Signing Workflow", () => {
   test("service worker rejects signing from non-Outlook origin", async ({
     context,
     extensionId,
-  }) => {
+  }: Readonly<{ context: Readonly<BrowserContext>; extensionId: string }>) => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/popup/popup.html`, {
       waitUntil: "domcontentloaded",
@@ -85,7 +91,9 @@ test.describe("PDF Signing Workflow", () => {
     await page.close();
   });
 
-  test("detects multiple PDF attachments", async ({ setupOutlookPage }) => {
+  test("detects multiple PDF attachments", async ({
+    setupOutlookPage,
+  }: Readonly<{ setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>> }>) => {
     const page = await setupOutlookPage("outlook-message.html");
 
     const pdfCount = await page.evaluate(() => {
@@ -93,7 +101,7 @@ test.describe("PDF Signing Workflow", () => {
       let count = 0;
       for (const lb of listboxes) {
         for (const opt of lb.querySelectorAll('[role="option"]')) {
-          if ((opt.textContent ?? "").toLowerCase().includes(".pdf")) {
+          if (opt.textContent.toLowerCase().includes(".pdf")) {
             count += 1;
           }
         }

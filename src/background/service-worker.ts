@@ -1,14 +1,14 @@
+import { base64ToUint8Array } from "#shared/encoding.js";
+import { getErrorMessage } from "#shared/errors.js";
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
 import type {
   ContentToBackgroundMessage,
   SignPdfRequest,
   SignPdfResponse,
 } from "#shared/messages.js";
+import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { generateAttachmentName, signPdf } from "#shared/pdf.js";
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
-import { OUTLOOK_ORIGINS } from "#shared/origins.js";
-import { base64ToUint8Array } from "#shared/encoding.js";
-import { getErrorMessage } from "#shared/errors.js";
 
 export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignPdfResponse> {
   const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
@@ -53,11 +53,12 @@ function sendAsyncResponse(
 }
 
 chrome.runtime.onMessage.addListener(
+  // eslint-disable-next-line typescript-eslint/strict-void-return -- Chrome onMessage requires boolean return to keep channel open
   (
     message: ContentToBackgroundMessage,
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void,
-  ) => {
+  ): boolean => {
     const senderUrl = sender.url;
     try {
       if (
@@ -70,11 +71,7 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
-    if (message.type === "SIGN_PDF") {
-      sendAsyncResponse(signPdfFromRequest(message.payload), sendResponse);
-      return true;
-    }
-
-    return false;
+    sendAsyncResponse(signPdfFromRequest(message.payload), sendResponse);
+    return true;
   },
 );

@@ -1,10 +1,11 @@
 import { dirname, join } from "node:path";
-import { expect, test } from "@playwright/test";
 import { fileURLToPath } from "node:url";
+
+import { type Page, expect, test } from "@playwright/test";
 
 const POPUP_PATH = join(dirname(fileURLToPath(import.meta.url)), "../../dist/popup/popup.html");
 
-test("popup initial state", async ({ page }) => {
+test("popup initial state", async ({ page }: Readonly<{ page: Readonly<Page> }>) => {
   // Given
   await page.goto(`file://${POPUP_PATH}`);
 
@@ -18,7 +19,7 @@ test("popup initial state", async ({ page }) => {
       progressHidden: progress?.classList.contains("hidden") ?? false,
       runBtnDisabled: runBtn?.disabled ?? false,
       settingsLinkText: settingsLink?.textContent ?? "",
-      statusVisible: status !== null && status.checkVisibility(),
+      statusVisible: status?.checkVisibility() ?? false,
     };
   });
 

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { getErrorMessage } from "./errors.js";
 
 describe("getErrorMessage", () => {

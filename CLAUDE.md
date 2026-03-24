@@ -45,14 +45,6 @@ src/
 4. Downloads PDF, sends to service worker for signing
 5. Creates reply draft with signed PDF attached
 
-## Lint Rules (oxlint)
-
-### Import Sorting
-
-1. Multi-specifier imports first (2+ members), sorted by first member
-2. Single-specifier imports second, sorted by first member
-3. Sorting by first imported member name (case-sensitive ASCII), not module path
-
 ### Code Style
 
 - `setTimeout`: In Node scripts, use `import { setTimeout } from "node:timers/promises"` not `new Promise(r => setTimeout(r, ms))`. In browser code (`src/`), use the `sleep` helper from `dom-utils.ts`

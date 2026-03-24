@@ -5,6 +5,7 @@
  */
 
 import { existsSync, readFileSync, statSync } from "node:fs";
+
 import { $ } from "bun";
 
 function getVersion(): string {
@@ -15,7 +16,7 @@ function getVersion(): string {
     return manifest.version;
   } catch {
     console.error("Failed to read manifest.json — ensure it exists and contains valid JSON.");
-    process.exit(1);
+    return process.exit(1);
   }
 }
 

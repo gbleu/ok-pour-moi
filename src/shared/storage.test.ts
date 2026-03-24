@@ -16,17 +16,17 @@ function createStorageMock(): unknown {
   return {
     storage: {
       local: {
-        get: (defaults: Record<string, unknown>): Promise<Record<string, unknown>> =>
+        get: (defaults: Readonly<Record<string, unknown>>): Promise<Record<string, unknown>> =>
           Promise.resolve({ ...defaults, ...localData }),
-        set: (data: Record<string, unknown>): Promise<void> => {
+        set: (data: Readonly<Record<string, unknown>>): Promise<void> => {
           Object.assign(localData, data);
           return Promise.resolve();
         },
       },
       sync: {
-        get: (defaults: Record<string, unknown>): Promise<Record<string, unknown>> =>
+        get: (defaults: Readonly<Record<string, unknown>>): Promise<Record<string, unknown>> =>
           Promise.resolve({ ...defaults, ...syncData }),
-        set: (data: Record<string, unknown>): Promise<void> => {
+        set: (data: Readonly<Record<string, unknown>>): Promise<void> => {
           Object.assign(syncData, data);
           return Promise.resolve();
         },
