@@ -8,7 +8,7 @@ export default {
     "src/options/options.ts",
     "src/popup/popup.ts",
     "scripts/*.ts",
-    "e2e/**/*.ts",
+    "e2e/tests/**/*.ts",
   ],
 
   ignoreDependencies: ["@types/chrome"],
