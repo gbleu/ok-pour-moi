@@ -34,7 +34,7 @@ export default defineConfig({
       globals: { Bun: "readonly" },
     },
     {
-      files: ["oxlint.config.ts", "oxfmt.config.ts", "knip.config.ts"],
+      files: ["oxlint.config.ts", "knip.config.ts"],
       env: { browser: false, node: true },
       globals: { chrome: "off" },
       rules: {
