@@ -17,6 +17,8 @@ jobs:
       - run: bun install
       - run: bun fmt --check
       - run: bun --bun lint
+      - run: bun --bun knip
+      - run: bun --bun jscpd
 
   build:
     permissions:
