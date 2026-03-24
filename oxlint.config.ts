@@ -44,33 +44,58 @@ export default defineConfig({
   ],
   plugins: ["eslint", "typescript", "unicorn", "oxc", "promise", "import"],
   rules: {
+    // Prefer function declarations over expressions
     "func-style": ["error", "declaration"],
+    // Allow short names for type params, iterators, coordinates, and discard
     "id-length": ["error", { exceptions: ["T", "i", "j", "x", "y", "_"] }],
-    "import/consistent-type-specifier-style": "off",
+    // Inline type specifiers preferred over top-level import type
+    "import/consistent-type-specifier-style": ["error", "prefer-inline"],
+    // Conflicts with consistent-type-specifier-style prefer-inline
+    "typescript/no-import-type-side-effects": "off",
+    // Exports can appear anywhere in the file
     "import/exports-last": "off",
+    // No need to group all exports together
     "import/group-exports": "off",
+    // Raise the default dependency limit
     "import/max-dependencies": ["error", { max: 20 }],
+    // Named exports are the project standard
     "import/no-named-export": "off",
     "import/prefer-default-export": "off",
+    // Variables don't need initializers at declaration
     "init-declarations": "off",
+    // Generous function size limits
     "max-lines-per-function": ["error", { max: 250 }],
     "max-statements": ["error", { max: 60 }],
+    // Sequential async work is common in DOM automation
     "no-await-in-loop": "off",
+    // Console is used for extension logging
     "no-console": "off",
+    // Continue improves readability in loops
     "no-continue": "off",
+    // Inline comments are fine for eslint-disable directives
     "no-inline-comments": "off",
+    // Magic numbers are acceptable in this codebase
     "no-magic-numbers": "off",
+    // Ternaries are concise and readable
     "no-ternary": "off",
+    // Using undefined is valid
     "no-undefined": "off",
+    // Modern JS features are the project standard
     "oxc/no-async-await": "off",
     "oxc/no-optional-chaining": "off",
     "oxc/no-rest-spread-properties": "off",
+    // Prefer async/await over .then() but allow in Chrome API callbacks
     "promise/catch-or-return": "off",
     "promise/prefer-await-to-then": "off",
+    // Functions may be async for interface conformance without awaiting
     "require-await": "off",
+    // Import sorting handled by oxfmt
     "sort-imports": "off",
+    // Object key order is not enforced
     "sort-keys": "off",
+    // Conflicts with no-unsafe-* rules on textContent (string | null)
     "typescript/no-unnecessary-condition": "off",
+    // DOM and Playwright types are inherently mutable — allow them as-is
     "typescript/prefer-readonly-parameter-types": [
       "error",
       {
@@ -112,8 +137,11 @@ export default defineConfig({
         treatMethodsAsReadonly: true,
       },
     ],
+    // Not all async functions need the async keyword enforced
     "typescript/promise-function-async": "off",
+    // Duplicate of require-await with type awareness — same reasoning
     "typescript/require-await": "off",
+    // Chrome onMessage API requires boolean returns in void callbacks
     "typescript/strict-void-return": "off",
   },
 });

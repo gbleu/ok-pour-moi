@@ -1,5 +1,5 @@
 /* eslint-disable promise/avoid-new, unicorn/prefer-global-this */
-import type { BlobCapturedMessage, BlobResultMessage } from "./blob-protocol.js";
+import { type BlobCapturedMessage, type BlobResultMessage } from "./blob-protocol.js";
 import {
   TIMING,
   simulateClick,

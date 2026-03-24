@@ -1,7 +1,7 @@
 import { getErrorMessage } from "#shared/errors.js";
 
 /* eslint-disable unicorn/prefer-global-this */
-import type { BlobRequestMessage } from "./blob-protocol.js";
+import { type BlobRequestMessage } from "./blob-protocol.js";
 
 function isBlobMessage(data: unknown): data is BlobRequestMessage {
   return (

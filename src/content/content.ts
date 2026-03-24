@@ -1,11 +1,11 @@
 import { getErrorMessage } from "#shared/errors.js";
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type {
-  ContentToBackgroundMessage,
-  PopupToContentMessage,
-  SignPdfResponse,
-  WorkflowConfig,
-  WorkflowResult,
+import {
+  type ContentToBackgroundMessage,
+  type PopupToContentMessage,
+  type SignPdfResponse,
+  type WorkflowConfig,
+  type WorkflowResult,
 } from "#shared/messages.js";
 import { getSyncStorage } from "#shared/storage.js";
 

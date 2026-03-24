@@ -1,4 +1,4 @@
-import type { SignaturePosition } from "./pdf.js";
+import { type SignaturePosition } from "./pdf.js";
 
 /** JSON-serialized Uint8Array for Chrome message transport (Uint8Array is not directly serializable) */
 type SerializedBytes = readonly number[];

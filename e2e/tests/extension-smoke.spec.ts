@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from "@playwright/test";
+import { type BrowserContext, type Page } from "@playwright/test";
 
 import test, { expect } from "#helpers/extension-fixture.js";
 

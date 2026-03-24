@@ -1,4 +1,4 @@
-import type { SignatureFormat, SignaturePosition } from "./pdf.js";
+import { type SignatureFormat, type SignaturePosition } from "./pdf.js";
 
 export interface SyncStorage {
   readonly myEmail: string;

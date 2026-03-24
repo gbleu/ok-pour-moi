@@ -1,10 +1,10 @@
 import { base64ToUint8Array } from "#shared/encoding.js";
 import { getErrorMessage } from "#shared/errors.js";
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type {
-  ContentToBackgroundMessage,
-  SignPdfRequest,
-  SignPdfResponse,
+import {
+  type ContentToBackgroundMessage,
+  type SignPdfRequest,
+  type SignPdfResponse,
 } from "#shared/messages.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { generateAttachmentName, signPdf } from "#shared/pdf.js";

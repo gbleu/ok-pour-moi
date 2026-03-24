@@ -1,7 +1,11 @@
 import { getElement } from "#shared/dom.js";
 import { getErrorMessage } from "#shared/errors.js";
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
-import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
+import {
+  type PopupToContentMessage,
+  type WorkflowConfig,
+  type WorkflowResult,
+} from "#shared/messages.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 
