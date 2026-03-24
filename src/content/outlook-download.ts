@@ -33,7 +33,11 @@ function waitForWindowMessage<TMessage>(
     const timerRef: { current: ReturnType<typeof setTimeout> | undefined } = { current: undefined };
 
     function handler(event: MessageEvent): void {
-      if (event.source !== window || !predicate(event.data)) {
+      if (
+        event.source !== window ||
+        event.origin !== window.location.origin ||
+        !predicate(event.data)
+      ) {
         return;
       }
       window.removeEventListener("message", handler);

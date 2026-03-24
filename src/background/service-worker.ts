@@ -59,8 +59,7 @@ chrome.runtime.onMessage.addListener(
   ) => {
     if (
       sender.url === undefined ||
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Guarded by sender.url === undefined check above
-      !OUTLOOK_ORIGINS.some((origin) => sender.url!.startsWith(origin))
+      !OUTLOOK_ORIGINS.some((origin) => origin === new URL(sender.url ?? "").origin)
     ) {
       return false;
     }

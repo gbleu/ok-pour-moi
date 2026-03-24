@@ -46,7 +46,15 @@ async function loadConfig(): Promise<
 }
 
 function isOutlookMailUrl(url: string): boolean {
-  return OUTLOOK_ORIGINS.some((origin) => url.startsWith(origin)) && url.includes("/mail");
+  try {
+    const parsed = new URL(url);
+    return (
+      OUTLOOK_ORIGINS.some((origin) => origin === parsed.origin) &&
+      parsed.pathname.startsWith("/mail")
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
