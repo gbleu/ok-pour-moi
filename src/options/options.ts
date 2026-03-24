@@ -1,3 +1,6 @@
+import { getElement } from "#shared/dom.js";
+import { getErrorMessage } from "#shared/errors.js";
+import { getSignatureFormat } from "#shared/pdf.js";
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks, promise/avoid-new, promise/always-return, unicorn/prefer-add-event-listener */
 import {
   getLocalStorage,
@@ -5,9 +8,6 @@ import {
   setLocalStorage,
   setSyncStorage,
 } from "#shared/storage.js";
-import { getElement } from "#shared/dom.js";
-import { getErrorMessage } from "#shared/errors.js";
-import { getSignatureFormat } from "#shared/pdf.js";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const fileInput = getElement<HTMLInputElement>("signatureFile");
   const chooseBtn = getElement<HTMLButtonElement>("chooseFileBtn");
-  const fileNameSpan = getElement<HTMLSpanElement>("fileName");
+  const fileNameSpan = getElement("fileName");
 
   chooseBtn.addEventListener("click", () => {
     fileInput.click();

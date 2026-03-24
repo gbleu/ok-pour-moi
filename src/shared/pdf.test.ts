@@ -1,12 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { extractEmail, extractLastname } from "./sender.js";
+
+import { PDFDocument } from "pdf-lib";
+
 import {
   generateAttachmentName,
   getSignatureFormat,
   getTargetMonthAndYear,
   signPdf,
 } from "./pdf.js";
-import { PDFDocument } from "pdf-lib";
+import { extractEmail, extractLastname } from "./sender.js";
 
 describe("getTargetMonthAndYear", () => {
   test("returns month based on day threshold", () => {

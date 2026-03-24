@@ -1,12 +1,15 @@
 import { dirname, join } from "node:path";
-import { expect, test } from "@playwright/test";
 import { fileURLToPath } from "node:url";
+
+import { type Page, expect, test } from "@playwright/test";
 
 const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "../fixtures");
 const FIXTURE_PATH = join(FIXTURES_DIR, "outlook-message.html");
 
 test.describe("Content Script DOM Queries", () => {
-  test("findLastMessageFromOthers skips own messages", async ({ page }) => {
+  test("findLastMessageFromOthers skips own messages", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with messages including own message
     await page.goto(`file://${FIXTURE_PATH}`);
 
@@ -26,7 +29,7 @@ test.describe("Content Script DOM Queries", () => {
       for (const el of senderElements.toReversed()) {
         const ariaLabel = el.getAttribute("aria-label") ?? "";
         const nameAttr = el.getAttribute("name") ?? "";
-        const textContent = el.textContent?.trim() ?? "";
+        const textContent = el.textContent.trim();
 
         const fromText =
           [ariaLabel, nameAttr].find((text) => text.startsWith("From:")) ?? textContent;
@@ -48,7 +51,9 @@ test.describe("Content Script DOM Queries", () => {
     expect(result.email).toBe("sarah.connor@cyberdyne.com");
   });
 
-  test("getPdfOptions filters to PDF files only", async ({ page }) => {
+  test("getPdfOptions filters to PDF files only", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with mixed attachments
     await page.goto(`file://${FIXTURE_PATH}`);
 
@@ -60,15 +65,16 @@ test.describe("Content Script DOM Queries", () => {
       }
 
       const options = listbox.querySelectorAll('[role="option"]');
-      return [...options].filter((opt) => (opt.textContent ?? "").toLowerCase().includes(".pdf"))
-        .length;
+      return [...options].filter((opt) => opt.textContent.toLowerCase().includes(".pdf")).length;
     });
 
     // Then: only PDF files are counted (Q4_Report.pdf, not summary.xlsx)
     expect(pdfCount).toBe(1);
   });
 
-  test("finds attachment listbox within message", async ({ page }) => {
+  test("finds attachment listbox within message", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with messages containing attachments
     await page.goto(`file://${FIXTURE_PATH}`);
 
@@ -82,7 +88,9 @@ test.describe("Content Script DOM Queries", () => {
     expect(hasAttachments).toBeGreaterThan(0);
   });
 
-  test("extracts email subject from heading", async ({ page }) => {
+  test("extracts email subject from heading", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     await page.goto(`file://${FIXTURE_PATH}`);
 
     const subject = await page
@@ -92,7 +100,9 @@ test.describe("Content Script DOM Queries", () => {
     expect(subject?.trim()).toBe("Quarterly Report Review");
   });
 
-  test("returns not found when only own messages exist", async ({ page }) => {
+  test("returns not found when only own messages exist", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with only own messages
     await page.goto(`file://${join(FIXTURES_DIR, "outlook-only-own-messages.html")}`);
 
@@ -110,7 +120,7 @@ test.describe("Content Script DOM Queries", () => {
       ];
 
       for (const el of senderElements.toReversed()) {
-        const textContent = el.textContent?.trim() ?? "";
+        const textContent = el.textContent.trim();
         const isOwnMessage = ["you", "moi"].includes(textContent.toLowerCase());
         if (!isOwnMessage) {
           return { found: true };
@@ -123,7 +133,9 @@ test.describe("Content Script DOM Queries", () => {
     expect(result.found).toBe(false);
   });
 
-  test("handles message without subject heading", async ({ page }) => {
+  test("handles message without subject heading", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with no heading element
     await page.goto(`file://${join(FIXTURES_DIR, "outlook-no-subject.html")}`);
 
@@ -134,7 +146,9 @@ test.describe("Content Script DOM Queries", () => {
     expect(heading).toBe(0);
   });
 
-  test("finds multiple attachment listboxes across messages", async ({ page }) => {
+  test("finds multiple attachment listboxes across messages", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with attachments in multiple messages
     await page.goto(`file://${FIXTURE_PATH}`);
 

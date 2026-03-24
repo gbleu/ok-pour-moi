@@ -1,22 +1,22 @@
-import type { SignatureFormat, SignaturePosition } from "./pdf.js";
+import { type SignatureFormat, type SignaturePosition } from "./pdf.js";
 
 export interface SyncStorage {
-  myEmail: string;
-  replyMessage: string;
-  signaturePosition: SignaturePosition;
+  readonly myEmail: string;
+  readonly replyMessage: string;
+  readonly signaturePosition: SignaturePosition;
 }
 
 export interface LocalStorage {
-  lastRun: {
-    emailsProcessed: number;
-    success: boolean;
-    timestamp: number;
+  readonly lastRun: {
+    readonly emailsProcessed: number;
+    readonly success: boolean;
+    readonly timestamp: number;
   } | null;
-  signatureImage: {
-    data: string;
-    format: SignatureFormat;
-    name: string;
-    uploadedAt: number;
+  readonly signatureImage: {
+    readonly data: string;
+    readonly format: SignatureFormat;
+    readonly name: string;
+    readonly uploadedAt: number;
   } | null;
 }
 
@@ -33,7 +33,7 @@ export async function getSyncStorage(): Promise<SyncStorage> {
   return result as unknown as SyncStorage;
 }
 
-export async function setSyncStorage(data: Partial<SyncStorage>): Promise<void> {
+export async function setSyncStorage(data: Readonly<Partial<SyncStorage>>): Promise<void> {
   await chrome.storage.sync.set(data as Record<string, unknown>);
 }
 
@@ -44,6 +44,6 @@ export async function getLocalStorage(): Promise<LocalStorage> {
   return result as unknown as LocalStorage;
 }
 
-export async function setLocalStorage(data: Partial<LocalStorage>): Promise<void> {
+export async function setLocalStorage(data: Readonly<Partial<LocalStorage>>): Promise<void> {
   await chrome.storage.local.set(data);
 }

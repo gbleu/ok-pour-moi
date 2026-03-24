@@ -1,15 +1,16 @@
-/* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type {
-  ContentToBackgroundMessage,
-  PopupToContentMessage,
-  SignPdfResponse,
-  WorkflowConfig,
-  WorkflowResult,
-} from "#shared/messages.js";
-import { collectPdfAttachment } from "./outlook-dom.js";
 import { getErrorMessage } from "#shared/errors.js";
+/* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
+import {
+  type ContentToBackgroundMessage,
+  type PopupToContentMessage,
+  type SignPdfResponse,
+  type WorkflowConfig,
+  type WorkflowResult,
+} from "#shared/messages.js";
 import { getSyncStorage } from "#shared/storage.js";
+
 import { prepareDrafts } from "./outlook-compose.js";
+import { collectPdfAttachment } from "./outlook-dom.js";
 
 console.log("[OPM] Content script loaded");
 
@@ -74,7 +75,7 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
   }
 }
 
-document.addEventListener("keydown", (event) => {
+document.addEventListener("keydown", (event: KeyboardEvent) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
     (async (): Promise<void> => {
       const sync = await getSyncStorage();
@@ -90,12 +91,13 @@ document.addEventListener("keydown", (event) => {
 });
 
 chrome.runtime.onMessage.addListener(
+  // eslint-disable-next-line typescript-eslint/strict-void-return -- Chrome onMessage requires boolean return to keep channel open
   (
     message: PopupToContentMessage,
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: WorkflowResult) => void,
-  ) => {
-    if (sender.id !== chrome.runtime.id || message.type !== "START_WORKFLOW") {
+  ): boolean => {
+    if (sender.id !== chrome.runtime.id) {
       return false;
     }
 

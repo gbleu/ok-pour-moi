@@ -1,3 +1,5 @@
+import { type BrowserContext, type Page } from "@playwright/test";
+
 import test, { expect } from "#helpers/extension-fixture.js";
 
 test.skip(Boolean(process.env.CI), "Extension tests require real Chrome");
@@ -6,7 +8,7 @@ test.describe("Origin Validation", () => {
   test("service worker rejects messages from non-Outlook origins", async ({
     context,
     extensionId,
-  }) => {
+  }: Readonly<{ context: Readonly<BrowserContext>; extensionId: string }>) => {
     // Extension pages have chrome-extension:// origin, not an Outlook origin
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/popup/popup.html`, {
@@ -38,14 +40,16 @@ test.describe("Origin Validation", () => {
     await page.close();
   });
 
-  test("content script loads on allowed Outlook origins", async ({ setupOutlookPage }) => {
+  test("content script loads on allowed Outlook origins", async ({
+    setupOutlookPage,
+  }: Readonly<{ setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>> }>) => {
     // Page served at Outlook URL gets the content script injected.
     // Content scripts run in an isolated world, so verify via console.log
     // Emitted on content script load. Subscribe before reload to avoid race.
     const page = await setupOutlookPage("outlook-message.html");
 
     const consolePromise = page.waitForEvent("console", {
-      predicate: (msg) => msg.text().includes("[OPM]"),
+      predicate: (msg: Readonly<{ text: () => string }>) => msg.text().includes("[OPM]"),
       timeout: 10_000,
     });
     await page.reload({ waitUntil: "domcontentloaded" });

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+
 import { getElement } from "./dom.js";
 
 describe("getElement", () => {

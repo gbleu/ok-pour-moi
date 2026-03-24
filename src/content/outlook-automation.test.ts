@@ -2,6 +2,7 @@
 /* eslint-disable unicorn/no-null, @typescript-eslint/no-non-null-assertion, import/no-unassigned-import -- DOM test fixtures */
 import "./happy-dom.setup.js";
 import { afterEach, describe, expect, test } from "bun:test";
+
 import { getButtonByName, getByRole } from "./outlook-automation.js";
 
 afterEach(() => {

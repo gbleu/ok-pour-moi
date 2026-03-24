@@ -1,13 +1,16 @@
 import { dirname, join } from "node:path";
-import { expect, test } from "@playwright/test";
 import { fileURLToPath } from "node:url";
+
+import { type Page, expect, test } from "@playwright/test";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "../fixtures");
 const INBOX_FIXTURE = join(FIXTURES, "outlook-inbox.html");
 const MESSAGE_FIXTURE = join(FIXTURES, "outlook-message.html");
 
 test.describe("Workflow DOM Interactions", () => {
-  test("inbox fixture has conversations with subject", async ({ page }) => {
+  test("inbox fixture has conversations with subject", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given
     await page.goto(`file://${INBOX_FIXTURE}`);
 
@@ -31,7 +34,7 @@ test.describe("Workflow DOM Interactions", () => {
     });
   });
 
-  test("message fixture has reply button", async ({ page }) => {
+  test("message fixture has reply button", async ({ page }: Readonly<{ page: Readonly<Page> }>) => {
     // Given
     await page.goto(`file://${MESSAGE_FIXTURE}`);
 
@@ -39,12 +42,14 @@ test.describe("Workflow DOM Interactions", () => {
     await expect(page.locator('button[name="Reply"]')).toBeVisible();
   });
 
-  test("compose dialog has textbox and attach button", async ({ page }) => {
+  test("compose dialog has textbox and attach button", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given
     await page.goto(`file://${MESSAGE_FIXTURE}`);
 
     // When
-    await page.locator('[role="dialog"]').evaluate((el: HTMLElement) => {
+    await page.locator('[role="dialog"]').evaluate((el) => {
       el.style.display = "block";
     });
 
@@ -53,8 +58,8 @@ test.describe("Workflow DOM Interactions", () => {
       const textbox = document.querySelector('[role="textbox"][contenteditable="true"]');
       const attachBtn = document.querySelector('button[aria-label*="Attach"]');
       return {
-        attachBtnVisible: attachBtn !== null && attachBtn.checkVisibility(),
-        textboxVisible: textbox !== null && textbox.checkVisibility(),
+        attachBtnVisible: attachBtn?.checkVisibility() ?? false,
+        textboxVisible: textbox?.checkVisibility() ?? false,
       };
     });
     expect(state).toEqual({
@@ -63,7 +68,9 @@ test.describe("Workflow DOM Interactions", () => {
     });
   });
 
-  test("identifies sender email from data-email attribute", async ({ page }) => {
+  test("identifies sender email from data-email attribute", async ({
+    page,
+  }: Readonly<{ page: Readonly<Page> }>) => {
     // Given
     await page.goto(`file://${MESSAGE_FIXTURE}`);
 

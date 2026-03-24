@@ -1,9 +1,11 @@
-import { type BrowserContext, type Page, chromium } from "@playwright/test";
-import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
-import { dirname, join } from "node:path";
 import { mkdtemp, rm } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { type BrowserContext, type Page, chromium } from "@playwright/test";
+
+import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PATH_TO_EXTENSION = join(__dirname, "../../dist");
@@ -33,13 +35,15 @@ export async function createExtensionContext(): Promise<{
   });
 
   // Wait for our extension's service worker (filter out Chrome's built-in component extensions)
-  let serviceWorker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));
+  let serviceWorker = context
+    .serviceWorkers()
+    .find((sw: Readonly<{ url: () => string }>) => sw.url().includes("service-worker"));
   serviceWorker ??= await context.waitForEvent("serviceworker", {
-    predicate: (sw) => sw.url().includes("service-worker"),
+    predicate: (sw: Readonly<{ url: () => string }>) => sw.url().includes("service-worker"),
     timeout: 10_000,
   });
 
-  const [, extensionId = ""] = serviceWorker.url().match(/chrome-extension:\/\/([^/]+)/) ?? [];
+  const [, extensionId = ""] = /chrome-extension:\/\/([^/]+)/.exec(serviceWorker.url()) ?? [];
 
   return {
     close: async () => {
@@ -59,13 +63,13 @@ export async function createExtensionContext(): Promise<{
 }
 
 export async function setupMockOutlookPage(
-  context: BrowserContext,
+  context: Readonly<BrowserContext>,
   fixturePath: string,
-  mockConfig: MockConfig = {},
+  mockConfig: Readonly<MockConfig> = {},
 ): Promise<Page> {
   const page = await context.newPage();
 
-  await page.addInitScript((chromeMock) => {
+  await page.addInitScript((chromeMock: Readonly<unknown>) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Browser context requires this
     (globalThis as { chrome: unknown }).chrome = chromeMock;
   }, createChromeMock(mockConfig));

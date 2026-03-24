@@ -99,11 +99,11 @@ export async function removeAllAttachments(): Promise<void> {
 
 function findFileInput(): HTMLInputElement {
   const fileInputs = [...document.querySelectorAll('input[type="file"]')].filter(
-    (input): input is HTMLInputElement => input instanceof HTMLInputElement,
+    (input: Element): input is HTMLInputElement => input instanceof HTMLInputElement,
   );
 
   const attachmentInput =
-    fileInputs.find((input) => {
+    fileInputs.find((input: HTMLInputElement) => {
       const accept = input.getAttribute("accept");
       return accept === null || !accept.startsWith("image/");
     }) ?? fileInputs.at(-1);
@@ -156,7 +156,7 @@ export async function closeCompose(): Promise<void> {
 
   const dialog = document.querySelector('[role="dialog"]');
   if (dialog) {
-    const cancelBtn = [...dialog.querySelectorAll("button")].find((btn) =>
+    const cancelBtn = [...dialog.querySelectorAll("button")].find((btn: HTMLButtonElement) =>
       (btn.textContent ?? "").toLowerCase().includes("cancel"),
     );
     if (cancelBtn) {

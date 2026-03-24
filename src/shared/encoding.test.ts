@@ -1,5 +1,6 @@
-import { base64ToUint8Array, uint8ArrayToBase64 } from "./encoding.js";
 import { describe, expect, test } from "bun:test";
+
+import { base64ToUint8Array, uint8ArrayToBase64 } from "./encoding.js";
 
 describe("base64ToUint8Array", () => {
   test("converts base64 to bytes", () => {

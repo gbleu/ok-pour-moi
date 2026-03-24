@@ -1,3 +1,5 @@
+import { type BrowserContext, type Page } from "@playwright/test";
+
 import test, { expect } from "#helpers/extension-fixture.js";
 
 // Extension tests require real Chrome with extension support — skip on CI where Playwright's
@@ -5,13 +7,19 @@ import test, { expect } from "#helpers/extension-fixture.js";
 test.skip(Boolean(process.env.CI), "Extension tests require real Chrome");
 
 test.describe("Extension Loading", () => {
-  test("service worker registers successfully", async ({ context }) => {
-    const worker = context.serviceWorkers().find((sw) => sw.url().includes("service-worker"));
+  test("service worker registers successfully", async ({
+    context,
+  }: Readonly<{ context: Readonly<BrowserContext> }>) => {
+    const worker = context
+      .serviceWorkers()
+      .find((sw: Readonly<{ url: () => string }>) => sw.url().includes("service-worker"));
     expect(worker).toBeDefined();
     expect(worker?.url()).toMatch(/chrome-extension:\/\/[^/]+\/background\/service-worker\.js/);
   });
 
-  test("popup renders initial state", async ({ getPopupPage }) => {
+  test("popup renders initial state", async ({
+    getPopupPage,
+  }: Readonly<{ getPopupPage: () => Promise<Readonly<Page>> }>) => {
     const page = await getPopupPage();
 
     const state = await page.evaluate(() => {
@@ -37,7 +45,9 @@ test.describe("Extension Loading", () => {
     await page.close();
   });
 
-  test("options page loads and displays form fields", async ({ getOptionsPage }) => {
+  test("options page loads and displays form fields", async ({
+    getOptionsPage,
+  }: Readonly<{ getOptionsPage: () => Promise<Readonly<Page>> }>) => {
     const page = await getOptionsPage();
 
     const state = await page.evaluate(() => ({
@@ -57,7 +67,9 @@ test.describe("Extension Loading", () => {
     await page.close();
   });
 
-  test("options page saves and reads settings via Chrome storage", async ({ getOptionsPage }) => {
+  test("options page saves and reads settings via Chrome storage", async ({
+    getOptionsPage,
+  }: Readonly<{ getOptionsPage: () => Promise<Readonly<Page>> }>) => {
     const page = await getOptionsPage();
 
     await page.fill("#myEmail", "test@example.com");

@@ -15,7 +15,7 @@ const FRENCH_MONTHS = [
   "décembre",
 ] as const;
 
-export function getTargetMonthAndYear(date: Date = new Date()): {
+export function getTargetMonthAndYear(date: Readonly<Date> = new Date()): {
   monthIndex: number;
   year: number;
 } {
@@ -35,7 +35,10 @@ export function getTargetMonthAndYear(date: Date = new Date()): {
   return { monthIndex, year };
 }
 
-export function generateAttachmentName(senderLastname: string, date: Date = new Date()): string {
+export function generateAttachmentName(
+  senderLastname: string,
+  date: Readonly<Date> = new Date(),
+): string {
   const { monthIndex, year } = getTargetMonthAndYear(date);
   const month = FRENCH_MONTHS[monthIndex];
   const prefix = senderLastname.trim();
@@ -45,10 +48,10 @@ export function generateAttachmentName(senderLastname: string, date: Date = new 
 }
 
 export interface SignaturePosition {
-  height: number;
-  width: number;
-  x: number;
-  y: number;
+  readonly height: number;
+  readonly width: number;
+  readonly x: number;
+  readonly y: number;
 }
 
 export type SignatureFormat = "png" | "jpg";
@@ -60,7 +63,7 @@ const EXTENSION_FORMAT_MAP: Record<string, SignatureFormat> = {
 };
 
 export function getSignatureFormat(filename: string): SignatureFormat {
-  const ext = filename.toLowerCase().match(/\.\w+$/)?.[0] ?? "";
+  const ext = /\.\w+$/.exec(filename.toLowerCase())?.[0] ?? "";
   const format = EXTENSION_FORMAT_MAP[ext];
   if (format === undefined) {
     throw new Error(
@@ -70,12 +73,14 @@ export function getSignatureFormat(filename: string): SignatureFormat {
   return format;
 }
 
-export async function signPdf(opts: {
-  format: SignatureFormat;
-  pdfBytes: Uint8Array;
-  position: SignaturePosition;
-  sigBytes: Uint8Array;
-}): Promise<Uint8Array> {
+export async function signPdf(
+  opts: Readonly<{
+    format: SignatureFormat;
+    pdfBytes: Readonly<Uint8Array>;
+    position: Readonly<SignaturePosition>;
+    sigBytes: Readonly<Uint8Array>;
+  }>,
+): Promise<Uint8Array> {
   const { pdfBytes, sigBytes, format, position } = opts;
   const pdfDoc = await PDFDocument.load(pdfBytes);
   const sigImage =

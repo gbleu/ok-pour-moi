@@ -12,12 +12,18 @@ export const TIMING = {
 } as const;
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
+  return new Promise((r) => {
+    setTimeout(r, ms);
+  });
 }
 
 export function waitForElement(
   selector: string,
-  options: { match?: (el: Element) => boolean; parent?: Document | Element; timeout?: number } = {},
+  options: Readonly<{
+    match?: (el: Element) => boolean;
+    parent?: Document | Element;
+    timeout?: number;
+  }> = {},
 ): Promise<Element> {
   const { timeout = TIMING.ELEMENT_VISIBLE, parent = document, match } = options;
 
@@ -75,7 +81,7 @@ function matchesName(el: Element, name: RegExp | string): boolean {
 
 export function getByRole(
   role: string,
-  options: { name?: RegExp | string; parent?: Document | Element } = {},
+  options: Readonly<{ name?: RegExp | string; parent?: Document | Element }> = {},
 ): Element | undefined {
   const { name, parent = document } = options;
   const elements = parent.querySelectorAll(`[role="${role}"]`);
@@ -90,7 +96,7 @@ export function getByRole(
 
 export function getButtonByName(
   name: RegExp | string,
-  options: { parent?: Document | Element } = {},
+  options: Readonly<{ parent?: Document | Element }> = {},
 ): HTMLButtonElement | undefined {
   const { parent = document } = options;
   const buttons = parent.querySelectorAll("button");
@@ -140,7 +146,7 @@ export function simulateClick(element: Element): void {
 
 export function simulateKeyPress(
   key: string,
-  modifiers: { ctrl?: boolean; meta?: boolean; shift?: boolean } = {},
+  modifiers: Readonly<{ ctrl?: boolean; meta?: boolean; shift?: boolean }> = {},
 ): void {
   const options: KeyboardEventInit = {
     bubbles: true,

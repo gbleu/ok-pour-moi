@@ -2,6 +2,7 @@
 /* eslint-disable unicorn/no-null, @typescript-eslint/no-non-null-assertion, import/no-unassigned-import -- DOM test fixtures */
 import "./happy-dom.setup.js";
 import { afterEach, describe, expect, test } from "bun:test";
+
 import {
   expandMessage,
   findAttachmentListbox,
@@ -132,7 +133,7 @@ describe("getPdfOptions", () => {
     const listbox = document.querySelector('[role="listbox"]')!;
     const pdfs = getPdfOptions(listbox);
 
-    expect(pdfs.map((el) => el.textContent)).toEqual(["report.pdf", "invoice.PDF"]);
+    expect(pdfs.map((el: Element) => el.textContent)).toEqual(["report.pdf", "invoice.PDF"]);
   });
 
   test("returns empty array when no PDFs", () => {

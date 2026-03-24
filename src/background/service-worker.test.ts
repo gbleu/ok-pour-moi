@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/no-null */
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { SignPdfRequest } from "#shared/messages.js";
+
+import { type SignPdfRequest } from "#shared/messages.js";
 
 // Mock chrome.storage before importing the module
 const mockSyncData = {

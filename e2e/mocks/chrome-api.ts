@@ -1,8 +1,13 @@
 export interface MockConfig {
-  myEmail?: string;
-  replyMessage?: string;
-  signatureImage?: { data: string; format: "png" | "jpg"; name: string; uploadedAt: number };
-  signaturePosition?: { height: number; width: number; x: number; y: number };
+  readonly myEmail?: string;
+  readonly replyMessage?: string;
+  readonly signatureImage?: Readonly<{
+    data: string;
+    format: "png" | "jpg";
+    name: string;
+    uploadedAt: number;
+  }>;
+  readonly signaturePosition?: Readonly<{ height: number; width: number; x: number; y: number }>;
 }
 
 interface ChromeMock {
@@ -13,12 +18,12 @@ interface ChromeMock {
   };
   storage: {
     local: {
-      get: (defaults: Record<string, unknown>) => Promise<Record<string, unknown>>;
-      set: (data: Record<string, unknown>) => Promise<void>;
+      get: (defaults: Readonly<Record<string, unknown>>) => Promise<Record<string, unknown>>;
+      set: (data: Readonly<Record<string, unknown>>) => Promise<void>;
     };
     sync: {
-      get: (defaults: Record<string, unknown>) => Promise<Record<string, unknown>>;
-      set: (data: Record<string, unknown>) => Promise<void>;
+      get: (defaults: Readonly<Record<string, unknown>>) => Promise<Record<string, unknown>>;
+      set: (data: Readonly<Record<string, unknown>>) => Promise<void>;
     };
   };
   tabs: {
@@ -27,7 +32,7 @@ interface ChromeMock {
   };
 }
 
-export function createChromeMock(config: MockConfig = {}): ChromeMock {
+export function createChromeMock(config: Readonly<MockConfig> = {}): ChromeMock {
   const syncData = {
     myEmail: config.myEmail ?? "test@example.com",
     replyMessage: config.replyMessage ?? "OK pour moi",
@@ -56,17 +61,17 @@ export function createChromeMock(config: MockConfig = {}): ChromeMock {
     },
     storage: {
       local: {
-        get: (defaults: Record<string, unknown>): Promise<Record<string, unknown>> =>
+        get: (defaults: Readonly<Record<string, unknown>>): Promise<Record<string, unknown>> =>
           Promise.resolve({ ...defaults, ...localData }),
-        set: (data: Record<string, unknown>): Promise<void> => {
+        set: (data: Readonly<Record<string, unknown>>): Promise<void> => {
           Object.assign(localData, data);
           return Promise.resolve();
         },
       },
       sync: {
-        get: (defaults: Record<string, unknown>): Promise<Record<string, unknown>> =>
+        get: (defaults: Readonly<Record<string, unknown>>): Promise<Record<string, unknown>> =>
           Promise.resolve({ ...defaults, ...syncData }),
-        set: (data: Record<string, unknown>): Promise<void> => {
+        set: (data: Readonly<Record<string, unknown>>): Promise<void> => {
           Object.assign(syncData, data);
           return Promise.resolve();
         },
