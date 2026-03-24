@@ -23,7 +23,7 @@ function isBlobResult(message: Readonly<PostedMessage>): message is BlobResultMe
   return message.type === "OPM_BLOB_RESULT";
 }
 
-function collectMessages(): PostedMessage[] {
+function collectMessages(): { messages: PostedMessage[]; cleanup: () => void } {
   const messages: PostedMessage[] = [];
   function handler(event: MessageEvent): void {
     if (isOpmMessage(event.data)) {
@@ -31,7 +31,12 @@ function collectMessages(): PostedMessage[] {
     }
   }
   window.addEventListener("message", handler);
-  return messages;
+  return {
+    messages,
+    cleanup: () => {
+      window.removeEventListener("message", handler);
+    },
+  };
 }
 
 function sendBlobRequest(id: string, url: string): void {
@@ -58,18 +63,23 @@ async function flush(): Promise<void> {
 }
 
 describe("main-world", () => {
+  let cleanupMessages: (() => void) | undefined;
+
   beforeAll(async () => {
     await import("./main-world.js");
   });
 
   afterEach(() => {
     document.body.innerHTML = "";
+    cleanupMessages?.();
+    cleanupMessages = undefined;
   });
 
   describe("isBlobMessage (via message listener)", () => {
     test("ignores messages without OPM_GET_BLOB type", async () => {
       // Given
-      const messages = collectMessages();
+      const { messages, cleanup } = collectMessages();
+      cleanupMessages = cleanup;
 
       // When
       window.postMessage({ type: "UNRELATED" }, window.location.origin);
@@ -84,7 +94,8 @@ describe("main-world", () => {
 
     test("ignores OPM_GET_BLOB messages missing required fields", async () => {
       // Given
-      const messages = collectMessages();
+      const { messages, cleanup } = collectMessages();
+      cleanupMessages = cleanup;
 
       // When
       window.postMessage({ type: "OPM_GET_BLOB" }, window.location.origin);
@@ -101,7 +112,8 @@ describe("main-world", () => {
   describe("createObjectURL monkey-patch", () => {
     test("captures PDF blobs and posts OPM_BLOB_CAPTURED", async () => {
       // Given
-      const messages = collectMessages();
+      const { messages, cleanup } = collectMessages();
+      cleanupMessages = cleanup;
       const pdfBlob = new Blob(["pdf-content"], { type: "application/pdf" });
 
       // When
@@ -117,7 +129,8 @@ describe("main-world", () => {
 
     test("does not capture non-PDF blobs", async () => {
       // Given
-      const messages = collectMessages();
+      const { messages, cleanup } = collectMessages();
+      cleanupMessages = cleanup;
       const textBlob = new Blob(["text"], { type: "text/plain" });
       const imageBlob = new Blob(["img"], { type: "image/png" });
 

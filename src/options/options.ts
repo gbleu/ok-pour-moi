@@ -78,7 +78,8 @@ async function storeSignatureFile(file: File): Promise<void> {
 }
 
 function getInputInt(id: string, fallback: number): number {
-  return Number.parseInt(getElement<HTMLInputElement>(id).value, 10) || fallback;
+  const value = Number.parseInt(getElement<HTMLInputElement>(id).value, 10);
+  return Number.isNaN(value) ? fallback : value;
 }
 
 async function saveSettings(): Promise<void> {
