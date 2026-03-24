@@ -44,42 +44,6 @@ export function generateAttachmentName(senderLastname: string, date: Date = new 
     : `${prefix.toUpperCase()} - ${month}${year % 100}.pdf`;
 }
 
-export function extractLastname(fromText: string): string {
-  const name = fromText
-    .replace(/^From:\s*/i, "")
-    .replace(/<[^>]+>\s*$/, "")
-    .trim();
-  const parts = name.split(/\s+/).filter(Boolean);
-
-  if (parts.length === 0) {
-    return "Unknown";
-  }
-  if (parts.length === 1) {
-    return parts[0] ?? "Unknown";
-  }
-
-  // Check for leading uppercase parts (e.g., "DUPONT Jean" or "DE LA TOUR Pierre")
-  const uppercaseParts: string[] = [];
-  for (const part of parts) {
-    if (part === part.toUpperCase() && part.length > 1) {
-      uppercaseParts.push(part);
-    } else {
-      break;
-    }
-  }
-
-  return uppercaseParts.length > 0 ? uppercaseParts.join(" ") : (parts.at(-1) ?? "Unknown");
-}
-
-export function extractEmail(fromText: string): string {
-  const angleMatch = fromText.match(/<([^>]+@[^>]+)>/);
-  if (angleMatch?.[1] !== undefined) {
-    return angleMatch[1];
-  }
-  const emailMatch = fromText.match(/[\w.+-]+@[\w.-]+\.\w+/);
-  return emailMatch?.[0] ?? "";
-}
-
 export interface SignaturePosition {
   height: number;
   width: number;
@@ -96,15 +60,14 @@ const EXTENSION_FORMAT_MAP: Record<string, SignatureFormat> = {
 };
 
 export function getSignatureFormat(filename: string): SignatureFormat {
-  const lower = filename.toLowerCase();
-  for (const [ext, format] of Object.entries(EXTENSION_FORMAT_MAP)) {
-    if (lower.endsWith(ext)) {
-      return format;
-    }
+  const ext = filename.toLowerCase().match(/\.\w+$/)?.[0] ?? "";
+  const format = EXTENSION_FORMAT_MAP[ext];
+  if (format === undefined) {
+    throw new Error(
+      `Unsupported signature format: "${filename}". Only .png, .jpg, .jpeg are supported.`,
+    );
   }
-  throw new Error(
-    `Unsupported signature format: "${filename}". Only .png, .jpg, .jpeg are supported.`,
-  );
+  return format;
 }
 
 export async function signPdf(opts: {

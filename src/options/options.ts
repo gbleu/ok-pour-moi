@@ -53,7 +53,7 @@ function showStatus(type: "error" | "success", message: string): void {
   }, 3000);
 }
 
-async function handleSignatureUpload(file: File): Promise<void> {
+async function storeSignatureFile(file: File): Promise<void> {
   const format = getSignatureFormat(file.name);
   const dataUrl = await readFileAsDataURL(file);
   const [, base64] = dataUrl.split(",");
@@ -92,11 +92,6 @@ async function saveSettings(): Promise<void> {
       },
     });
 
-    const fileInput = getElement<HTMLInputElement>("signatureFile");
-    if (fileInput.files?.[0] !== undefined) {
-      await handleSignatureUpload(fileInput.files[0]);
-    }
-
     showStatus("success", "Settings saved!");
   } catch (error) {
     showStatus(
@@ -131,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const file = fileInput.files?.[0];
     if (file !== undefined) {
       fileNameSpan.textContent = file.name;
-      handleSignatureUpload(file)
+      storeSignatureFile(file)
         .then(() => {
           showStatus("success", "Signature uploaded!");
         })

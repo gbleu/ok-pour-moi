@@ -13,7 +13,7 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-export async function waitForElement(
+export function waitForElement(
   selector: string,
   options: { match?: (el: Element) => boolean; parent?: Document | Element; timeout?: number } = {},
 ): Promise<Element> {
@@ -88,8 +88,9 @@ export function getByRole(
 
 export function getButtonByName(
   name: RegExp | string,
-  parent: Document | Element = document,
+  options: { parent?: Document | Element } = {},
 ): HTMLButtonElement | undefined {
+  const { parent = document } = options;
   const buttons = parent.querySelectorAll("button");
   for (const btn of buttons) {
     if (matchesName(btn, name)) {

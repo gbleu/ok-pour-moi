@@ -1,4 +1,4 @@
-import { base64ToUint8Array, uint8ArrayToBase64 } from "./storage.js";
+import { base64ToUint8Array, uint8ArrayToBase64 } from "./encoding.js";
 import { describe, expect, test } from "bun:test";
 
 describe("base64ToUint8Array", () => {

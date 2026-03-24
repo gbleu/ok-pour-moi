@@ -1,12 +1,7 @@
 /* eslint-disable unicorn/prefer-global-this */
+import type { BlobRequestMessage } from "./blob-protocol.js";
 
-interface BlobMessage {
-  id: string;
-  type: "OPM_GET_BLOB";
-  url: string;
-}
-
-function isBlobMessage(data: unknown): data is BlobMessage {
+function isBlobMessage(data: unknown): data is BlobRequestMessage {
   return (
     typeof data === "object" &&
     data !== null &&
@@ -29,7 +24,7 @@ URL.createObjectURL = (obj: Blob | MediaSource): string => {
   return url;
 };
 
-async function handleBlobRequest(id: string, url: string): Promise<void> {
+async function postBlobResult(id: string, url: string): Promise<void> {
   const blob = capturedBlobs.get(url);
 
   if (blob === undefined) {
@@ -63,7 +58,19 @@ window.addEventListener("message", (event) => {
   if (event.source !== window || !isBlobMessage(event.data)) {
     return;
   }
-  handleBlobRequest(event.data.id, event.data.url).catch(console.error);
+  const { id, url } = event.data;
+  // eslint-disable-next-line promise/prefer-await-to-callbacks -- Event listener cannot be async
+  postBlobResult(id, url).catch((error: unknown) => {
+    window.postMessage(
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+        id,
+        type: "OPM_BLOB_RESULT",
+      },
+      window.location.origin,
+    );
+  });
 });
 
+// Sentinel export — ensures bundler treats this as a module (required for Chrome MAIN world injection)
 export type MainWorldModule = true;

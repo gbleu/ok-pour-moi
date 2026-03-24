@@ -1,6 +1,7 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Event listeners require callbacks */
 import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
+import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { getElement } from "#shared/dom.js";
 
 function showStatus(type: "error" | "info" | "ready" | "warning", message: string): void {
@@ -18,7 +19,9 @@ function setProgress(show: boolean, value = 0, text = ""): void {
   }
 }
 
-async function checkConfig(): Promise<{ config?: WorkflowConfig; error?: string; valid: boolean }> {
+async function loadConfig(): Promise<
+  { config: WorkflowConfig; valid: true } | { error: string; valid: false }
+> {
   const [sync, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
 
   if (sync.myEmail === "") {
@@ -42,41 +45,41 @@ async function checkConfig(): Promise<{ config?: WorkflowConfig; error?: string;
   };
 }
 
+function isOutlookMailUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      OUTLOOK_ORIGINS.some((origin) => origin === parsed.origin) &&
+      parsed.pathname.startsWith("/mail")
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
-  // First try active tab in current window
   const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (
-    activeTab?.url !== undefined &&
-    /outlook\.(office365|office|live)\.com\/mail|outlook\.cloud\.microsoft\/mail/.test(
-      activeTab.url,
-    )
-  ) {
+  if (activeTab?.url !== undefined && isOutlookMailUrl(activeTab.url)) {
     return activeTab;
   }
-  // Fallback: find any Outlook tab (useful when popup is opened as a page)
   const outlookTabs = await chrome.tabs.query({
-    url: [
-      "*://outlook.office365.com/mail/*",
-      "*://outlook.office.com/mail/*",
-      "*://outlook.live.com/mail/*",
-      "*://outlook.cloud.microsoft/mail/*",
-    ],
+    url: OUTLOOK_ORIGINS.map((origin) => `${origin}/mail/*`),
   });
   return outlookTabs[0];
 }
 
-async function runWorkflow(): Promise<void> {
+async function dispatchWorkflow(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
   runBtn.disabled = true;
 
   try {
-    const [tab, { valid, config, error }] = await Promise.all([checkOutlookTab(), checkConfig()]);
+    const [tab, configResult] = await Promise.all([checkOutlookTab(), loadConfig()]);
     if (tab?.id === undefined) {
       showStatus("error", "Open Outlook Web mail first");
       return;
     }
-    if (!valid || config === undefined) {
-      showStatus("error", error ?? "Invalid configuration");
+    if (!configResult.valid) {
+      showStatus("error", configResult.error);
       return;
     }
 
@@ -84,7 +87,7 @@ async function runWorkflow(): Promise<void> {
     setProgress(true, 0, "Initializing...");
 
     const result = await chrome.tabs.sendMessage<PopupToContentMessage, WorkflowResult>(tab.id, {
-      config,
+      config: configResult.config,
       type: "START_WORKFLOW",
     });
 
@@ -111,13 +114,13 @@ async function runWorkflow(): Promise<void> {
 async function init(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
 
-  const [tab, { valid, error }] = await Promise.all([checkOutlookTab(), checkConfig()]);
+  const [tab, configResult] = await Promise.all([checkOutlookTab(), loadConfig()]);
   if (tab === undefined) {
     showStatus("warning", "Open Outlook Web to use this extension");
     return;
   }
-  if (!valid) {
-    showStatus("warning", `${error} - click Settings to configure`);
+  if (!configResult.valid) {
+    showStatus("warning", `${configResult.error} - click Settings to configure`);
     return;
   }
 
@@ -131,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   getElement<HTMLButtonElement>("run-btn").addEventListener("click", () => {
-    runWorkflow().catch((error: unknown) => {
+    dispatchWorkflow().catch((error: unknown) => {
       console.error("[OPM] Workflow error:", error);
     });
   });

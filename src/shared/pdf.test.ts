@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { extractEmail, extractLastname } from "./sender.js";
 import {
-  extractEmail,
-  extractLastname,
   generateAttachmentName,
   getSignatureFormat,
   getTargetMonthAndYear,

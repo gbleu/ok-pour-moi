@@ -4,13 +4,13 @@ import type {
   WorkflowConfig,
 } from "#shared/messages.js";
 import {
-  downloadAttachment,
   expandMessage,
   expandThread,
   findAttachmentListbox,
   findLastMessageFromOthers,
   getPdfOptions,
 } from "./outlook-actions.js";
+import { downloadAttachment } from "./outlook-download.js";
 
 export interface PdfItem {
   conversationId: string;
@@ -21,13 +21,10 @@ export interface PdfItem {
   subject: string;
 }
 
-export async function collectSignedPdfs(
-  config: WorkflowConfig,
-  onProgress?: (current: number, total: number, subject: string) => void,
-): Promise<PdfItem[]> {
+function getConversationContext(): { conversationId: string; subject: string } | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (!readingPane) {
-    return [];
+    return undefined;
   }
 
   const subjectEl = readingPane.querySelector('[role="heading"][aria-level="2"]');
@@ -41,7 +38,17 @@ export async function collectSignedPdfs(
   );
   const conversationId = selectedEmail?.dataset.convid ?? "";
 
-  onProgress?.(1, 1, subject);
+  return { conversationId, subject };
+}
+
+// Returns [] when no PDF is found (missing DOM state). Throws on signing failure (real error).
+export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem[]> {
+  const context = getConversationContext();
+  if (!context) {
+    return [];
+  }
+
+  const { subject, conversationId } = context;
 
   await expandThread();
 
@@ -65,35 +72,29 @@ export async function collectSignedPdfs(
   const originalFilename =
     (firstPdf.textContent ?? "").match(/^(.+\.pdf)/i)?.[1] ?? "attachment.pdf";
 
-  try {
-    const pdfBytes = await downloadAttachment(firstPdf);
+  const pdfBytes = await downloadAttachment(firstPdf);
 
-    const response = await chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
-      payload: {
-        originalFilename,
-        pdfBytes: [...pdfBytes],
-        senderLastname: message.senderLastname,
-      },
-      type: "SIGN_PDF",
-    });
+  const response = await chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
+    payload: {
+      originalFilename,
+      pdfBytes: [...pdfBytes],
+      senderLastname: message.senderLastname,
+    },
+    type: "SIGN_PDF",
+  });
 
-    if (!response.success || !response.signedPdf || response.filename === undefined) {
-      console.error(`[OPM] Signing failed: ${response.error}`);
-      return [];
-    }
-
-    return [
-      {
-        conversationId,
-        filename: response.filename,
-        senderEmail: message.senderEmail,
-        senderLastname: message.senderLastname,
-        signedPdf: new Uint8Array(response.signedPdf),
-        subject,
-      },
-    ];
-  } catch (error) {
-    console.error(`[OPM] Download failed:`, error);
-    return [];
+  if (!response.success) {
+    throw new Error(`Signing failed: ${response.error}`);
   }
+
+  return [
+    {
+      conversationId,
+      filename: response.filename,
+      senderEmail: message.senderEmail,
+      senderLastname: message.senderLastname,
+      signedPdf: new Uint8Array(response.signedPdf),
+      subject,
+    },
+  ];
 }
