@@ -18,7 +18,7 @@ export default defineConfig({
       },
     },
     {
-      files: ["oxlint.config.ts"],
+      files: ["oxlint.config.ts", "knip.config.ts"],
       rules: {
         "import/no-default-export": "off",
       },
