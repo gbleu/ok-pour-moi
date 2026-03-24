@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/prefer-global-this */
 import type { BlobRequestMessage } from "./blob-protocol.js";
+import { getErrorMessage } from "#shared/errors.js";
 
 function isBlobMessage(data: unknown): data is BlobRequestMessage {
   return (
@@ -45,7 +46,7 @@ async function postBlobResult(id: string, url: string): Promise<void> {
   } catch (error: unknown) {
     window.postMessage(
       {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
         id,
         type: "OPM_BLOB_RESULT",
       },
@@ -63,7 +64,7 @@ window.addEventListener("message", (event) => {
   postBlobResult(id, url).catch((error: unknown) => {
     window.postMessage(
       {
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
         id,
         type: "OPM_BLOB_RESULT",
       },

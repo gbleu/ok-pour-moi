@@ -74,13 +74,11 @@ async function removeFirstAttachment(): Promise<boolean> {
   return true;
 }
 
-export async function openReply(conversationId?: string): Promise<HTMLElement> {
-  if (conversationId !== undefined && conversationId !== "") {
-    const emailItem = document.querySelector(`[data-convid="${CSS.escape(conversationId)}"]`);
-    if (emailItem) {
-      simulateClick(emailItem);
-      await sleep(TIMING.UI_SETTLE);
-    }
+export async function openReply(conversationId: string): Promise<HTMLElement> {
+  const emailItem = document.querySelector(`[data-convid="${CSS.escape(conversationId)}"]`);
+  if (emailItem) {
+    simulateClick(emailItem);
+    await sleep(TIMING.UI_SETTLE);
   }
 
   const replyBtn = await waitForElement('button[name="Reply"], button[aria-label*="Reply"]');
@@ -173,10 +171,10 @@ export async function closeCompose(): Promise<void> {
     await sleep(TIMING.UI_SETTLE);
   }
 
-  for (let idx = 0; idx < 20; idx += 1) {
+  for (let idx = 0; idx < TIMING.COMPOSE_CLOSE_MAX_POLLS; idx += 1) {
     if (!document.querySelector('[role="textbox"][contenteditable="true"]')) {
       break;
     }
-    await sleep(200);
+    await sleep(TIMING.COMPOSE_CLOSE_INTERVAL);
   }
 }

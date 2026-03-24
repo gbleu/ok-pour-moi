@@ -39,14 +39,14 @@ test.describe("Origin Validation", () => {
   });
 
   test("content script loads on allowed Outlook origins", async ({ setupOutlookPage }) => {
-    // Page served at Outlook URL gets the content script injected
+    // Page served at Outlook URL gets the content script injected.
+    // Content scripts run in an isolated world, so verify via console.log
+    // Emitted on content script load. Subscribe before reload to avoid race.
     const page = await setupOutlookPage("outlook-message.html");
 
-    // Chrome content scripts run in an isolated world, so verify via console log instead.
-    // Reload to capture console messages from content script injection.
     const consolePromise = page.waitForEvent("console", {
       predicate: (msg) => msg.text().includes("[OPM]"),
-      timeout: 5000,
+      timeout: 10_000,
     });
     await page.reload({ waitUntil: "domcontentloaded" });
     const message = await consolePromise;

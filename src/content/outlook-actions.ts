@@ -137,6 +137,7 @@ export async function expandMessage(messageButton: Element): Promise<void> {
       return;
     }
   }
+  throw new Error("Message did not expand after 5 attempts");
 }
 
 export function findAttachmentListbox(messageButton: Element): Element | undefined {

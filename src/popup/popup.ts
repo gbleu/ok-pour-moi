@@ -3,6 +3,7 @@ import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#sha
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { getElement } from "#shared/dom.js";
+import { getErrorMessage } from "#shared/errors.js";
 
 function showStatus(type: "error" | "info" | "ready" | "warning", message: string): void {
   const status = getElement<HTMLDivElement>("status");
@@ -100,7 +101,7 @@ async function dispatchWorkflow(): Promise<void> {
     }
   } catch (error) {
     setProgress(false);
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = getErrorMessage(error);
     if (message.includes("Receiving end does not exist")) {
       showStatus("error", "Refresh Outlook page and try again");
     } else {
@@ -131,6 +132,7 @@ async function init(): Promise<void> {
 document.addEventListener("DOMContentLoaded", () => {
   init().catch((error: unknown) => {
     console.error("[OPM] Init error:", error);
+    showStatus("error", getErrorMessage(error));
   });
 
   getElement<HTMLButtonElement>("run-btn").addEventListener("click", () => {

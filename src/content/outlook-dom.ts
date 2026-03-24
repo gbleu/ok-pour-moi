@@ -1,8 +1,3 @@
-import type {
-  ContentToBackgroundMessage,
-  SignPdfResponse,
-  WorkflowConfig,
-} from "#shared/messages.js";
 import {
   expandMessage,
   expandThread,
@@ -12,12 +7,12 @@ import {
 } from "./outlook-actions.js";
 import { downloadAttachment } from "./outlook-download.js";
 
-export interface PdfItem {
+export interface PdfAttachment {
   conversationId: string;
-  filename: string;
-  senderLastname: string;
+  originalFilename: string;
+  pdfBytes: Uint8Array;
   senderEmail: string;
-  signedPdf: Uint8Array;
+  senderLastname: string;
   subject: string;
 }
 
@@ -41,8 +36,8 @@ function getConversationContext(): { conversationId: string; subject: string } |
   return { conversationId, subject };
 }
 
-// Returns [] when no PDF is found (missing DOM state). Throws on signing failure (real error).
-export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem[]> {
+// Returns [] when no PDF is found (missing DOM state). Throws on download failure.
+export async function collectPdfAttachment(myEmail: string): Promise<PdfAttachment[]> {
   const context = getConversationContext();
   if (!context) {
     return [];
@@ -52,7 +47,7 @@ export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem
 
   await expandThread();
 
-  const message = findLastMessageFromOthers(config.myEmail);
+  const message = findLastMessageFromOthers(myEmail);
   if (!message) {
     return [];
   }
@@ -74,26 +69,13 @@ export async function collectSignedPdfs(config: WorkflowConfig): Promise<PdfItem
 
   const pdfBytes = await downloadAttachment(firstPdf);
 
-  const response = await chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
-    payload: {
-      originalFilename,
-      pdfBytes: [...pdfBytes],
-      senderLastname: message.senderLastname,
-    },
-    type: "SIGN_PDF",
-  });
-
-  if (!response.success) {
-    throw new Error(`Signing failed: ${response.error}`);
-  }
-
   return [
     {
       conversationId,
-      filename: response.filename,
+      originalFilename,
+      pdfBytes,
       senderEmail: message.senderEmail,
       senderLastname: message.senderLastname,
-      signedPdf: new Uint8Array(response.signedPdf),
       subject,
     },
   ];
