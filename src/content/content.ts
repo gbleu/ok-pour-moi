@@ -55,7 +55,7 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: WorkflowResult) => void,
   ) => {
-    if (sender.id !== chrome.runtime.id) {
+    if (sender.id !== chrome.runtime.id || message.type !== "START_WORKFLOW") {
       return false;
     }
 
