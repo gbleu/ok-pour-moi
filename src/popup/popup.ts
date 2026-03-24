@@ -44,7 +44,6 @@ async function loadConfig(): Promise<
     config: {
       myEmail: sync.myEmail,
       replyMessage: sync.replyMessage,
-      signaturePosition: sync.signaturePosition,
     },
     valid: true,
   };
@@ -73,28 +72,54 @@ async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
   return outlookTabs[0];
 }
 
+interface Prerequisites {
+  readonly config: WorkflowConfig;
+  readonly tabId: number;
+}
+
+async function validatePrerequisites(
+  level: "error" | "warning",
+): Promise<Prerequisites | undefined> {
+  const [tab, configResult] = await Promise.all([checkOutlookTab(), loadConfig()]);
+  if (tab?.id === undefined) {
+    showStatus(
+      level,
+      level === "error" ? "Open Outlook Web mail first" : "Open Outlook Web to use this extension",
+    );
+    return undefined;
+  }
+  if (!configResult.valid) {
+    showStatus(
+      level,
+      level === "error"
+        ? configResult.error
+        : `${configResult.error} - click Settings to configure`,
+    );
+    return undefined;
+  }
+  return { config: configResult.config, tabId: tab.id };
+}
+
 async function dispatchWorkflow(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
   runBtn.disabled = true;
 
   try {
-    const [tab, configResult] = await Promise.all([checkOutlookTab(), loadConfig()]);
-    if (tab?.id === undefined) {
-      showStatus("error", "Open Outlook Web mail first");
-      return;
-    }
-    if (!configResult.valid) {
-      showStatus("error", configResult.error);
+    const prereqs = await validatePrerequisites("error");
+    if (prereqs === undefined) {
       return;
     }
 
     showStatus("info", "Starting workflow...");
     setProgress(true, 0, "Initializing...");
 
-    const result = await chrome.tabs.sendMessage<PopupToContentMessage, WorkflowResult>(tab.id, {
-      config: configResult.config,
-      type: "START_WORKFLOW",
-    });
+    const result = await chrome.tabs.sendMessage<PopupToContentMessage, WorkflowResult>(
+      prereqs.tabId,
+      {
+        config: prereqs.config,
+        type: "START_WORKFLOW",
+      },
+    );
 
     setProgress(false);
 
@@ -119,13 +144,8 @@ async function dispatchWorkflow(): Promise<void> {
 async function init(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
 
-  const [tab, configResult] = await Promise.all([checkOutlookTab(), loadConfig()]);
-  if (tab === undefined) {
-    showStatus("warning", "Open Outlook Web to use this extension");
-    return;
-  }
-  if (!configResult.valid) {
-    showStatus("warning", `${configResult.error} - click Settings to configure`);
+  const prereqs = await validatePrerequisites("warning");
+  if (prereqs === undefined) {
     return;
   }
 

@@ -6,6 +6,7 @@ import { type Page, expect, test } from "@playwright/test";
 const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "../fixtures");
 const FIXTURE_PATH = join(FIXTURES_DIR, "outlook-message.html");
 
+// DOM query smoke tests against HTML fixtures. Algorithm logic is tested in outlook-actions.test.ts.
 test.describe("Content Script DOM Queries", () => {
   test("findLastMessageFromOthers skips own messages", async ({
     page,
@@ -37,6 +38,7 @@ test.describe("Content Script DOM Queries", () => {
         const emailElement = el.querySelector<HTMLElement>("[data-email]");
         const elementEmail = emailElement?.dataset.email ?? "";
 
+        // Simplified from production isOwnMessage — see outlook-actions.test.ts for full coverage
         const isOwnMessage = ["you", "moi"].includes(textContent.toLowerCase());
 
         if (!isOwnMessage) {
@@ -121,6 +123,7 @@ test.describe("Content Script DOM Queries", () => {
 
       for (const el of senderElements.toReversed()) {
         const textContent = el.textContent.trim();
+        // Simplified from production isOwnMessage — see outlook-actions.test.ts for full coverage
         const isOwnMessage = ["you", "moi"].includes(textContent.toLowerCase());
         if (!isOwnMessage) {
           return { found: true };

@@ -12,8 +12,6 @@ import { getSyncStorage } from "#shared/storage.js";
 import { prepareDrafts } from "./outlook-compose.js";
 import { collectPdfAttachment } from "./outlook-dom.js";
 
-console.log("[OPM] Content script loaded");
-
 function signPdf(
   pdfBytes: Uint8Array,
   originalFilename: string,
@@ -82,7 +80,6 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
       await runWorkflow({
         myEmail: sync.myEmail,
         replyMessage: sync.replyMessage,
-        signaturePosition: sync.signaturePosition,
       });
     })().catch((error: unknown) => {
       console.error("[OPM] Debug workflow error:", error);

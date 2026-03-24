@@ -77,6 +77,11 @@ async function storeSignatureFile(file: File): Promise<void> {
   preview.classList.remove("hidden");
 }
 
+function getInputInt(id: string, fallback: number): number {
+  const value = Number.parseInt(getElement<HTMLInputElement>(id).value, 10);
+  return Number.isNaN(value) ? fallback : value;
+}
+
 async function saveSettings(): Promise<void> {
   const saveBtn = getElement<HTMLButtonElement>("save");
   saveBtn.disabled = true;
@@ -86,10 +91,10 @@ async function saveSettings(): Promise<void> {
       myEmail: getElement<HTMLInputElement>("myEmail").value.trim(),
       replyMessage: getElement<HTMLTextAreaElement>("replyMessage").value || "Hello, Ok pour moi.",
       signaturePosition: {
-        height: Number.parseInt(getElement<HTMLInputElement>("sigHeight").value, 10) || 50,
-        width: Number.parseInt(getElement<HTMLInputElement>("sigWidth").value, 10) || 150,
-        x: Number.parseInt(getElement<HTMLInputElement>("sigX").value, 10) || 120,
-        y: Number.parseInt(getElement<HTMLInputElement>("sigY").value, 10) || 130,
+        height: getInputInt("sigHeight", 50),
+        width: getInputInt("sigWidth", 150),
+        x: getInputInt("sigX", 120),
+        y: getInputInt("sigY", 130),
       },
     });
 
