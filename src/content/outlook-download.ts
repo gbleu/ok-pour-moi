@@ -61,7 +61,7 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
 
   const result = await waitForWindowMessage<BlobResultMessage>(
     (data) => isBlobResult(data, messageId),
-    30_000,
+    TIMING.DOWNLOAD_TIMEOUT,
   );
 
   if ("error" in result) {

@@ -3,6 +3,7 @@
 import "./happy-dom.setup.js";
 import { afterEach, describe, expect, test } from "bun:test";
 import {
+  expandMessage,
   findAttachmentListbox,
   findLastMessageFromOthers,
   getPdfOptions,
@@ -171,4 +172,28 @@ describe("findAttachmentListbox", () => {
     const msgBtn = document.querySelector("#msg")!;
     expect(findAttachmentListbox(msgBtn)).toBeUndefined();
   });
+});
+
+describe("expandMessage", () => {
+  // eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 5 retries × 1s CONTENT_LOAD + buffer
+  test("throws when attachment listbox never appears", async () => {
+    // Given: a button with no attachment listbox in its ancestor tree
+    document.body.innerHTML = `
+        <div>
+          <button id="msg">Message</button>
+        </div>`;
+
+    const msgBtn = document.querySelector("#msg")!;
+
+    // When/Then: throws after exhausting attempts
+    try {
+      await expandMessage(msgBtn);
+      expect.unreachable("Should have thrown");
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      if (error instanceof Error) {
+        expect(error.message).toBe("Message did not expand after 5 attempts");
+      }
+    }
+  }, 10_000);
 });

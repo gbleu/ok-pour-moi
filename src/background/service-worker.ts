@@ -8,6 +8,7 @@ import { generateAttachmentName, signPdf } from "#shared/pdf.js";
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
 import { base64ToUint8Array } from "#shared/encoding.js";
+import { getErrorMessage } from "#shared/errors.js";
 
 export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignPdfResponse> {
   const [config, local] = await Promise.all([getSyncStorage(), getLocalStorage()]);
@@ -33,19 +34,19 @@ export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignP
     };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Signing failed",
+      error: getErrorMessage(error),
       success: false,
     };
   }
 }
 
-function respondWithPromise(
+function sendAsyncResponse(
   promise: Promise<unknown>,
   sendResponse: (response: unknown) => void,
 ): void {
   promise.then(sendResponse).catch((error: unknown) => {
     sendResponse({
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: getErrorMessage(error),
       success: false,
     });
   });
@@ -57,15 +58,20 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void,
   ) => {
-    if (
-      sender.url === undefined ||
-      !OUTLOOK_ORIGINS.some((origin) => origin === new URL(sender.url ?? "").origin)
-    ) {
+    const senderUrl = sender.url;
+    try {
+      if (
+        senderUrl === undefined ||
+        !OUTLOOK_ORIGINS.some((origin) => origin === new URL(senderUrl).origin)
+      ) {
+        return false;
+      }
+    } catch {
       return false;
     }
 
     if (message.type === "SIGN_PDF") {
-      respondWithPromise(signPdfFromRequest(message.payload), sendResponse);
+      sendAsyncResponse(signPdfFromRequest(message.payload), sendResponse);
       return true;
     }
 

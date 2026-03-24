@@ -1,18 +1,61 @@
 /* eslint-disable promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- Chrome message listeners require callbacks */
-import type { PopupToContentMessage, WorkflowConfig, WorkflowResult } from "#shared/messages.js";
-import { collectSignedPdfs } from "./outlook-dom.js";
+import type {
+  ContentToBackgroundMessage,
+  PopupToContentMessage,
+  SignPdfResponse,
+  WorkflowConfig,
+  WorkflowResult,
+} from "#shared/messages.js";
+import { collectPdfAttachment } from "./outlook-dom.js";
+import { getErrorMessage } from "#shared/errors.js";
 import { getSyncStorage } from "#shared/storage.js";
 import { prepareDrafts } from "./outlook-compose.js";
 
+console.log("[OPM] Content script loaded");
+
+function signPdf(
+  pdfBytes: Uint8Array,
+  originalFilename: string,
+  senderLastname: string,
+): Promise<SignPdfResponse> {
+  return chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
+    payload: { originalFilename, pdfBytes: [...pdfBytes], senderLastname },
+    type: "SIGN_PDF",
+  });
+}
+
 async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
   try {
-    const items = await collectSignedPdfs(config);
+    const attachments = await collectPdfAttachment(config.myEmail);
 
-    if (items.length === 0) {
+    if (attachments.length === 0) {
       return { message: "No PDFs found in current conversation", success: true };
     }
 
-    const { successCount, errors } = await prepareDrafts(items, config);
+    const items = await Promise.all(
+      attachments.map(async (attachment) => {
+        const response = await signPdf(
+          attachment.pdfBytes,
+          attachment.originalFilename,
+          attachment.senderLastname,
+        );
+
+        if (!response.success) {
+          throw new Error(`Signing failed: ${response.error}`);
+        }
+
+        return {
+          conversationId: attachment.conversationId,
+          filename: response.filename,
+          senderEmail: attachment.senderEmail,
+          senderLastname: attachment.senderLastname,
+          signedPdf: new Uint8Array(response.signedPdf),
+          subject: attachment.subject,
+        };
+      }),
+    );
+
+    const { successCount, errors } = await prepareDrafts(items, config.replyMessage);
 
     if (errors.length > 0) {
       return {
@@ -27,10 +70,7 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
     };
   } catch (error) {
     console.error("[OPM] Workflow error:", error);
-    return {
-      message: error instanceof Error ? error.message : "Unknown error",
-      success: false,
-    };
+    return { message: getErrorMessage(error), success: false };
   }
 }
 
@@ -62,10 +102,7 @@ chrome.runtime.onMessage.addListener(
     runWorkflow(message.config)
       .then(sendResponse)
       .catch((error: unknown) => {
-        sendResponse({
-          message: error instanceof Error ? error.message : "Unknown error",
-          success: false,
-        });
+        sendResponse({ message: getErrorMessage(error), success: false });
       });
     return true;
   },

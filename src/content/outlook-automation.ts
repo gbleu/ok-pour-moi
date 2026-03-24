@@ -1,5 +1,7 @@
 /* eslint-disable func-style, id-length, promise/avoid-new, promise/param-names, no-promise-executor-return, unicorn/prefer-global-this */
 export const TIMING = {
+  COMPOSE_CLOSE_INTERVAL: 200,
+  COMPOSE_CLOSE_MAX_POLLS: 20,
   CONTENT_LOAD: 1000,
   DOWNLOAD_TIMEOUT: 30_000,
   ELEMENT_VISIBLE: 10_000,

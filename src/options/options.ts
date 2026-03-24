@@ -6,6 +6,7 @@ import {
   setSyncStorage,
 } from "#shared/storage.js";
 import { getElement } from "#shared/dom.js";
+import { getErrorMessage } from "#shared/errors.js";
 import { getSignatureFormat } from "#shared/pdf.js";
 
 function readFileAsDataURL(file: File): Promise<string> {
@@ -94,10 +95,7 @@ async function saveSettings(): Promise<void> {
 
     showStatus("success", "Settings saved!");
   } catch (error) {
-    showStatus(
-      "error",
-      `Failed to save: ${error instanceof Error ? error.message : "Unknown error"}`,
-    );
+    showStatus("error", `Failed to save: ${getErrorMessage(error)}`);
   } finally {
     saveBtn.disabled = false;
   }
@@ -106,6 +104,7 @@ async function saveSettings(): Promise<void> {
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().catch((error: unknown) => {
     console.error("[OPM] Load settings error:", error);
+    showStatus("error", getErrorMessage(error));
   });
 
   getElement<HTMLButtonElement>("save").addEventListener("click", () => {
@@ -131,10 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showStatus("success", "Signature uploaded!");
         })
         .catch((error: unknown) => {
-          showStatus(
-            "error",
-            `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
+          showStatus("error", `Upload failed: ${getErrorMessage(error)}`);
         });
     }
   });

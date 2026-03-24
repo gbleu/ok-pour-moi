@@ -6,8 +6,15 @@ import {
   removeAllAttachments,
   saveDraft,
 } from "./outlook-compose-actions.js";
-import type { PdfItem } from "./outlook-dom.js";
-import type { WorkflowConfig } from "#shared/messages.js";
+import { getErrorMessage } from "#shared/errors.js";
+export interface SignedPdfItem {
+  conversationId: string;
+  filename: string;
+  senderEmail: string;
+  senderLastname: string;
+  signedPdf: Uint8Array;
+  subject: string;
+}
 
 export interface DraftResult {
   errors: string[];
@@ -15,8 +22,8 @@ export interface DraftResult {
 }
 
 export async function prepareDrafts(
-  items: PdfItem[],
-  config: WorkflowConfig,
+  items: SignedPdfItem[],
+  replyMessage: string,
 ): Promise<DraftResult> {
   let successCount = 0;
   const errors: string[] = [];
@@ -28,7 +35,7 @@ export async function prepareDrafts(
     try {
       const composeBody = await openReply(item.conversationId);
       composeBody.focus();
-      typeText(composeBody, config.replyMessage);
+      typeText(composeBody, replyMessage);
       await removeAllAttachments();
       await attachFile(item.signedPdf, item.filename);
       await saveDraft();
@@ -37,7 +44,7 @@ export async function prepareDrafts(
       await sleep(TIMING.UI_SETTLE);
       successCount += 1;
     } catch (error) {
-      errors.push(`[${idx + 1}] ${error instanceof Error ? error.message : "Unknown error"}`);
+      errors.push(`[${idx + 1}] ${getErrorMessage(error)}`);
     }
   }
 
