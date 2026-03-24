@@ -10,7 +10,7 @@ import {
 import { getSyncStorage } from "#shared/storage.js";
 
 import { prepareDrafts } from "./outlook-compose.js";
-import { collectPdfAttachment } from "./outlook-dom.js";
+import { collectPdfAttachments } from "./outlook-dom.js";
 
 function signPdf(
   pdfBytes: Uint8Array,
@@ -25,7 +25,7 @@ function signPdf(
 
 async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
   try {
-    const attachments = await collectPdfAttachment(config.myEmail);
+    const attachments = await collectPdfAttachments(config.myEmail);
 
     if (attachments.length === 0) {
       return { message: "No PDFs found in current conversation", success: true };

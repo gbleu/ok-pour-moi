@@ -82,7 +82,7 @@ function getInputInt(id: string, fallback: number): number {
   return Number.isNaN(value) ? fallback : value;
 }
 
-async function saveSettings(): Promise<void> {
+export async function saveSettings(): Promise<void> {
   const saveBtn = getElement<HTMLButtonElement>("save");
   saveBtn.disabled = true;
 

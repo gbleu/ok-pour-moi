@@ -100,7 +100,7 @@ async function validatePrerequisites(
   return { config: configResult.config, tabId: tab.id };
 }
 
-async function dispatchWorkflow(): Promise<void> {
+export async function dispatchWorkflow(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
   runBtn.disabled = true;
 

@@ -3,10 +3,10 @@
 import "./happy-dom.setup.js";
 import { afterEach, describe, expect, test } from "bun:test";
 
-// GetConversationContext is not exported, so test collectPdfAttachment indirectly
+// GetConversationContext is not exported, so test collectPdfAttachments indirectly
 // By verifying the DOM parsing logic through the public API
 
-describe("collectPdfAttachment DOM prerequisites", () => {
+describe("collectPdfAttachments DOM prerequisites", () => {
   afterEach(() => {
     document.body.innerHTML = "";
   });
@@ -15,9 +15,9 @@ describe("collectPdfAttachment DOM prerequisites", () => {
     // Given: empty document with no [role="main"]
     document.body.innerHTML = "<div>empty</div>";
 
-    // When: we import and call collectPdfAttachment
-    const { collectPdfAttachment } = await import("./outlook-dom.js");
-    const result = await collectPdfAttachment("test@example.com");
+    // When: we import and call collectPdfAttachments
+    const { collectPdfAttachments } = await import("./outlook-dom.js");
+    const result = await collectPdfAttachments("test@example.com");
 
     // Then: returns empty array
     expect(result).toEqual([]);
@@ -31,8 +31,8 @@ describe("collectPdfAttachment DOM prerequisites", () => {
       </div>
     `;
 
-    const { collectPdfAttachment } = await import("./outlook-dom.js");
-    const result = await collectPdfAttachment("me@example.com");
+    const { collectPdfAttachments } = await import("./outlook-dom.js");
+    const result = await collectPdfAttachments("me@example.com");
 
     // Then: returns empty (no message from others found)
     expect(result).toEqual([]);

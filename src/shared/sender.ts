@@ -6,7 +6,7 @@ export function extractLastname(fromText: string): string {
   const parts = name.split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) {
-    return "Unknown";
+    return "";
   }
   if (parts.length === 1) {
     return parts[0] ?? "Unknown";

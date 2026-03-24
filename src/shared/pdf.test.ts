@@ -56,7 +56,7 @@ describe("extractLastname", () => {
       extractLastname("From: MARTIN Sophie <sophie.martin@example.com>"),
       extractLastname("From:   "),
       extractLastname("From: A Jean Dupont"),
-    ]).toEqual(["DUPONT", "DE LA TOUR", "Dupont", "Admin", "MARTIN", "Unknown", "Dupont"]);
+    ]).toEqual(["DUPONT", "DE LA TOUR", "Dupont", "Admin", "MARTIN", "", "Dupont"]);
   });
 
   test("skips single-char uppercase parts", () => {

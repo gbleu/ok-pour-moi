@@ -19,22 +19,28 @@ Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, sign
 ```
 src/
 ├── content/           # Content scripts (injected into Outlook)
-│   ├── outlook-actions.ts  # Outlook DOM operations (messages, attachments, replies)
-│   ├── outlook-compose.ts  # Create draft replies
-│   ├── outlook-dom.ts      # PDF collection workflow orchestrator
-│   ├── main-world.ts       # MAIN world script (blob URL interception)
-│   ├── dom-utils.ts        # Low-level DOM utilities
-│   └── content.ts          # Entry point, message handling
+│   ├── content.ts              # Entry point, message handling
+│   ├── outlook-dom.ts          # PDF collection workflow orchestrator
+│   ├── outlook-actions.ts      # Outlook DOM operations (messages, attachments, replies)
+│   ├── outlook-automation.ts   # DOM interaction helpers (click, type, wait)
+│   ├── outlook-compose.ts      # Create draft replies
+│   ├── outlook-compose-actions.ts # Draft reply DOM operations
+│   ├── outlook-download.ts     # PDF download via blob interception
+│   ├── blob-protocol.ts        # Window message types for blob transfer
+│   └── main-world.ts           # MAIN world script (blob URL interception)
 ├── background/        # Service worker
 │   └── service-worker.ts   # PDF signing, message routing
 ├── popup/             # Extension popup UI
 ├── options/           # Settings page
 └── shared/            # Shared types and utilities
-    ├── css.ts         # CSS utility (escape values)
     ├── dom.ts         # DOM utility (getElement)
+    ├── encoding.ts    # Base64 encoding/decoding
+    ├── errors.ts      # Error message extraction
     ├── messages.ts    # Message types
+    ├── origins.ts     # Outlook origin constants
     ├── pdf.ts         # PDF signing, name extraction, attachment naming
-    └── storage.ts     # Chrome storage API wrappers, base64 encoding
+    ├── sender.ts      # Email/lastname extraction from sender strings
+    └── storage.ts     # Chrome storage API wrappers
 ```
 
 ### Workflow
