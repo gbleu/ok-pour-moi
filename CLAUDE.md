@@ -47,7 +47,7 @@ src/
 
 ### Code Style
 
-- `setTimeout`: In Node scripts, use `import { setTimeout } from "node:timers/promises"` not `new Promise(r => setTimeout(r, ms))`. In browser code (`src/`), use the `sleep` helper from `dom-utils.ts`
+- `setTimeout`: In Node scripts, use `import { setTimeout } from "node:timers/promises"` not `new Promise(r => setTimeout(r, ms))`. In browser code (`src/`), use the `sleep` helper from `outlook-automation.ts`
 - Encoding: `utf8` not `utf-8` (unicorn/text-encoding-identifier-case)
 - Array destructuring: `const [, second] = arr` not `arr[1]` (prefer-destructuring)
 - Strict booleans: `!== undefined && !== ""` not truthy checks (strict-boolean-expressions)
