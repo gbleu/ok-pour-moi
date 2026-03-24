@@ -34,7 +34,7 @@ export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignP
     };
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Signing failed",
+      error: getErrorMessage(error),
       success: false,
     };
   }
@@ -59,10 +59,14 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response: unknown) => void,
   ) => {
     const senderUrl = sender.url;
-    if (
-      senderUrl === undefined ||
-      !OUTLOOK_ORIGINS.some((origin) => origin === new URL(senderUrl).origin)
-    ) {
+    try {
+      if (
+        senderUrl === undefined ||
+        !OUTLOOK_ORIGINS.some((origin) => origin === new URL(senderUrl).origin)
+      ) {
+        return false;
+      }
+    } catch {
       return false;
     }
 
