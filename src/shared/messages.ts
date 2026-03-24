@@ -1,12 +1,9 @@
-import { type SignaturePosition } from "./pdf.js";
-
 /** JSON-serialized Uint8Array for Chrome message transport (Uint8Array is not directly serializable) */
 type SerializedBytes = readonly number[];
 
 export interface WorkflowConfig {
   readonly myEmail: string;
   readonly replyMessage: string;
-  readonly signaturePosition: SignaturePosition;
 }
 
 export interface SignPdfRequest {

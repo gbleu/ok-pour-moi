@@ -18,8 +18,8 @@ export interface SignedPdfItem {
 }
 
 export interface DraftResult {
-  errors: string[];
-  successCount: number;
+  readonly errors: readonly string[];
+  readonly successCount: number;
 }
 
 export async function prepareDrafts(

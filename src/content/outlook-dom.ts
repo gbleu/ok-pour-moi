@@ -8,12 +8,12 @@ import {
 import { downloadAttachment } from "./outlook-download.js";
 
 export interface PdfAttachment {
-  conversationId: string;
-  originalFilename: string;
-  pdfBytes: Uint8Array;
-  senderEmail: string;
-  senderLastname: string;
-  subject: string;
+  readonly conversationId: string;
+  readonly originalFilename: string;
+  readonly pdfBytes: Uint8Array;
+  readonly senderEmail: string;
+  readonly senderLastname: string;
+  readonly subject: string;
 }
 
 function getConversationContext(): { conversationId: string; subject: string } | undefined {
