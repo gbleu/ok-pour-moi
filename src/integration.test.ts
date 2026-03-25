@@ -8,13 +8,21 @@ import {
   type WorkflowResult,
 } from "#shared/messages.js";
 
-import { sleep } from "./content/outlook-automation.js";
-
 type MessageListener<TMessage, TResponse> = (
   message: TMessage,
   sender: chrome.runtime.MessageSender,
   sendResponse: (response: TResponse) => void,
 ) => boolean;
+
+function captureResponse<T>(): { mock: ReturnType<typeof mock>; promise: Promise<T> } {
+  const { promise, resolve } = Promise.withResolvers<T>();
+  return {
+    mock: mock((response: T) => {
+      resolve(response);
+    }),
+    promise,
+  };
+}
 
 // --- Service worker handler capture ---
 
@@ -131,7 +139,7 @@ describe("service-worker onMessage handler", () => {
   });
 
   test("accepts Outlook origin and responds with signing result", async () => {
-    const sendResponse = mock();
+    const { mock: sendResponse, promise } = captureResponse<SignPdfResponse>();
 
     const keepOpen = swHandler(
       validMessage,
@@ -140,9 +148,8 @@ describe("service-worker onMessage handler", () => {
     );
 
     expect(keepOpen).toBe(true);
-    await sleep(50);
 
-    expect(sendResponse.mock.calls[0]?.[0]).toEqual({
+    expect(await promise).toEqual({
       error: "No signature configured",
       success: false,
     });
@@ -183,14 +190,13 @@ describe("content.ts onMessage handler", () => {
   });
 
   test("accepts own extension and responds with workflow result", async () => {
-    const sendResponse = mock();
+    const { mock: sendResponse, promise } = captureResponse<WorkflowResult>();
 
     const keepOpen = contentHandler(validMessage, { id: "test-extension-id" }, sendResponse);
 
     expect(keepOpen).toBe(true);
-    await sleep(50);
 
-    expect(sendResponse.mock.calls[0]?.[0]).toEqual({
+    expect(await promise).toEqual({
       message: "No PDFs found in current conversation",
       success: true,
     });
