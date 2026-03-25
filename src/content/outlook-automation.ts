@@ -113,35 +113,29 @@ export function simulateClick(element: Element): void {
   const x = rect.left + rect.width / 2;
   const y = rect.top + rect.height / 2;
 
-  const pointerOptions: PointerEventInit = {
+  const shared: MouseEventInit = {
     bubbles: true,
     button: 0,
     buttons: 1,
     cancelable: true,
     clientX: x,
     clientY: y,
+    view: window,
+  };
+  const pointer: PointerEventInit = {
+    ...shared,
     isPrimary: true,
     pointerId: 1,
     pointerType: "mouse",
-    view: window,
   };
-
-  const mouseOptions: MouseEventInit = {
-    bubbles: true,
-    button: 0,
-    buttons: 1,
-    cancelable: true,
-    clientX: x,
-    clientY: y,
-    view: window,
-  };
+  const released = { ...shared, buttons: 0 };
 
   // Dispatch pointer events (React 17+ listens to these)
-  element.dispatchEvent(new PointerEvent("pointerdown", pointerOptions));
-  element.dispatchEvent(new MouseEvent("mousedown", mouseOptions));
-  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOptions, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
+  element.dispatchEvent(new PointerEvent("pointerdown", pointer));
+  element.dispatchEvent(new MouseEvent("mousedown", shared));
+  element.dispatchEvent(new PointerEvent("pointerup", { ...pointer, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("mouseup", released));
+  element.dispatchEvent(new MouseEvent("click", released));
 }
 
 export function simulateKeyPress(
