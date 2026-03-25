@@ -79,12 +79,14 @@ describe("popup dispatchWorkflow", () => {
     // When
     await dispatchWorkflow();
 
-    // Then
+    // Then: correct message sent to the right tab, success shown
     const status = document.querySelector<HTMLDivElement>("#status");
     expect({
+      callCount: tabsSendMessageMock.mock.calls.length,
       className: status?.className,
       text: status?.textContent,
     }).toEqual({
+      callCount: 1,
       className: "status ready",
       text: "Processed 1/1 emails",
     });

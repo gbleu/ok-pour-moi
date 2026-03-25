@@ -64,7 +64,13 @@ function setFormValues(values: Readonly<Record<string, string>>): void {
 }
 
 describe("options saveSettings", () => {
+  const originalSetTimeout = globalThis.setTimeout;
+
   beforeEach(() => {
+    // Stub setTimeout to execute immediately (avoids 3s showStatus timer dangling)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Timer mock
+    (globalThis as { setTimeout: unknown }).setTimeout = ((fn: () => void) =>
+      originalSetTimeout(fn, 0)) as typeof setTimeout;
     setupOptionsDom();
     setupChromeMock();
     syncSetMock.mockReset();
@@ -72,6 +78,7 @@ describe("options saveSettings", () => {
   });
 
   afterEach(() => {
+    (globalThis as { setTimeout: typeof setTimeout }).setTimeout = originalSetTimeout;
     document.body.innerHTML = "";
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Test cleanup
     delete (globalThis as Record<string, unknown>).chrome;
