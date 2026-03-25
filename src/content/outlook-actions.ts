@@ -1,3 +1,6 @@
+// Convention: query functions (find*, get*) return undefined or [] when not found.
+// Action functions (expandMessage) throw on failure after retries.
+// ExpandThread is a no-op when the reading pane is missing (nothing to expand).
 import { extractEmail, extractLastname } from "#shared/sender.js";
 
 /* eslint-disable no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
@@ -15,16 +18,19 @@ export async function expandThread(): Promise<void> {
     return;
   }
 
-  for (let misses = 0; misses < 2; ) {
+  // Poll for "See more messages" button. Stop after 2 consecutive misses
+  // (the button may appear after a short delay following each click).
+  let consecutiveMisses = 0;
+  while (consecutiveMisses < 2) {
     await sleep(TIMING.CONTENT_LOAD);
     const seeMoreBtn = getButtonByName("See more messages", { parent: readingPane });
 
     if (!seeMoreBtn || getComputedStyle(seeMoreBtn).display === "none") {
-      misses += 1;
+      consecutiveMisses += 1;
       continue;
     }
 
-    misses = 0;
+    consecutiveMisses = 0;
     simulateClick(seeMoreBtn);
   }
 }
@@ -60,6 +66,30 @@ function extractSenderEmail(el: Element, textContent: string, fromText: string):
   );
 }
 
+function parseSenderElement(el: Element, myEmail: string): MessageInfo | undefined {
+  const ariaLabel = el.getAttribute("aria-label") ?? "";
+  const nameAttr = el.getAttribute("name") ?? "";
+  const textContent = (el.textContent ?? "").trim();
+
+  const fromText = [ariaLabel, nameAttr].find((text) => text.startsWith("From:")) ?? textContent;
+
+  const emailElement = el.querySelector("[data-email]");
+  const elementEmail =
+    emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
+
+  if (isOwnMessage(myEmail, { elementEmail, fromText, textContent })) {
+    return undefined;
+  }
+
+  const senderEmail = elementEmail || extractSenderEmail(el, textContent, fromText);
+  if (senderEmail === "") {
+    return undefined;
+  }
+
+  const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
+  return { element: el, senderEmail, senderLastname: extractLastname(normalizedFrom) };
+}
+
 export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (!readingPane) {
@@ -71,31 +101,16 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
   ];
 
   for (const el of senderElements.toReversed()) {
-    const ariaLabel = el.getAttribute("aria-label") ?? "";
-    const nameAttr = el.getAttribute("name") ?? "";
-    const textContent = (el.textContent ?? "").trim();
-
-    const fromText = [ariaLabel, nameAttr].find((text) => text.startsWith("From:")) ?? textContent;
-
-    const emailElement = el.querySelector("[data-email]");
-    const elementEmail =
-      emailElement instanceof HTMLElement ? (emailElement.dataset.email ?? "") : "";
-
-    if (isOwnMessage(myEmail, { elementEmail, fromText, textContent })) {
-      continue;
-    }
-
-    const senderEmail = elementEmail || extractSenderEmail(el, textContent, fromText);
-    if (senderEmail !== "") {
-      const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
-      return { element: el, senderEmail, senderLastname: extractLastname(normalizedFrom) };
+    const result = parseSenderElement(el, myEmail);
+    if (result !== undefined) {
+      return result;
     }
   }
 
   return undefined;
 }
 
-function findAncestor(
+export function findAncestor(
   element: Element,
   predicate: (ancestor: Element) => boolean,
   maxDepth = 10,

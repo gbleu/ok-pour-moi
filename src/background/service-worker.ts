@@ -41,8 +41,8 @@ export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignP
 }
 
 function sendAsyncResponse(
-  promise: Promise<unknown>,
-  sendResponse: (response: unknown) => void,
+  promise: Promise<SignPdfResponse>,
+  sendResponse: (response: SignPdfResponse) => void,
 ): void {
   promise.then(sendResponse).catch((error: unknown) => {
     sendResponse({
@@ -57,7 +57,7 @@ chrome.runtime.onMessage.addListener(
   (
     message: ContentToBackgroundMessage,
     sender: chrome.runtime.MessageSender,
-    sendResponse: (response: unknown) => void,
+    sendResponse: (response: SignPdfResponse) => void,
   ): boolean => {
     const senderUrl = sender.url;
     try {

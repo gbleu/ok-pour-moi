@@ -1,4 +1,5 @@
 /* eslint-disable unicorn/no-null */
+import { findAncestor } from "./outlook-actions.js";
 import {
   TIMING,
   getByRole,
@@ -33,10 +34,10 @@ async function removeFirstAttachment(): Promise<boolean> {
   }
 
   // Outlook nests the compose textbox ~5 levels deep within the compose pane. closest() covers
-  // Standard dialog/form wrappers; the parentElement chain is a fallback for inline compose mode.
+  // Standard dialog/form wrappers; findAncestor is a fallback for inline compose mode.
   const composeContainer =
     composeBody.closest('[role="dialog"], [role="form"], form') ??
-    composeBody.parentElement?.parentElement?.parentElement?.parentElement?.parentElement;
+    findAncestor(composeBody, (el) => el.querySelector('[role="listbox"]') !== null, 8);
   if (!composeContainer) {
     return false;
   }

@@ -6,10 +6,11 @@ export function extractLastname(fromText: string): string {
   const parts = name.split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) {
-    return "Unknown";
+    return "";
   }
   if (parts.length === 1) {
-    return parts[0] ?? "Unknown";
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- parts.length === 1 guarantees parts[0] exists
+    return parts[0]!;
   }
 
   // Check for leading uppercase parts (e.g., "DUPONT Jean" or "DE LA TOUR Pierre")
@@ -22,7 +23,8 @@ export function extractLastname(fromText: string): string {
     }
   }
 
-  return uppercaseParts.length > 0 ? uppercaseParts.join(" ") : (parts.at(-1) ?? "Unknown");
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- parts.length >= 2 guarantees parts.at(-1) exists
+  return uppercaseParts.length > 0 ? uppercaseParts.join(" ") : parts.at(-1)!;
 }
 
 export function extractEmail(fromText: string): string {

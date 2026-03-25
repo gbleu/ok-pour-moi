@@ -61,7 +61,7 @@ function isOutlookMailUrl(url: string): boolean {
   }
 }
 
-async function checkOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
+async function findOutlookTab(): Promise<chrome.tabs.Tab | undefined> {
   const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (activeTab?.url !== undefined && isOutlookMailUrl(activeTab.url)) {
     return activeTab;
@@ -80,7 +80,7 @@ interface Prerequisites {
 async function validatePrerequisites(
   level: "error" | "warning",
 ): Promise<Prerequisites | undefined> {
-  const [tab, configResult] = await Promise.all([checkOutlookTab(), loadConfig()]);
+  const [tab, configResult] = await Promise.all([findOutlookTab(), loadConfig()]);
   if (tab?.id === undefined) {
     showStatus(
       level,
@@ -100,7 +100,7 @@ async function validatePrerequisites(
   return { config: configResult.config, tabId: tab.id };
 }
 
-async function dispatchWorkflow(): Promise<void> {
+export async function dispatchWorkflow(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
   runBtn.disabled = true;
 
