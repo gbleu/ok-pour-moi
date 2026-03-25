@@ -3,7 +3,7 @@
 import "./happy-dom.setup.js";
 import { afterEach, describe, expect, test } from "bun:test";
 
-// GetConversationContext is not exported, so test collectPdfAttachments indirectly
+// The helper getConversationContext is not exported, so test collectPdfAttachments indirectly
 // By verifying the DOM parsing logic through the public API
 
 describe("collectPdfAttachments DOM prerequisites", () => {

@@ -36,7 +36,7 @@ function getConversationContext(): { conversationId: string; subject: string } |
   return { conversationId, subject };
 }
 
-// Returns [] when no PDF is found (missing DOM state). Throws on download failure.
+// Returns [] when no PDF is found (missing DOM state). Throws on expand or download failure.
 // Currently returns at most one attachment but the array contract allows future extension.
 export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachment[]> {
   const context = getConversationContext();
