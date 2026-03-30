@@ -29,11 +29,8 @@ async function buildTypeScript(): Promise<void> {
   });
 
   if (!result.success) {
-    console.error("Build failed:");
-    for (const log of result.logs) {
-      console.error(log);
-    }
-    throw new Error("TypeScript build failed");
+    const errors = result.logs.map(String).join("\n");
+    throw new Error(`TypeScript build failed:\n${errors}`);
   }
 
   console.log("TypeScript compiled successfully");

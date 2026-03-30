@@ -23,7 +23,7 @@ function signPdf(
   });
 }
 
-async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
+async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
   try {
     const attachments = await collectPdfAttachments(config.myEmail);
 
@@ -77,7 +77,7 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
     (async (): Promise<void> => {
       const sync = await getSyncStorage();
-      await runWorkflow({
+      await signAndDraft({
         myEmail: sync.myEmail,
         replyMessage: sync.replyMessage,
       });
@@ -98,7 +98,7 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
-    runWorkflow(message.config)
+    signAndDraft(message.config)
       .then(sendResponse)
       .catch((error: unknown) => {
         sendResponse({ message: getErrorMessage(error), success: false });

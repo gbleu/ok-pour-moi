@@ -14,9 +14,8 @@ function getVersion(): string {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Manifest structure is known
     const manifest = JSON.parse(manifestContent) as { version: string };
     return manifest.version;
-  } catch {
-    console.error("Failed to read manifest.json — ensure it exists and contains valid JSON.");
-    return process.exit(1);
+  } catch (error) {
+    throw new Error("Failed to read manifest.json", { cause: error });
   }
 }
 

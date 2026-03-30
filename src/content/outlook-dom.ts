@@ -32,6 +32,9 @@ function getConversationContext(): { conversationId: string; subject: string } |
     '[data-convid][aria-selected="true"], [data-convid]:focus',
   );
   const conversationId = selectedEmail?.dataset.convid ?? "";
+  if (conversationId === "") {
+    return undefined;
+  }
 
   return { conversationId, subject };
 }
