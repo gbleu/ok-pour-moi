@@ -82,9 +82,6 @@ function parseSenderElement(el: Element, myEmail: string): MessageInfo | undefin
   }
 
   const senderEmail = elementEmail || extractSenderEmail(el, textContent, fromText);
-  if (senderEmail === "") {
-    return undefined;
-  }
 
   const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
   return { element: el, senderEmail, senderLastname: extractLastname(normalizedFrom) };

@@ -118,6 +118,22 @@ describe("findLastMessageFromOthers", () => {
 
     expect([result?.senderEmail, result?.senderLastname]).toEqual(["sophie@example.com", "MARTIN"]);
   });
+
+  test("returns sender with empty email for internal enterprise users", () => {
+    // Given: an internal Outlook sender with display name only (no email in DOM)
+    document.body.innerHTML = `
+      <div role="main">
+        <span role="button" aria-label="From: DURAND Marc.">
+          <span>DURAND Marc.</span>
+        </span>
+      </div>`;
+
+    // When
+    const result = findLastMessageFromOthers("me@example.com");
+
+    // Then: sender is found with empty email and extracted lastname
+    expect([result?.senderEmail, result?.senderLastname]).toEqual(["", "DURAND"]);
+  });
 });
 
 describe("getPdfOptions", () => {
