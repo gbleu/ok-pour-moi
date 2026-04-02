@@ -1,15 +1,11 @@
+/* eslint-disable import/no-nodejs-modules -- Build tests need filesystem access */
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 import { readdir } from "node:fs/promises";
-import { join } from "node:path";
 
 const SRC_DIR = "./src";
 const DIST_DIR = "./dist";
 const distExists = existsSync(DIST_DIR);
-
-async function readDistFile(path: string): Promise<string> {
-  return Bun.file(join(DIST_DIR, path)).text();
-}
 
 describe("source HTML", () => {
   test("script tags use type=module for files with exports", async () => {
@@ -19,8 +15,8 @@ describe("source HTML", () => {
     ];
 
     for (const { html, ts } of pages) {
-      const htmlContent = await Bun.file(join(SRC_DIR, html)).text();
-      const tsContent = await Bun.file(join(SRC_DIR, ts)).text();
+      const htmlContent = await Bun.file(`${SRC_DIR}/${html}`).text();
+      const tsContent = await Bun.file(`${SRC_DIR}/${ts}`).text();
       const hasExport = /^export /m.test(tsContent);
 
       if (hasExport) {
@@ -41,7 +37,7 @@ describe.skipIf(!distExists)("build output", () => {
     ];
 
     for (const path of entrypoints) {
-      const js = await readDistFile(path);
+      const js = await Bun.file(`${DIST_DIR}/${path}`).text();
       expect(js.length).toBeGreaterThan(0);
     }
   });
