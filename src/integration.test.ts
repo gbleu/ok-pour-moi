@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null -- Chrome mock setup */
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 
 import {
   type ContentToBackgroundMessage,
@@ -88,6 +88,18 @@ const contentHandler = contentAddListenerMock.mock.calls[0]![0] as MessageListen
   PopupToContentMessage,
   WorkflowResult
 >;
+
+// --- Cleanup ---
+
+const originalChrome = globalThis.chrome;
+afterAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion, @typescript-eslint/no-dynamic-delete -- Restore original global state
+  if (originalChrome === undefined) {
+    delete (globalThis as Record<string, unknown>).chrome;
+  } else {
+    globalThis.chrome = originalChrome;
+  }
+});
 
 // --- Tests ---
 

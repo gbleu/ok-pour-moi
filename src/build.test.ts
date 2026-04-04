@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
+import { existsSync } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const SRC_DIR = "./src";
 const DIST_DIR = "./dist";
+const distExists = existsSync(DIST_DIR);
 
 async function readDistFile(path: string): Promise<string> {
   return Bun.file(join(DIST_DIR, path)).text();
@@ -28,7 +30,7 @@ describe("source HTML", () => {
   });
 });
 
-describe("build output", () => {
+describe.skipIf(!distExists)("build output", () => {
   test("all entrypoint JS files are non-empty", async () => {
     const entrypoints = [
       "popup/popup.js",
@@ -47,8 +49,8 @@ describe("build output", () => {
   test("dist contains all expected directories", async () => {
     const entries = await readdir(DIST_DIR);
 
-    expect(entries.sort()).toEqual(
-      ["background", "content", "icons", "manifest.json", "options", "popup"].sort(),
+    expect(entries.toSorted()).toEqual(
+      ["background", "content", "icons", "manifest.json", "options", "popup"].toSorted(),
     );
   });
 });

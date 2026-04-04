@@ -32,6 +32,9 @@ export default defineConfig({
     {
       files: ["**/*.test.ts"],
       globals: { Bun: "readonly" },
+      rules: {
+        "import/no-nodejs-modules": "off",
+      },
     },
     {
       files: ["oxlint.config.ts", "knip.config.ts"],
