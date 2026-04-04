@@ -27,7 +27,13 @@ async function createPackage(): Promise<boolean> {
     return false;
   }
 
-  const version = getVersion();
+  let version: string;
+  try {
+    version = getVersion();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    return false;
+  }
   const zipFilename = `ok-pour-moi-v${version}.zip`;
 
   console.log(`📦 Creating package: ${zipFilename}`);
