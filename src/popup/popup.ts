@@ -78,14 +78,14 @@ interface Prerequisites {
 }
 
 async function validatePrerequisites(): Promise<
-  { prereqs: Prerequisites; valid: true } | { error: string; valid: false }
+  { prereqs: Prerequisites; valid: true } | { configError: boolean; error: string; valid: false }
 > {
   const [tab, configResult] = await Promise.all([findOutlookTab(), loadConfig()]);
   if (tab?.id === undefined) {
-    return { error: "Open Outlook Web mail first", valid: false };
+    return { configError: false, error: "Open Outlook Web mail first", valid: false };
   }
   if (!configResult.valid) {
-    return { error: configResult.error, valid: false };
+    return { configError: true, error: configResult.error, valid: false };
   }
   return { prereqs: { config: configResult.config, tabId: tab.id }, valid: true };
 }
@@ -138,7 +138,8 @@ async function init(): Promise<void> {
 
   const validation = await validatePrerequisites();
   if (!validation.valid) {
-    showStatus("warning", `${validation.error} - click Settings to configure`);
+    const suffix = validation.configError ? " - click Settings to configure" : "";
+    showStatus("warning", `${validation.error}${suffix}`);
     return;
   }
 

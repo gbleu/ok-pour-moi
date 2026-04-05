@@ -73,6 +73,8 @@ async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
   }
 }
 
+document.documentElement.dataset.opmLoaded = "true";
+
 document.addEventListener("keydown", (event: KeyboardEvent) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
     (async (): Promise<void> => {

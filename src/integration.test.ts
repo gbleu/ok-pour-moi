@@ -82,7 +82,10 @@ const contentAddListenerMock = mock();
 
 const originalDocument = globalThis.document;
 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Stub document for module load
-globalThis.document = { addEventListener: mock() } as unknown as typeof globalThis.document;
+globalThis.document = {
+  addEventListener: mock(),
+  documentElement: { dataset: {} },
+} as unknown as typeof globalThis.document;
 await import("./content/content.js");
 globalThis.document = originalDocument;
 
