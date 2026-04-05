@@ -7,7 +7,7 @@ import {
   expandMessage,
   findAttachmentListbox,
   findLastMessageFromOthers,
-  getPdfOptions,
+  findPdfOptions,
 } from "./outlook-actions.js";
 
 afterEach(() => {
@@ -136,7 +136,7 @@ describe("findLastMessageFromOthers", () => {
   });
 });
 
-describe("getPdfOptions", () => {
+describe("findPdfOptions", () => {
   test("filters to PDF attachments only", () => {
     document.body.innerHTML = `
       <div role="listbox" aria-label="Attachments">
@@ -147,7 +147,7 @@ describe("getPdfOptions", () => {
       </div>`;
 
     const listbox = document.querySelector('[role="listbox"]')!;
-    const pdfs = getPdfOptions(listbox);
+    const pdfs = findPdfOptions(listbox);
 
     expect(pdfs.map((el: Element) => el.textContent)).toEqual(["report.pdf", "invoice.PDF"]);
   });
@@ -159,7 +159,7 @@ describe("getPdfOptions", () => {
       </div>`;
 
     const listbox = document.querySelector('[role="listbox"]')!;
-    expect(getPdfOptions(listbox)).toEqual([]);
+    expect(findPdfOptions(listbox)).toEqual([]);
   });
 });
 

@@ -77,27 +77,17 @@ interface Prerequisites {
   readonly tabId: number;
 }
 
-async function validatePrerequisites(
-  level: "error" | "warning",
-): Promise<Prerequisites | undefined> {
+async function validatePrerequisites(): Promise<
+  { prereqs: Prerequisites; valid: true } | { error: string; valid: false }
+> {
   const [tab, configResult] = await Promise.all([findOutlookTab(), loadConfig()]);
   if (tab?.id === undefined) {
-    showStatus(
-      level,
-      level === "error" ? "Open Outlook Web mail first" : "Open Outlook Web to use this extension",
-    );
-    return undefined;
+    return { error: "Open Outlook Web mail first", valid: false };
   }
   if (!configResult.valid) {
-    showStatus(
-      level,
-      level === "error"
-        ? configResult.error
-        : `${configResult.error} - click Settings to configure`,
-    );
-    return undefined;
+    return { error: configResult.error, valid: false };
   }
-  return { config: configResult.config, tabId: tab.id };
+  return { prereqs: { config: configResult.config, tabId: tab.id }, valid: true };
 }
 
 export async function dispatchWorkflow(): Promise<void> {
@@ -105,10 +95,12 @@ export async function dispatchWorkflow(): Promise<void> {
   runBtn.disabled = true;
 
   try {
-    const prereqs = await validatePrerequisites("error");
-    if (prereqs === undefined) {
+    const validation = await validatePrerequisites();
+    if (!validation.valid) {
+      showStatus("error", validation.error);
       return;
     }
+    const { prereqs } = validation;
 
     showStatus("info", "Starting workflow...");
     setProgress(true, 0, "Initializing...");
@@ -144,8 +136,9 @@ export async function dispatchWorkflow(): Promise<void> {
 async function init(): Promise<void> {
   const runBtn = getElement<HTMLButtonElement>("run-btn");
 
-  const prereqs = await validatePrerequisites("warning");
-  if (prereqs === undefined) {
+  const validation = await validatePrerequisites();
+  if (!validation.valid) {
+    showStatus("warning", `${validation.error} - click Settings to configure`);
     return;
   }
 
@@ -162,12 +155,14 @@ document.addEventListener("DOMContentLoaded", () => {
   getElement<HTMLButtonElement>("run-btn").addEventListener("click", () => {
     dispatchWorkflow().catch((error: unknown) => {
       console.error("[OPM] Workflow error:", error);
+      showStatus("error", getErrorMessage(error));
     });
   });
   getElement<HTMLAnchorElement>("settings-link").addEventListener("click", (event: MouseEvent) => {
     event.preventDefault();
     chrome.runtime.openOptionsPage().catch((error: unknown) => {
       console.error("[OPM] Options page error:", error);
+      showStatus("error", getErrorMessage(error));
     });
   });
 });

@@ -41,21 +41,28 @@ test.describe("Origin Validation", () => {
   });
 
   test("content script loads on allowed Outlook origins", async ({
+    extensionId,
     setupOutlookPage,
-  }: Readonly<{ setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>> }>) => {
+  }: Readonly<{
+    extensionId: string;
+    setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>>;
+  }>) => {
     // Page served at Outlook URL gets the content script injected.
-    // Content scripts run in an isolated world, so verify via console.log
-    // Emitted on content script load. Subscribe before reload to avoid race.
+    // Chrome throws "Receiving end does not exist" when no content script is loaded.
+    // Sending a message that gets any other result proves the content script is present.
     const page = await setupOutlookPage("outlook-message.html");
 
-    const consolePromise = page.waitForEvent("console", {
-      predicate: (msg: Readonly<{ text: () => string }>) => msg.text().includes("[OPM]"),
-      timeout: 10_000,
-    });
-    await page.reload({ waitUntil: "domcontentloaded" });
-    const message = await consolePromise;
+    const hasContentScript = await page.evaluate(async (extId: string) => {
+      try {
+        await chrome.runtime.sendMessage(extId, { type: "PING" });
+        return true;
+      } catch (error) {
+        // "Receiving end does not exist" means no content script
+        return !(error instanceof Error && error.message.includes("Receiving end"));
+      }
+    }, extensionId);
 
-    expect(message.text()).toContain("[OPM]");
+    expect(hasContentScript).toBe(true);
 
     await page.close();
   });

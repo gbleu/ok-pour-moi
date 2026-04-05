@@ -3,7 +3,7 @@ import {
   expandThread,
   findAttachmentListbox,
   findLastMessageFromOthers,
-  getPdfOptions,
+  findPdfOptions,
 } from "./outlook-actions.js";
 import { downloadAttachment } from "./outlook-download.js";
 
@@ -16,7 +16,7 @@ export interface PdfAttachment {
   readonly subject: string;
 }
 
-function getConversationContext(): { conversationId: string; subject: string } | undefined {
+function findConversationContext(): { conversationId: string; subject: string } | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (!readingPane) {
     return undefined;
@@ -42,7 +42,7 @@ function getConversationContext(): { conversationId: string; subject: string } |
 // Returns [] when no PDF is found (missing DOM state). Throws on expand or download failure.
 // Currently returns at most one attachment but the array contract allows future extension.
 export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachment[]> {
-  const context = getConversationContext();
+  const context = findConversationContext();
   if (!context) {
     return [];
   }
@@ -63,7 +63,7 @@ export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachm
     return [];
   }
 
-  const [firstPdf] = getPdfOptions(attachmentsList);
+  const [firstPdf] = findPdfOptions(attachmentsList);
   if (!firstPdf) {
     return [];
   }

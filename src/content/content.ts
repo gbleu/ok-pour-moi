@@ -9,7 +9,7 @@ import {
 } from "#shared/messages.js";
 import { getSyncStorage } from "#shared/storage.js";
 
-import { prepareDrafts } from "./outlook-compose.js";
+import { type SignedPdfItem, prepareDrafts } from "./outlook-compose.js";
 import { collectPdfAttachments } from "./outlook-dom.js";
 
 function signPdf(
@@ -31,7 +31,7 @@ async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
       return { message: "No PDFs found in current conversation", success: true };
     }
 
-    const items = await Promise.all(
+    const items: SignedPdfItem[] = await Promise.all(
       attachments.map(async (attachment) => {
         const response = await signPdf(
           attachment.pdfBytes,
@@ -82,7 +82,7 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
         replyMessage: sync.replyMessage,
       });
     })().catch((error: unknown) => {
-      console.error("[OPM] Debug workflow error:", error);
+      console.error("[OPM] Keyboard shortcut error:", error);
     });
   }
 });
@@ -95,6 +95,10 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response: WorkflowResult) => void,
   ): boolean => {
     if (sender.id !== chrome.runtime.id) {
+      return false;
+    }
+
+    if (message.type !== "START_WORKFLOW") {
       return false;
     }
 

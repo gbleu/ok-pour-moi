@@ -79,7 +79,7 @@ function matchesName(el: Element, name: RegExp | string): boolean {
     : name.test(searchText);
 }
 
-export function getByRole(
+export function findByRole(
   role: string,
   options: Readonly<{ name?: RegExp | string; parent?: Document | Element }> = {},
 ): Element | undefined {
@@ -94,7 +94,7 @@ export function getByRole(
   return undefined;
 }
 
-export function getButtonByName(
+export function findButtonByName(
   name: RegExp | string,
   options: Readonly<{ parent?: Document | Element }> = {},
 ): HTMLButtonElement | undefined {
@@ -104,6 +104,21 @@ export function getButtonByName(
     if (matchesName(btn, name)) {
       return btn;
     }
+  }
+  return undefined;
+}
+
+export function findAncestor(
+  element: Element,
+  predicate: (ancestor: Element) => boolean,
+  maxDepth = 10,
+): Element | undefined {
+  let current = element.parentElement;
+  for (let depth = 0; depth < maxDepth && current; depth += 1) {
+    if (predicate(current)) {
+      return current;
+    }
+    current = current.parentElement;
   }
   return undefined;
 }

@@ -53,7 +53,7 @@ test.describe("Content Script DOM Queries", () => {
     expect(result.email).toBe("sarah.connor@cyberdyne.com");
   });
 
-  test("getPdfOptions filters to PDF files only", async ({
+  test("findPdfOptions filters to PDF files only", async ({
     page,
   }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with mixed attachments

@@ -3,7 +3,13 @@
 import "./happy-dom.setup.js";
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { closeCompose, removeAllAttachments, saveDraft } from "./outlook-compose-actions.js";
+import {
+  attachFile,
+  closeCompose,
+  openReply,
+  removeAllAttachments,
+  saveDraft,
+} from "./outlook-compose-actions.js";
 
 afterEach(() => {
   document.body.innerHTML = "";
@@ -122,5 +128,91 @@ describe("saveDraft", () => {
 
     // Then: received save shortcut
     expect(events).toEqual(["s:true"]);
+  });
+});
+
+describe("openReply", () => {
+  test("clicks conversation item and reply button, returns compose body", async () => {
+    // Given: email item and reply button leading to compose textbox
+    const clicks: string[] = [];
+    document.body.innerHTML = `
+      <div data-convid="conv-123" aria-selected="true">Email</div>
+      <button name="Reply">Reply</button>
+      <div role="textbox" contenteditable="true">compose area</div>
+    `;
+    document.querySelector('[data-convid="conv-123"]')!.addEventListener("pointerdown", () => {
+      clicks.push("conversation");
+    });
+    document.querySelector('button[name="Reply"]')!.addEventListener("pointerdown", () => {
+      clicks.push("reply");
+    });
+
+    // When
+    const composeBody = await openReply("conv-123");
+
+    // Then
+    expect(clicks).toEqual(["conversation", "reply"]);
+    expect(composeBody.getAttribute("contenteditable")).toBe("true");
+  });
+
+  test("proceeds without clicking when conversation item is missing", async () => {
+    // Given: reply button and compose textbox but no conversation item
+    const clicks: string[] = [];
+    document.body.innerHTML = `
+      <button name="Reply">Reply</button>
+      <div role="textbox" contenteditable="true">compose area</div>
+    `;
+    document.querySelector('button[name="Reply"]')!.addEventListener("pointerdown", () => {
+      clicks.push("reply");
+    });
+
+    // When
+    const composeBody = await openReply("nonexistent-conv");
+
+    // Then: only reply was clicked, compose body returned
+    expect(clicks).toEqual(["reply"]);
+    expect(composeBody.getAttribute("contenteditable")).toBe("true");
+  });
+});
+
+describe("attachFile", () => {
+  test("creates file and sets it on file input", async () => {
+    // Given: attach button and file input
+    const clicks: string[] = [];
+    document.body.innerHTML = `
+      <button aria-label="Attach files">Attach</button>
+      <input type="file" accept="application/pdf,.pdf" />
+    `;
+    document.querySelector("button")!.addEventListener("pointerdown", () => {
+      clicks.push("attach");
+    });
+
+    // When
+    const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+    await attachFile(pdfBytes, "signed.pdf");
+
+    // Then: attach button was clicked and file input received the file
+    expect(clicks).toEqual(["attach"]);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
+    expect(input.files?.length).toBe(1);
+    expect(input.files?.[0]?.name).toBe("signed.pdf");
+  });
+
+  test("throws when no file input exists", async () => {
+    // Given: attach button but no file input
+    document.body.innerHTML = `
+      <button aria-label="Attach files">Attach</button>
+    `;
+
+    // When / Then
+    const pdfBytes = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+    try {
+      await attachFile(pdfBytes, "signed.pdf");
+      expect.unreachable("should have thrown");
+    } catch (error) {
+      expect(error instanceof Error && error.message).toBe(
+        "Could not find file input for attachment",
+      );
+    }
   });
 });

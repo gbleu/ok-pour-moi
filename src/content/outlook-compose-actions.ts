@@ -1,8 +1,8 @@
 /* eslint-disable unicorn/no-null */
-import { findAncestor } from "./outlook-actions.js";
 import {
   TIMING,
-  getByRole,
+  findAncestor,
+  findByRole,
   simulateClick,
   simulateKeyPress,
   sleep,
@@ -98,7 +98,7 @@ export async function removeAllAttachments(): Promise<void> {
   }
 }
 
-function findFileInput(): HTMLInputElement {
+function getFileInput(): HTMLInputElement {
   const fileInputs = [...document.querySelectorAll('input[type="file"]')].filter(
     (input: Element): input is HTMLInputElement => input instanceof HTMLInputElement,
   );
@@ -140,7 +140,7 @@ export async function attachFile(pdfBytes: Uint8Array, filename: string): Promis
 
   await sleep(TIMING.UI_SETTLE);
 
-  const input = findFileInput();
+  const input = getFileInput();
   input.files = dataTransfer.files;
   input.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(TIMING.UPLOAD_COMPLETE);
@@ -166,7 +166,7 @@ export async function closeCompose(): Promise<void> {
     }
   }
 
-  const homeTab = getByRole("tab", { name: "Home" });
+  const homeTab = findByRole("tab", { name: "Home" });
   if (homeTab) {
     simulateClick(homeTab);
     await sleep(TIMING.UI_SETTLE);

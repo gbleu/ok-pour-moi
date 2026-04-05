@@ -45,6 +45,7 @@ async function postBlobResult(id: string, url: string): Promise<void> {
     );
     capturedBlobs.delete(url);
   } catch (error: unknown) {
+    capturedBlobs.delete(url);
     window.postMessage(
       {
         error: getErrorMessage(error),
