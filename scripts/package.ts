@@ -15,7 +15,9 @@ function getVersion(): string {
     const manifest = JSON.parse(manifestContent) as { version: string };
     return manifest.version;
   } catch (error) {
-    throw new Error("Failed to read manifest.json", { cause: error });
+    throw new Error("Failed to read manifest.json — ensure it exists and contains valid JSON.", {
+      cause: error,
+    });
   }
 }
 
@@ -31,7 +33,11 @@ async function createPackage(): Promise<boolean> {
   try {
     version = getVersion();
   } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
+    if (error instanceof Error) {
+      console.error(error.message, error.cause);
+    } else {
+      console.error(error);
+    }
     return false;
   }
   const zipFilename = `ok-pour-moi-v${version}.zip`;

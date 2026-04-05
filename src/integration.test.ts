@@ -8,6 +8,9 @@ import {
   type WorkflowResult,
 } from "#shared/messages.js";
 
+// Capture before any module-scope mock overwrites globalThis.chrome
+const originalChrome = (globalThis as Record<string, unknown>).chrome;
+
 type MessageListener<TMessage, TResponse> = (
   message: TMessage,
   sender: chrome.runtime.MessageSender,
@@ -91,13 +94,13 @@ const contentHandler = contentAddListenerMock.mock.calls[0]![0] as MessageListen
 
 // --- Cleanup ---
 
-const originalChrome = globalThis.chrome;
 afterAll(() => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion, @typescript-eslint/no-dynamic-delete -- Restore original global state
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Restore original global state
   if (originalChrome === undefined) {
     delete (globalThis as Record<string, unknown>).chrome;
   } else {
-    globalThis.chrome = originalChrome;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Restore original global state
+    globalThis.chrome = originalChrome as typeof chrome;
   }
 });
 
