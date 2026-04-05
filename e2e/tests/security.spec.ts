@@ -43,19 +43,16 @@ test.describe("Origin Validation", () => {
   test("content script loads on allowed Outlook origins", async ({
     setupOutlookPage,
   }: Readonly<{ setupOutlookPage: (fixtureName: string) => Promise<Readonly<Page>> }>) => {
-    // Page served at Outlook URL gets the content script injected.
-    // Content scripts run in an isolated world, so verify via console.log
-    // Emitted on content script load. Subscribe before reload to avoid race.
+    // Content scripts run in an isolated world, but can modify the page DOM.
+    // The content script sets data-opm-loaded="true" on <html> when it loads.
     const page = await setupOutlookPage("outlook-message.html");
 
-    const consolePromise = page.waitForEvent("console", {
-      predicate: (msg: Readonly<{ text: () => string }>) => msg.text().includes("[OPM]"),
-      timeout: 10_000,
+    await page.waitForFunction(() => document.documentElement.dataset.opmLoaded === "true", {
+      timeout: 5000,
     });
-    await page.reload({ waitUntil: "domcontentloaded" });
-    const message = await consolePromise;
 
-    expect(message.text()).toContain("[OPM]");
+    const marker = await page.evaluate(() => document.documentElement.dataset.opmLoaded);
+    expect(marker).toBe("true");
 
     await page.close();
   });

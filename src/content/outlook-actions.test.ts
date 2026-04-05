@@ -7,7 +7,7 @@ import {
   expandMessage,
   findAttachmentListbox,
   findLastMessageFromOthers,
-  getPdfOptions,
+  findPdfOptions,
 } from "./outlook-actions.js";
 
 afterEach(() => {
@@ -118,9 +118,25 @@ describe("findLastMessageFromOthers", () => {
 
     expect([result?.senderEmail, result?.senderLastname]).toEqual(["sophie@example.com", "MARTIN"]);
   });
+
+  test("returns sender with empty email for internal enterprise users", () => {
+    // Given: an internal Outlook sender with display name only (no email in DOM)
+    document.body.innerHTML = `
+      <div role="main">
+        <span role="button" aria-label="From: DURAND Marc.">
+          <span>DURAND Marc.</span>
+        </span>
+      </div>`;
+
+    // When
+    const result = findLastMessageFromOthers("me@example.com");
+
+    // Then: sender is found with empty email and extracted lastname
+    expect([result?.senderEmail, result?.senderLastname]).toEqual(["", "DURAND"]);
+  });
 });
 
-describe("getPdfOptions", () => {
+describe("findPdfOptions", () => {
   test("filters to PDF attachments only", () => {
     document.body.innerHTML = `
       <div role="listbox" aria-label="Attachments">
@@ -131,7 +147,7 @@ describe("getPdfOptions", () => {
       </div>`;
 
     const listbox = document.querySelector('[role="listbox"]')!;
-    const pdfs = getPdfOptions(listbox);
+    const pdfs = findPdfOptions(listbox);
 
     expect(pdfs.map((el: Element) => el.textContent)).toEqual(["report.pdf", "invoice.PDF"]);
   });
@@ -143,7 +159,7 @@ describe("getPdfOptions", () => {
       </div>`;
 
     const listbox = document.querySelector('[role="listbox"]')!;
-    expect(getPdfOptions(listbox)).toEqual([]);
+    expect(findPdfOptions(listbox)).toEqual([]);
   });
 });
 

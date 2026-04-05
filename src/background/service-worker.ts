@@ -71,6 +71,10 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
+    if (message.type !== "SIGN_PDF") {
+      return false;
+    }
+
     sendAsyncResponse(signPdfFromRequest(message.payload), sendResponse);
     return true;
   },

@@ -9,7 +9,7 @@ import {
 } from "#shared/messages.js";
 import { getSyncStorage } from "#shared/storage.js";
 
-import { prepareDrafts } from "./outlook-compose.js";
+import { type SignedPdfItem, prepareDrafts } from "./outlook-compose.js";
 import { collectPdfAttachments } from "./outlook-dom.js";
 
 function signPdf(
@@ -23,7 +23,7 @@ function signPdf(
   });
 }
 
-async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
+async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
   try {
     const attachments = await collectPdfAttachments(config.myEmail);
 
@@ -31,7 +31,7 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
       return { message: "No PDFs found in current conversation", success: true };
     }
 
-    const items = await Promise.all(
+    const items: SignedPdfItem[] = await Promise.all(
       attachments.map(async (attachment) => {
         const response = await signPdf(
           attachment.pdfBytes,
@@ -73,16 +73,18 @@ async function runWorkflow(config: WorkflowConfig): Promise<WorkflowResult> {
   }
 }
 
+document.documentElement.dataset.opmLoaded = "true";
+
 document.addEventListener("keydown", (event: KeyboardEvent) => {
   if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
     (async (): Promise<void> => {
       const sync = await getSyncStorage();
-      await runWorkflow({
+      await signAndDraft({
         myEmail: sync.myEmail,
         replyMessage: sync.replyMessage,
       });
     })().catch((error: unknown) => {
-      console.error("[OPM] Debug workflow error:", error);
+      console.error("[OPM] Keyboard shortcut error:", error);
     });
   }
 });
@@ -98,7 +100,11 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
-    runWorkflow(message.config)
+    if (message.type !== "START_WORKFLOW") {
+      return false;
+    }
+
+    signAndDraft(message.config)
       .then(sendResponse)
       .catch((error: unknown) => {
         sendResponse({ message: getErrorMessage(error), success: false });

@@ -1,10 +1,16 @@
-// Convention: query functions (find*, get*) return undefined or [] when not found.
+// Convention: find* returns undefined or [] when not found. get* throws on miss.
 // Action functions (expandMessage) throw on failure after retries.
 // ExpandThread is a no-op when the reading pane is missing (nothing to expand).
 import { extractEmail, extractLastname } from "#shared/sender.js";
 
 /* eslint-disable no-negated-condition, unicorn/no-useless-undefined, unicorn/prefer-global-this, unicorn/no-null, unicorn/prefer-dom-node-text-content */
-import { TIMING, getButtonByName, simulateClick, sleep } from "./outlook-automation.js";
+import {
+  TIMING,
+  findAncestor,
+  findButtonByName,
+  simulateClick,
+  sleep,
+} from "./outlook-automation.js";
 
 export interface MessageInfo {
   readonly element: Element;
@@ -23,7 +29,7 @@ export async function expandThread(): Promise<void> {
   let consecutiveMisses = 0;
   while (consecutiveMisses < 2) {
     await sleep(TIMING.CONTENT_LOAD);
-    const seeMoreBtn = getButtonByName("See more messages", { parent: readingPane });
+    const seeMoreBtn = findButtonByName("See more messages", { parent: readingPane });
 
     if (!seeMoreBtn || getComputedStyle(seeMoreBtn).display === "none") {
       consecutiveMisses += 1;
@@ -82,9 +88,6 @@ function parseSenderElement(el: Element, myEmail: string): MessageInfo | undefin
   }
 
   const senderEmail = elementEmail || extractSenderEmail(el, textContent, fromText);
-  if (senderEmail === "") {
-    return undefined;
-  }
 
   const normalizedFrom = fromText.includes("From:") ? fromText : `From: ${fromText}`;
   return { element: el, senderEmail, senderLastname: extractLastname(normalizedFrom) };
@@ -107,21 +110,6 @@ export function findLastMessageFromOthers(myEmail: string): MessageInfo | undefi
     }
   }
 
-  return undefined;
-}
-
-export function findAncestor(
-  element: Element,
-  predicate: (ancestor: Element) => boolean,
-  maxDepth = 10,
-): Element | undefined {
-  let current = element.parentElement;
-  for (let depth = 0; depth < maxDepth && current; depth += 1) {
-    if (predicate(current)) {
-      return current;
-    }
-    current = current.parentElement;
-  }
   return undefined;
 }
 
@@ -178,7 +166,7 @@ export function findAttachmentListbox(messageButton: Element): Element | undefin
   return undefined;
 }
 
-export function getPdfOptions(attachmentListbox: Element): Element[] {
+export function findPdfOptions(attachmentListbox: Element): Element[] {
   const options = attachmentListbox.querySelectorAll('[role="option"]');
   return [...options].filter((opt) => (opt.textContent ?? "").toLowerCase().includes(".pdf"));
 }

@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null -- Chrome mock setup */
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 
 import {
   type ContentToBackgroundMessage,
@@ -7,6 +7,9 @@ import {
   type SignPdfResponse,
   type WorkflowResult,
 } from "#shared/messages.js";
+
+// Capture before any module-scope mock overwrites globalThis.chrome
+const originalChrome = (globalThis as Record<string, unknown>).chrome;
 
 type MessageListener<TMessage, TResponse> = (
   message: TMessage,
@@ -79,7 +82,10 @@ const contentAddListenerMock = mock();
 
 const originalDocument = globalThis.document;
 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Stub document for module load
-globalThis.document = { addEventListener: mock() } as unknown as typeof globalThis.document;
+globalThis.document = {
+  addEventListener: mock(),
+  documentElement: { dataset: {} },
+} as unknown as typeof globalThis.document;
 await import("./content/content.js");
 globalThis.document = originalDocument;
 
@@ -88,6 +94,18 @@ const contentHandler = contentAddListenerMock.mock.calls[0]![0] as MessageListen
   PopupToContentMessage,
   WorkflowResult
 >;
+
+// --- Cleanup ---
+
+afterAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Restore original global state
+  if (originalChrome === undefined) {
+    delete (globalThis as Record<string, unknown>).chrome;
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Restore original global state
+    globalThis.chrome = originalChrome as typeof chrome;
+  }
+});
 
 // --- Tests ---
 

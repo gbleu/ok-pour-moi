@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
   getElement<HTMLButtonElement>("save").addEventListener("click", () => {
     saveSettings().catch((error: unknown) => {
       console.error("[OPM] Save settings error:", error);
+      showStatus("error", getErrorMessage(error));
     });
   });
 
