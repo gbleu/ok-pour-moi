@@ -59,6 +59,6 @@ async function createPackage(): Promise<void> {
 try {
   await createPackage();
 } catch (error) {
-  console.error(error instanceof Error ? error.message : error);
+  console.error(error);
   process.exit(1);
 }
