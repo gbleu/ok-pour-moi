@@ -40,18 +40,6 @@ export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignP
   }
 }
 
-function sendAsyncResponse(
-  promise: Promise<SignPdfResponse>,
-  sendResponse: (response: SignPdfResponse) => void,
-): void {
-  promise.then(sendResponse).catch((error: unknown) => {
-    sendResponse({
-      error: getErrorMessage(error),
-      success: false,
-    });
-  });
-}
-
 chrome.runtime.onMessage.addListener(
   // eslint-disable-next-line typescript-eslint/strict-void-return -- Chrome onMessage requires boolean return to keep channel open
   (
@@ -75,7 +63,11 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
-    sendAsyncResponse(signPdfFromRequest(message.payload), sendResponse);
+    signPdfFromRequest(message.payload)
+      .then(sendResponse)
+      .catch((error: unknown) => {
+        sendResponse({ error: getErrorMessage(error), success: false });
+      });
     return true;
   },
 );

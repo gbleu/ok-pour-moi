@@ -151,20 +151,33 @@ export async function saveDraft(): Promise<void> {
   await sleep(TIMING.CONTENT_LOAD);
 }
 
+async function dismissSaveDialog(): Promise<void> {
+  const dialog = document.querySelector('[role="dialog"]');
+  if (!dialog) {
+    return;
+  }
+  const cancelBtn = [...dialog.querySelectorAll("button")].find((btn: HTMLButtonElement) =>
+    (btn.textContent ?? "").toLowerCase().includes("cancel"),
+  );
+  if (cancelBtn) {
+    simulateClick(cancelBtn);
+    await sleep(TIMING.UI_SETTLE);
+  }
+}
+
+async function waitForComposeClose(): Promise<void> {
+  for (let idx = 0; idx < TIMING.COMPOSE_CLOSE_MAX_POLLS; idx += 1) {
+    if (!document.querySelector('[role="textbox"][contenteditable="true"]')) {
+      return;
+    }
+    await sleep(TIMING.COMPOSE_CLOSE_INTERVAL);
+  }
+}
+
 export async function closeCompose(): Promise<void> {
   simulateKeyPress("Escape");
   await sleep(TIMING.UI_SETTLE);
-
-  const dialog = document.querySelector('[role="dialog"]');
-  if (dialog) {
-    const cancelBtn = [...dialog.querySelectorAll("button")].find((btn: HTMLButtonElement) =>
-      (btn.textContent ?? "").toLowerCase().includes("cancel"),
-    );
-    if (cancelBtn) {
-      simulateClick(cancelBtn);
-      await sleep(TIMING.UI_SETTLE);
-    }
-  }
+  await dismissSaveDialog();
 
   const homeTab = findByRole("tab", { name: "Home" });
   if (homeTab) {
@@ -172,10 +185,5 @@ export async function closeCompose(): Promise<void> {
     await sleep(TIMING.UI_SETTLE);
   }
 
-  for (let idx = 0; idx < TIMING.COMPOSE_CLOSE_MAX_POLLS; idx += 1) {
-    if (!document.querySelector('[role="textbox"][contenteditable="true"]')) {
-      break;
-    }
-    await sleep(TIMING.COMPOSE_CLOSE_INTERVAL);
-  }
+  await waitForComposeClose();
 }

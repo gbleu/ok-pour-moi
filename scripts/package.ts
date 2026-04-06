@@ -21,25 +21,14 @@ function getVersion(): string {
   }
 }
 
-async function createPackage(): Promise<boolean> {
+async function createPackage(): Promise<void> {
   const distDir = "dist";
 
   if (!existsSync(distDir)) {
-    console.error("❌ Error: dist/ directory not found. Run 'bun run build' first.");
-    return false;
+    throw new Error("dist/ directory not found. Run 'bun run build' first.");
   }
 
-  let version: string;
-  try {
-    version = getVersion();
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(error.message, error.cause);
-    } else {
-      console.error(error);
-    }
-    return false;
-  }
+  const version = getVersion();
   const zipFilename = `ok-pour-moi-v${version}.zip`;
 
   await $`rm -f ${zipFilename}`.quiet();
@@ -48,29 +37,28 @@ async function createPackage(): Promise<boolean> {
     await $`cd dist && zip -r ../${zipFilename} . -x "*.DS_Store" "*.map" "*/.gitkeep" "Thumbs.db"`.quiet();
 
   if (result.exitCode !== 0) {
-    console.error("Error creating ZIP file");
-    return false;
+    throw new Error("Error creating ZIP file");
   }
 
   const listResult = await $`unzip -l ${zipFilename}`.text();
 
   if (!listResult.includes(" manifest.json")) {
-    console.error("manifest.json not at root of ZIP");
-    return false;
+    throw new Error("manifest.json not at root of ZIP");
   }
 
   const requiredDirs = ["background/", "content/", "options/", "popup/"];
   const missingDirs = requiredDirs.filter((dir) => !listResult.includes(dir));
   if (missingDirs.length > 0) {
-    console.error(`Missing directories: ${missingDirs.join(", ")}`);
-    return false;
+    throw new Error(`Missing directories: ${missingDirs.join(", ")}`);
   }
 
   const sizeMb = statSync(zipFilename).size / (1024 * 1024);
   console.log(`${zipFilename} (${sizeMb.toFixed(2)} MB) — ready for Chrome Web Store`);
-
-  return true;
 }
 
-const success = await createPackage();
-process.exit(success ? 0 : 1);
+try {
+  await createPackage();
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
