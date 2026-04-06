@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Commands
 
 ```bash
@@ -8,13 +10,20 @@ bun run build        # Build extension to ./dist
 bun run lint         # Lint (type-aware)
 bun run fmt          # Format
 bun run test         # Run unit tests
+bun run test src/shared/pdf.test.ts  # Run a single test file
 bun run test:e2e     # Run e2e tests with Playwright
 bun run package      # Package extension
 ```
 
 ## Architecture
 
-Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, signs them, creates reply drafts.
+Chrome extension (Manifest V3) for PDF signing in Outlook Web. Downloads PDF attachments, signs them, creates reply drafts. Built with Bun, uses `pdf-lib` for PDF manipulation.
+
+### Path Aliases
+
+- `#shared/*` → `src/shared/*`
+- `#mocks/*` → `e2e/mocks/*`
+- `#helpers/*` → `e2e/helpers/*`
 
 ```
 src/
@@ -42,6 +51,15 @@ src/
     ├── sender.ts      # Email/lastname extraction from sender strings
     └── storage.ts     # Chrome storage API wrappers
 ```
+
+### Two-World Content Script Architecture
+
+The extension uses two content scripts injected into Outlook pages:
+
+- **MAIN world** (`main-world.ts`): Runs in the page's JS context to intercept `blob:` URLs via `XMLHttpRequest` monkey-patching. Communicates PDF data to the content script via `window.postMessage`.
+- **ISOLATED world** (`content.ts`): Standard content script that orchestrates the workflow, manipulates DOM, and communicates with the service worker via `chrome.runtime`.
+
+The blob protocol (`blob-protocol.ts`) defines the message types exchanged between worlds.
 
 ### Workflow
 
