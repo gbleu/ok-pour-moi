@@ -22,6 +22,7 @@ export interface DraftResult {
   readonly successCount: number;
 }
 
+// Sequential: Outlook allows only one compose window at a time
 export async function prepareDrafts(
   items: readonly SignedPdfItem[],
   replyMessage: string,
