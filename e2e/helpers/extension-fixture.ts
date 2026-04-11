@@ -1,13 +1,11 @@
 import { readFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { type BrowserContext, type Page, test as base } from "@playwright/test";
 
 import { createExtensionContext } from "./extension-context.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const FIXTURES_DIR = join(__dirname, "../fixtures");
+const FIXTURES_DIR = join(import.meta.dirname, "../fixtures");
 
 interface ExtensionWorkerFixtures {
   extensionContext: BrowserContext;

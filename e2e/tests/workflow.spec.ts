@@ -1,9 +1,8 @@
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { type Page, expect, test } from "@playwright/test";
 
-const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "../fixtures");
+const FIXTURES = join(import.meta.dirname, "../fixtures");
 const INBOX_FIXTURE = join(FIXTURES, "outlook-inbox.html");
 const MESSAGE_FIXTURE = join(FIXTURES, "outlook-message.html");
 

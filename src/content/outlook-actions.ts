@@ -33,11 +33,10 @@ export async function expandThread(): Promise<void> {
 
     if (!seeMoreBtn || getComputedStyle(seeMoreBtn).display === "none") {
       consecutiveMisses += 1;
-      continue;
+    } else {
+      consecutiveMisses = 0;
+      simulateClick(seeMoreBtn);
     }
-
-    consecutiveMisses = 0;
-    simulateClick(seeMoreBtn);
   }
 }
 
