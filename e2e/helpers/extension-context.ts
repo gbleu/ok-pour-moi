@@ -1,14 +1,12 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { type BrowserContext, type Page, chromium } from "@playwright/test";
 
 import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PATH_TO_EXTENSION = join(__dirname, "../../dist");
+const PATH_TO_EXTENSION = join(import.meta.dirname, "../../dist");
 
 export async function createExtensionContext(): Promise<{
   close: () => Promise<void>;

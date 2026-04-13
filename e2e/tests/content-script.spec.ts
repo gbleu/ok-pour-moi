@@ -1,9 +1,8 @@
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { type Page, expect, test } from "@playwright/test";
 
-const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "../fixtures");
+const FIXTURES_DIR = join(import.meta.dirname, "../fixtures");
 const FIXTURE_PATH = join(FIXTURES_DIR, "outlook-message.html");
 
 // DOM query smoke tests against HTML fixtures. Algorithm logic is tested in outlook-actions.test.ts.
