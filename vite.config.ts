@@ -1,6 +1,15 @@
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "#shared": fileURLToPath(new URL("src/shared", import.meta.url)),
+      "#mocks": fileURLToPath(new URL("e2e/mocks", import.meta.url)),
+      "#helpers": fileURLToPath(new URL("e2e/helpers", import.meta.url)),
+    },
+  },
   lint: {
     options: { typeAware: true, typeCheck: true },
     categories: {
@@ -34,7 +43,6 @@ export default defineConfig({
       },
       {
         files: ["**/*.test.ts"],
-        globals: { Bun: "readonly" },
         rules: {
           "import/no-nodejs-modules": "off",
         },
@@ -45,6 +53,7 @@ export default defineConfig({
         globals: { chrome: "off" },
         rules: {
           "import/no-default-export": "off",
+          "import/no-nodejs-modules": "off",
         },
       },
     ],
@@ -128,5 +137,14 @@ export default defineConfig({
   },
   staged: {
     "*": "vp check --fix",
+  },
+  test: {
+    include: ["src/**/*.test.ts"],
+    environment: "happy-dom",
+    coverage: {
+      provider: "v8",
+      reporter: ["lcov"],
+      exclude: ["**/*.test.ts", "e2e/**", "dist/**", "scripts/**", "build.ts"],
+    },
   },
 });

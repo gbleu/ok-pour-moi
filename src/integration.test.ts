@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null -- Chrome mock setup */
-import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
 import {
   type ContentToBackgroundMessage,
@@ -17,10 +17,13 @@ type MessageListener<TMessage, TResponse> = (
   sendResponse: (response: TResponse) => void,
 ) => boolean;
 
-function captureResponse<T>(): { mock: ReturnType<typeof mock>; promise: Promise<T> } {
+function captureResponse<T>(): {
+  mock: (response: T) => void;
+  promise: Promise<T>;
+} {
   const { promise, resolve } = Promise.withResolvers<T>();
   return {
-    mock: mock((response: T) => {
+    mock: vi.fn<(response: T) => void>((response: T) => {
       resolve(response);
     }),
     promise,
@@ -29,14 +32,14 @@ function captureResponse<T>(): { mock: ReturnType<typeof mock>; promise: Promise
 
 // --- Service worker handler capture ---
 
-const swAddListenerMock = mock();
+const swAddListenerMock = vi.fn();
 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Partial chrome mock for testing
 (globalThis as Record<string, unknown>).chrome = {
   runtime: { onMessage: { addListener: swAddListenerMock } },
   storage: {
-    local: { get: mock(async () => ({ signatureImage: null })) },
+    local: { get: vi.fn(async () => ({ signatureImage: null })) },
     sync: {
-      get: mock(async () => ({
+      get: vi.fn(async () => ({
         myEmail: "test@example.com",
         replyMessage: "Ok",
         signaturePosition: { height: 50, width: 150, x: 100, y: 100 },
@@ -55,24 +58,27 @@ const swHandler = swAddListenerMock.mock.calls[0]![0] as MessageListener<
 
 // --- Content handler capture ---
 
-await mock.module("./content/outlook-dom.js", () => ({
-  collectPdfAttachments: mock(() => Promise.resolve([])),
+vi.mock("./content/outlook-dom.js", () => ({
+  collectPdfAttachments: async (): Promise<never[]> => [],
 }));
-await mock.module("./content/outlook-compose.js", () => ({
-  prepareDrafts: mock(() => Promise.resolve({ errors: [], successCount: 0 })),
+vi.mock("./content/outlook-compose.js", () => ({
+  prepareDrafts: async (): Promise<{ errors: never[]; successCount: number }> => ({
+    errors: [],
+    successCount: 0,
+  }),
 }));
 
-const contentAddListenerMock = mock();
+const contentAddListenerMock = vi.fn();
 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Partial chrome mock for testing
 (globalThis as Record<string, unknown>).chrome = {
   runtime: {
     id: "test-extension-id",
     onMessage: { addListener: contentAddListenerMock },
-    sendMessage: mock(async () => ({ error: "No signature", success: false })),
+    sendMessage: vi.fn(async () => ({ error: "No signature", success: false })),
   },
   storage: {
     sync: {
-      get: mock(async () => ({
+      get: vi.fn(async () => ({
         myEmail: "test@example.com",
         replyMessage: "Ok",
       })),
@@ -83,7 +89,7 @@ const contentAddListenerMock = mock();
 const originalDocument = globalThis.document;
 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Stub document for module load
 globalThis.document = {
-  addEventListener: mock(),
+  addEventListener: vi.fn(),
   documentElement: { dataset: {} },
 } as unknown as typeof globalThis.document;
 await import("./content/content.js");
@@ -118,11 +124,11 @@ describe("service-worker onMessage handler", () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Partial chrome mock for testing
     (globalThis as Record<string, unknown>).chrome = {
-      runtime: { onMessage: { addListener: mock() } },
+      runtime: { onMessage: { addListener: vi.fn() } },
       storage: {
-        local: { get: mock(async () => ({ signatureImage: null })) },
+        local: { get: vi.fn(async () => ({ signatureImage: null })) },
         sync: {
-          get: mock(async () => ({
+          get: vi.fn(async () => ({
             myEmail: "test@example.com",
             replyMessage: "Ok",
             signaturePosition: { height: 50, width: 150, x: 100, y: 100 },
@@ -133,7 +139,7 @@ describe("service-worker onMessage handler", () => {
   });
 
   test("rejects messages from non-Outlook origins", () => {
-    const sendResponse = mock();
+    const sendResponse = vi.fn();
 
     const keepOpen = swHandler(validMessage, { url: "https://evil.com/mail/inbox" }, sendResponse);
 
@@ -141,7 +147,7 @@ describe("service-worker onMessage handler", () => {
   });
 
   test("rejects messages with undefined sender URL", () => {
-    const sendResponse = mock();
+    const sendResponse = vi.fn();
 
     const keepOpen = swHandler(validMessage, {}, sendResponse);
 
@@ -149,7 +155,7 @@ describe("service-worker onMessage handler", () => {
   });
 
   test("rejects messages with malformed sender URL", () => {
-    const sendResponse = mock();
+    const sendResponse = vi.fn();
 
     const keepOpen = swHandler(validMessage, { url: "not-a-url" }, sendResponse);
 
@@ -185,12 +191,12 @@ describe("content.ts onMessage handler", () => {
     (globalThis as Record<string, unknown>).chrome = {
       runtime: {
         id: "test-extension-id",
-        onMessage: { addListener: mock() },
-        sendMessage: mock(async () => ({ error: "No signature", success: false })),
+        onMessage: { addListener: vi.fn() },
+        sendMessage: vi.fn(async () => ({ error: "No signature", success: false })),
       },
       storage: {
         sync: {
-          get: mock(async () => ({
+          get: vi.fn(async () => ({
             myEmail: "test@example.com",
             replyMessage: "Ok",
           })),
@@ -200,7 +206,7 @@ describe("content.ts onMessage handler", () => {
   });
 
   test("rejects messages from different extension", () => {
-    const sendResponse = mock();
+    const sendResponse = vi.fn();
 
     const keepOpen = contentHandler(validMessage, { id: "other-extension" }, sendResponse);
 

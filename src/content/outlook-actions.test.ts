@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
-/* eslint-disable unicorn/no-null, @typescript-eslint/no-non-null-assertion, import/no-unassigned-import -- DOM test fixtures */
-import "./happy-dom.setup.js";
-import { afterEach, describe, expect, test } from "bun:test";
+/* eslint-disable unicorn/no-null, @typescript-eslint/no-non-null-assertion -- DOM test fixtures */
+import { afterEach, describe, expect, test } from "vite-plus/test";
 
 import {
   expandMessage,

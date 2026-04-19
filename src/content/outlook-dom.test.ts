@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
-/* eslint-disable unicorn/no-null, import/no-unassigned-import -- DOM test fixtures */
-import "./happy-dom.setup.js";
-import { afterEach, describe, expect, test } from "bun:test";
+/* eslint-disable unicorn/no-null -- DOM test fixtures */
+import { afterEach, describe, expect, test } from "vite-plus/test";
 
 // The helper getConversationContext is not exported, so test collectPdfAttachments indirectly
 // By verifying the DOM parsing logic through the public API

@@ -7,11 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 vp install           # Install dependencies (wraps bun)
 vp run build         # Build extension to ./dist
-vp run lint          # Lint (type-aware)
-vp run fmt           # Format
+vp lint              # Lint (type-aware, config in vite.config.ts)
+vp fmt               # Format
 vp check             # Run fmt + lint + typecheck in one command
-vp run test          # Run unit tests
-vp run test src/shared/pdf.test.ts  # Run a single test file
+vp test              # Run unit tests (via Vitest)
+vp test src/shared/pdf.test.ts  # Run a single test file
 vp run test:e2e      # Run e2e tests with Playwright
 vp run package       # Package extension
 ```

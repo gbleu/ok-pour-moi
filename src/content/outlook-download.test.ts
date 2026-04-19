@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
-/* eslint-disable unicorn/no-null, import/no-unassigned-import -- DOM test fixtures */
-import "./happy-dom.setup.js";
-import { afterEach, describe, expect, test } from "bun:test";
+/* eslint-disable unicorn/no-null -- DOM test fixtures */
+import { afterEach, describe, expect, test } from "vite-plus/test";
 
 // Verify downloadAttachment contract through its error paths
 // Type guards and blob protocol are internal
@@ -21,6 +20,6 @@ describe("outlook-download module", () => {
     const { downloadAttachment } = await import("./outlook-download.js");
 
     // When/Then: throws because waitUntilAttachmentReady times out
-    expect(downloadAttachment(option)).rejects.toThrow("Attachment ID not found in URL");
+    await expect(downloadAttachment(option)).rejects.toThrow("Attachment ID not found in URL");
   });
 });

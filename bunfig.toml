@@ -1,4 +1,0 @@
-[test]
-root = "src"
-coverageSkipTestFiles = true
-

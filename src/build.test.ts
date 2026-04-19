@@ -1,7 +1,8 @@
 /* eslint-disable import/no-nodejs-modules -- Build tests need filesystem access */
-import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+
+import { describe, expect, test } from "vite-plus/test";
 
 const SRC_DIR = "./src";
 const DIST_DIR = "./dist";
@@ -15,8 +16,8 @@ describe("source HTML", () => {
     ];
 
     for (const { html, ts } of pages) {
-      const htmlContent = await Bun.file(`${SRC_DIR}/${html}`).text();
-      const tsContent = await Bun.file(`${SRC_DIR}/${ts}`).text();
+      const htmlContent = await readFile(`${SRC_DIR}/${html}`, "utf8");
+      const tsContent = await readFile(`${SRC_DIR}/${ts}`, "utf8");
       const hasExport = /^export /m.test(tsContent);
 
       if (hasExport) {
@@ -37,7 +38,7 @@ describe.skipIf(!distExists)("build output", () => {
     ];
 
     for (const path of entrypoints) {
-      const js = await Bun.file(`${DIST_DIR}/${path}`).text();
+      const js = await readFile(`${DIST_DIR}/${path}`, "utf8");
       expect(js.length).toBeGreaterThan(0);
     }
   });
