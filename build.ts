@@ -2,7 +2,7 @@ import { cpSync, existsSync } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 
-import { build } from "vite";
+import { build } from "vite-plus";
 
 const SRC_DIR = "src";
 const DIST_DIR = "dist";
