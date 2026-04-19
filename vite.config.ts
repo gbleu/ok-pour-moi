@@ -29,7 +29,7 @@ export default defineConfig({
       {
         files: ["build.ts", "scripts/**/*.ts"],
         env: { browser: false, node: true },
-        globals: { Bun: "readonly", chrome: "off" },
+        globals: { chrome: "off" },
         rules: {
           "import/no-nodejs-modules": "off",
         },

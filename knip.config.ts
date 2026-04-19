@@ -13,7 +13,7 @@ export default {
     "vite.config.ts",
   ],
 
-  ignoreDependencies: ["@types/chrome", "@vitest/coverage-v8", "happy-dom"],
+  ignoreDependencies: ["@types/chrome", "@vitest/coverage-v8", "happy-dom", "vite"],
   ignoreExportsUsedInFile: true,
   rules: {
     exports: "off",

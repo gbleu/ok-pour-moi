@@ -16,7 +16,7 @@ Comprehensive code quality analysis using:
 ### Step 1: Run knip
 
 ```bash
-bun knip --no-progress
+vp exec knip --no-progress
 ```
 
 Detects unused files, exports, dependencies, and dev dependencies.
@@ -24,7 +24,7 @@ Detects unused files, exports, dependencies, and dev dependencies.
 ### Step 2: Run jscpd
 
 ```bash
-bun jscpd src/ --min-lines 10 --min-tokens 100
+vp run jscpd
 ```
 
 Detects duplicated code blocks (copy-paste detection).

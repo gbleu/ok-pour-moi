@@ -7,7 +7,8 @@ import {
   type SignPdfResponse,
 } from "#shared/messages.js";
 import { OUTLOOK_ORIGINS } from "#shared/origins.js";
-import { generateAttachmentName, signPdf } from "#shared/pdf.js";
+import { generateAttachmentName } from "#shared/pdf.js";
+import { signPdf } from "#shared/signer.js";
 import { getLocalStorage, getSyncStorage } from "#shared/storage.js";
 
 export async function signPdfFromRequest(request: SignPdfRequest): Promise<SignPdfResponse> {
