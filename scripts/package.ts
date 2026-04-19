@@ -25,7 +25,7 @@ async function createPackage(): Promise<void> {
   const distDir = "dist";
 
   if (!existsSync(distDir)) {
-    throw new Error("dist/ directory not found. Run 'bun run build' first.");
+    throw new Error("dist/ directory not found. Run 'vp run build' first.");
   }
 
   const version = getVersion();

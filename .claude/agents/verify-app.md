@@ -21,7 +21,7 @@ The OPM (Ok Pour Moi) extension automates PDF signing in Outlook Web:
 
 Before testing, ensure:
 
-- The extension is built: `bun run build`
+- The extension is built: `vp run build`
 - Playwright MCP browser has the extension loaded
 - You're logged into Outlook Web
 
@@ -30,7 +30,7 @@ Before testing, ensure:
 ### Step 1: Build the Extension
 
 ```bash
-bun run build
+vp run build
 ```
 
 Verify output shows: "Build complete! Output in ./dist"
@@ -258,7 +258,7 @@ Overall: PASS / FAIL
 
 **Solution:**
 
-1. Rebuild: `bun run build`
+1. Rebuild: `vp run build`
 2. Navigate to `chrome://extensions/`
 3. Click **Reload** button on "OK Pour Moi" extension
 4. Navigate back to Outlook

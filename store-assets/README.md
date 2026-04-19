@@ -51,14 +51,6 @@ Use design tools like:
 - Photoshop
 - Canva (quick templates)
 
-### Automated Creation (Optional)
-
-View asset creation instructions:
-
-```bash
-bun run store:assets
-```
-
 ## Asset Guidelines
 
 ### Store Icon

@@ -9,6 +9,7 @@ export default {
     "src/popup/popup.ts",
     "scripts/*.ts",
     "e2e/tests/**/*.ts",
+    "vite.config.ts",
   ],
 
   ignoreDependencies: ["@types/chrome"],

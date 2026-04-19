@@ -15,8 +15,8 @@ Chrome extension for PDF signing in Outlook Web. Downloads PDF attachments, sign
 ### 1. Install dependencies and build
 
 ```bash
-bun install
-bun run build
+vp install
+vp run build
 ```
 
 ### 2. Load extension in Chrome
@@ -48,11 +48,11 @@ The extension will:
 ## Development
 
 ```bash
-bun run build       # Build to ./dist
-bun run lint        # Type-aware linting
-bun run fmt         # Format code
-bun run test        # Unit tests
-bun run test:e2e    # E2E tests
+vp run build       # Build to ./dist
+vp run lint        # Type-aware linting
+vp run fmt         # Format code
+vp run test        # Unit tests
+vp run test:e2e    # E2E tests
 ```
 
 ## Chrome Web Store Submission
@@ -64,13 +64,13 @@ Ready to publish to Chrome Web Store! See [CHROME_STORE_GUIDE.md](./CHROME_STORE
 1. **Build the extension:**
 
    ```bash
-   bun run build
+   vp run build
    ```
 
 2. **Package for submission:**
 
    ```bash
-   bun run package
+   vp run package
    ```
 
    This creates `ok-pour-moi-v1.0.0.zip` ready for upload.
