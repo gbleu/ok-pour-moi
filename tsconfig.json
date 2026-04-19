@@ -5,7 +5,7 @@
       "#mocks/*": ["./e2e/mocks/*"],
       "#helpers/*": ["./e2e/helpers/*"]
     },
-    "types": ["bun", "chrome"],
+    "types": ["chrome"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "Preserve",

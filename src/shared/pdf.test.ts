@@ -1,13 +1,9 @@
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, test } from "vite-plus/test";
 
-import {
-  generateAttachmentName,
-  getSignatureFormat,
-  getTargetMonthAndYear,
-  signPdf,
-} from "./pdf.js";
+import { generateAttachmentName, getSignatureFormat, getTargetMonthAndYear } from "./pdf.js";
 import { extractEmail, extractLastname } from "./sender.js";
+import { signPdf } from "./signer.js";
 
 describe("getTargetMonthAndYear", () => {
   test("returns month based on day threshold", () => {

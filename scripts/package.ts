@@ -1,12 +1,12 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Package the extension for Chrome Web Store submission.
  * Creates a clean ZIP file with only necessary files.
  */
 
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
-
-import { $ } from "bun";
+import { rm } from "node:fs/promises";
 
 function getVersion(): string {
   try {
@@ -22,32 +22,28 @@ function getVersion(): string {
 }
 
 async function createPackage(): Promise<void> {
-  const distDir = "dist";
-
-  if (!existsSync(distDir)) {
+  if (!existsSync("dist")) {
     throw new Error("dist/ directory not found. Run 'vp run build' first.");
   }
 
-  const version = getVersion();
-  const zipFilename = `ok-pour-moi-v${version}.zip`;
+  const zipFilename = `ok-pour-moi-v${getVersion()}.zip`;
 
-  await $`rm -f ${zipFilename}`.quiet();
+  await rm(zipFilename, { force: true });
 
-  const result =
-    await $`cd dist && zip -r ../${zipFilename} . -x "*.DS_Store" "*.map" "*/.gitkeep" "Thumbs.db"`.quiet();
+  execFileSync(
+    "zip",
+    ["-r", `../${zipFilename}`, ".", "-x", "*.DS_Store", "*.map", "*/.gitkeep", "Thumbs.db"],
+    { cwd: "dist", stdio: "pipe" },
+  );
 
-  if (result.exitCode !== 0) {
-    throw new Error("Error creating ZIP file");
-  }
+  const listing = execFileSync("unzip", ["-l", zipFilename], { encoding: "utf8" });
 
-  const listResult = await $`unzip -l ${zipFilename}`.text();
-
-  if (!listResult.includes(" manifest.json")) {
+  if (!listing.includes(" manifest.json")) {
     throw new Error("manifest.json not at root of ZIP");
   }
 
   const requiredDirs = ["background/", "content/", "options/", "popup/"];
-  const missingDirs = requiredDirs.filter((dir) => !listResult.includes(dir));
+  const missingDirs = requiredDirs.filter((dir) => !listing.includes(dir));
   if (missingDirs.length > 0) {
     throw new Error(`Missing directories: ${missingDirs.join(", ")}`);
   }

@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-vp install           # Install dependencies (wraps bun)
+vp install           # Install dependencies (auto-detects pnpm)
 vp run build         # Build extension to ./dist
 vp lint              # Lint (type-aware, config in vite.config.ts)
 vp fmt               # Format
@@ -18,7 +18,7 @@ vp run package       # Package extension
 
 ## Architecture
 
-Chrome extension (Manifest V3) for PDF signing in Outlook Web. Downloads PDF attachments, signs them, creates reply drafts. Built with Bun, uses `pdf-lib` for PDF manipulation.
+Chrome extension (Manifest V3) for PDF signing in Outlook Web. Downloads PDF attachments, signs them, creates reply drafts. Built with Vite+, uses `pdf-lib` for PDF manipulation.
 
 ### Path Aliases
 
