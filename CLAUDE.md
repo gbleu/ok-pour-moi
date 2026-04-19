@@ -5,14 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-bun install          # Install dependencies
-bun run build        # Build extension to ./dist
-bun run lint         # Lint (type-aware)
-bun run fmt          # Format
-bun run test         # Run unit tests
-bun run test src/shared/pdf.test.ts  # Run a single test file
-bun run test:e2e     # Run e2e tests with Playwright
-bun run package      # Package extension
+vp install           # Install dependencies (wraps bun)
+vp run build         # Build extension to ./dist
+vp run lint          # Lint (type-aware)
+vp run fmt           # Format
+vp check             # Run fmt + lint + typecheck in one command
+vp run test          # Run unit tests
+vp run test src/shared/pdf.test.ts  # Run a single test file
+vp run test:e2e      # Run e2e tests with Playwright
+vp run package       # Package extension
 ```
 
 ## Architecture

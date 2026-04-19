@@ -89,12 +89,7 @@ Located in `store-assets/` directory:
 
 ### Asset Creation Tips
 
-```bash
-# View asset creation instructions
-bun run store:assets
-```
-
-Or use design tools: Figma (recommended), GIMP, Photoshop, Canva.
+Use design tools: Figma (recommended), GIMP, Photoshop, Canva.
 
 ## Privacy Policy
 
@@ -124,8 +119,8 @@ Link directly to the GitHub file:
 ### 1. Build the Extension
 
 ```bash
-bun install
-bun run build
+vp install
+vp run build
 ```
 
 This creates the `dist/` folder with:
@@ -353,7 +348,7 @@ Common rejection reasons and fixes:
 For future updates:
 
 1. Increment version in `manifest.json` (e.g., `1.0.0` → `1.0.1`)
-2. Rebuild extension: `bun run build`
+2. Rebuild extension: `vp run build`
 3. Create new ZIP package
 4. Upload to Developer Console
 5. Update "What's New" section with changelog

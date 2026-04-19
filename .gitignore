@@ -13,3 +13,4 @@ ok-pour-moi-v*.zip
 .claude/worktrees
 .claude/*.lock
 .desloppify
+docs/superpowers

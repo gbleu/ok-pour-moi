@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun run fmt || true"
+            "command": "vp run fmt || true"
           }
         ]
       }
