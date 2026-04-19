@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null */
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
 import { type SignPdfRequest } from "#shared/messages.js";
 
@@ -18,10 +18,10 @@ const mockLocalData: {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Partial chrome mock for testing
 (globalThis as Record<string, unknown>).chrome = {
-  runtime: { onMessage: { addListener: mock() } },
+  runtime: { onMessage: { addListener: vi.fn() } },
   storage: {
-    local: { get: mock(async () => mockLocalData) },
-    sync: { get: mock(async () => mockSyncData) },
+    local: { get: vi.fn(async () => mockLocalData) },
+    sync: { get: vi.fn(async () => mockSyncData) },
   },
 };
 

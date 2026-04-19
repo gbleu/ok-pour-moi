@@ -1,6 +1,5 @@
-import { describe, expect, test } from "bun:test";
-
 import { PDFDocument } from "pdf-lib";
+import { describe, expect, test } from "vite-plus/test";
 
 import {
   generateAttachmentName,

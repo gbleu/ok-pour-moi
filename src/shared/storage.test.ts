@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null -- Chrome storage API uses null */
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test";
 
 function createStorageMock(): unknown {
   const syncData: Record<string, unknown> = {

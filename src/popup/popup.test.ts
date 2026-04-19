@@ -1,10 +1,9 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
 /* eslint-disable unicorn/no-null -- Chrome mock setup */
-import "../content/happy-dom.setup.js"; // eslint-disable-line import/no-unassigned-import, import/no-relative-parent-imports -- DOM test setup
 
-const tabsQueryMock = mock(() => Promise.resolve([] as chrome.tabs.Tab[]));
-const tabsSendMessageMock = mock(() =>
+const tabsQueryMock = vi.fn(() => Promise.resolve([] as chrome.tabs.Tab[]));
+const tabsSendMessageMock = vi.fn(() =>
   Promise.resolve({ message: "Processed 1/1 emails", success: true }),
 );
 
@@ -13,7 +12,7 @@ function setupChromeMock(): void {
   (globalThis as { chrome: unknown }).chrome = {
     runtime: {
       id: "test-extension-id",
-      openOptionsPage: mock(() => Promise.resolve()),
+      openOptionsPage: vi.fn(() => Promise.resolve()),
     },
     storage: {
       local: {

@@ -49,9 +49,9 @@ The extension will:
 
 ```bash
 vp run build       # Build to ./dist
-vp run lint        # Type-aware linting
-vp run fmt         # Format code
-vp run test        # Unit tests
+vp lint            # Type-aware linting
+vp fmt             # Format code
+vp test            # Unit tests
 vp run test:e2e    # E2E tests
 ```
 

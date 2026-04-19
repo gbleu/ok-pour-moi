@@ -1,11 +1,9 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
 /* eslint-disable unicorn/no-null -- DOM test fixtures + Chrome mock setup */
 import { getElement } from "#shared/dom.js";
 
-import "../content/happy-dom.setup.js"; // eslint-disable-line import/no-unassigned-import, import/no-relative-parent-imports -- DOM test setup
-
-const syncSetMock = mock(
+const syncSetMock = vi.fn(
   (_data: Readonly<Record<string, unknown>>): Promise<void> => Promise.resolve(),
 );
 
@@ -28,7 +26,7 @@ function setupChromeMock(): void {
       local: {
         get: (defaults: Readonly<Record<string, unknown>>): Promise<Record<string, unknown>> =>
           Promise.resolve({ ...defaults, ...localData }),
-        set: mock((): Promise<void> => Promise.resolve()),
+        set: vi.fn((): Promise<void> => Promise.resolve()),
       },
       sync: {
         get: (defaults: Readonly<Record<string, unknown>>): Promise<Record<string, unknown>> =>

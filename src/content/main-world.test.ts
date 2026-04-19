@@ -1,7 +1,6 @@
 /// <reference lib="dom" />
-/* eslint-disable unicorn/no-null, unicorn/prefer-global-this, import/no-unassigned-import, promise/avoid-new -- DOM test fixtures with window API */
-import "./happy-dom.setup.js";
-import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+/* eslint-disable unicorn/no-null, unicorn/prefer-global-this, promise/avoid-new -- DOM test fixtures with window API */
+import { afterEach, beforeAll, describe, expect, test } from "vite-plus/test";
 
 import {
   type BlobCapturedMessage,

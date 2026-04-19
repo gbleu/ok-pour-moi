@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vite-plus/test";
 
 import { base64ToUint8Array, uint8ArrayToBase64 } from "./encoding.js";
 
