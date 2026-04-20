@@ -36,7 +36,6 @@ async function createMinimalPdf(): Promise<Uint8Array> {
 
 describe("signPdfFromRequest", () => {
   const request: SignPdfRequest = {
-    originalFilename: "attachment.pdf",
     pdfBytes: [],
     senderLastname: "DUPONT",
   };

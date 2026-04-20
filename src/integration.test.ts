@@ -117,7 +117,7 @@ afterAll(() => {
 
 describe("service-worker onMessage handler", () => {
   const validMessage: ContentToBackgroundMessage = {
-    payload: { originalFilename: "doc.pdf", pdfBytes: [1, 2, 3], senderLastname: "DUPONT" },
+    payload: { pdfBytes: [1, 2, 3], senderLastname: "DUPONT" },
     type: "SIGN_PDF",
   };
 

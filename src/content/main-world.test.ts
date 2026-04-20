@@ -40,7 +40,9 @@ function collectMessages(): { messages: PostedMessage[]; cleanup: () => void } {
 
 function sendBlobRequest(id: string, url: string): void {
   const data: BlobRequestMessage = { id, type: "OPM_GET_BLOB", url };
-  window.dispatchEvent(new MessageEvent("message", { data, source: window }));
+  window.dispatchEvent(
+    new MessageEvent("message", { data, origin: window.location.origin, source: window }),
+  );
 }
 
 function waitForBlobResult(): Promise<BlobResultMessage> {

@@ -12,13 +12,9 @@ import { getSyncStorage } from "#shared/storage.js";
 import { type SignedPdfItem, prepareDrafts } from "./outlook-compose.js";
 import { collectPdfAttachments } from "./outlook-dom.js";
 
-function signPdf(
-  pdfBytes: Uint8Array,
-  originalFilename: string,
-  senderLastname: string,
-): Promise<SignPdfResponse> {
+function signPdf(pdfBytes: Uint8Array, senderLastname: string): Promise<SignPdfResponse> {
   return chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
-    payload: { originalFilename, pdfBytes: [...pdfBytes], senderLastname },
+    payload: { pdfBytes: [...pdfBytes], senderLastname },
     type: "SIGN_PDF",
   });
 }
@@ -33,11 +29,7 @@ async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
 
     const items: SignedPdfItem[] = await Promise.all(
       attachments.map(async (attachment) => {
-        const response = await signPdf(
-          attachment.pdfBytes,
-          attachment.originalFilename,
-          attachment.senderLastname,
-        );
+        const response = await signPdf(attachment.pdfBytes, attachment.senderLastname);
 
         if (!response.success) {
           throw new Error(`Signing failed: ${response.error}`);

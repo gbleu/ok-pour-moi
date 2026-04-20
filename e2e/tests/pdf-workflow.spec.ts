@@ -69,7 +69,6 @@ test.describe("PDF Signing Workflow", () => {
         try {
           const response = await chrome.runtime.sendMessage({
             payload: {
-              originalFilename: "test.pdf",
               pdfBytes: [...new Uint8Array(100)],
               senderLastname: "Test",
             },

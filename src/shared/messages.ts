@@ -7,7 +7,6 @@ export interface WorkflowConfig {
 }
 
 export interface SignPdfRequest {
-  readonly originalFilename: string;
   readonly pdfBytes: SerializedBytes;
   readonly senderLastname: string;
 }

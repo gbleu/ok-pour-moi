@@ -9,7 +9,6 @@ import { downloadAttachment } from "./outlook-download.js";
 
 export interface PdfAttachment {
   readonly conversationId: string;
-  readonly originalFilename: string;
   readonly pdfBytes: Uint8Array;
   readonly senderEmail: string;
   readonly senderLastname: string;
@@ -68,14 +67,11 @@ export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachm
     return [];
   }
 
-  const originalFilename = /^(.+\.pdf)/i.exec(firstPdf.textContent ?? "")?.[1] ?? "attachment.pdf";
-
   const pdfBytes = await downloadAttachment(firstPdf);
 
   return [
     {
       conversationId,
-      originalFilename,
       pdfBytes,
       senderEmail: message.senderEmail,
       senderLastname: message.senderLastname,
