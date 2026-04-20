@@ -221,8 +221,10 @@ describe("content.ts onMessage handler", () => {
     expect(keepOpen).toBe(true);
 
     expect(await promise).toEqual({
-      message: "No PDFs found in current conversation",
+      kind: "processed",
       success: true,
+      successCount: 0,
+      totalCount: 0,
     });
   });
 });

@@ -4,13 +4,14 @@ import { getErrorMessage } from "#shared/errors.js";
 import { type BlobRequestMessage } from "./blob-protocol.js";
 
 function isBlobMessage(data: unknown): data is BlobRequestMessage {
+  if (typeof data !== "object" || data === null || !("type" in data)) {
+    return false;
+  }
+  const record = data as Readonly<Record<string, unknown>>;
   return (
-    typeof data === "object" &&
-    data !== null &&
-    "type" in data &&
-    data.type === "OPM_GET_BLOB" &&
-    "id" in data &&
-    "url" in data
+    record.type === "OPM_GET_BLOB" &&
+    typeof record.id === "string" &&
+    typeof record.url === "string"
   );
 }
 
@@ -34,7 +35,7 @@ async function postBlobResult(id: string, url: string): Promise<void> {
       window.location.origin,
     );
     capturedBlobs.delete(url);
-  } catch (error: unknown) {
+  } catch (error) {
     capturedBlobs.delete(url);
     window.postMessage(
       {
@@ -88,5 +89,3 @@ export function installMainWorld(): () => void {
     capturedBlobs.clear();
   };
 }
-
-installMainWorld();

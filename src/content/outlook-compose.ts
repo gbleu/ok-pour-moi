@@ -1,4 +1,5 @@
 import { getErrorMessage } from "#shared/errors.js";
+import { type DraftError } from "#shared/messages.js";
 
 import { TIMING, simulateKeyPress, sleep, typeText } from "./outlook-automation.js";
 import {
@@ -8,17 +9,15 @@ import {
   removeAllAttachments,
   saveDraft,
 } from "./outlook-compose-actions.js";
+
 export interface SignedPdfItem {
   readonly conversationId: string;
   readonly filename: string;
-  readonly senderEmail: string;
-  readonly senderLastname: string;
   readonly signedPdf: Uint8Array;
-  readonly subject: string;
 }
 
 export interface DraftResult {
-  readonly errors: readonly string[];
+  readonly errors: readonly DraftError[];
   readonly successCount: number;
 }
 
@@ -28,7 +27,7 @@ export async function prepareDrafts(
   replyMessage: string,
 ): Promise<DraftResult> {
   let successCount = 0;
-  const errors: string[] = [];
+  const errors: DraftError[] = [];
 
   for (const [idx, item] of items.entries()) {
     simulateKeyPress("Escape");
@@ -46,7 +45,7 @@ export async function prepareDrafts(
       await sleep(TIMING.UI_SETTLE);
       successCount += 1;
     } catch (error) {
-      errors.push(`[${idx + 1}] ${getErrorMessage(error)}`);
+      errors.push({ index: idx + 1, message: getErrorMessage(error) });
     }
   }
 

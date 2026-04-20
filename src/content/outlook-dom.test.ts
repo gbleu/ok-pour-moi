@@ -4,7 +4,6 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test";
 
 interface MockMessageInfo {
   readonly element: Element;
-  readonly senderEmail: string;
   readonly senderLastname: string;
 }
 
@@ -15,7 +14,6 @@ function findMessageInDom(): MockMessageInfo | undefined {
   }
   return {
     element: messageEl,
-    senderEmail: "dupont@example.com",
     senderLastname: "DUPONT",
   };
 }
@@ -102,22 +100,9 @@ describe("collectPdfAttachments happy path", () => {
       {
         conversationId: "conv-123",
         pdfBytes: new Uint8Array([10, 20, 30]),
-        senderEmail: "dupont@example.com",
         senderLastname: "DUPONT",
-        subject: "Project update",
       },
     ]);
-  });
-
-  test("strips trailing 'Summarize' from the subject heading", async () => {
-    // Given
-    renderHappyPathDom("Project updateSummarize");
-
-    // When
-    const [attachment] = await collectPdfAttachments("me@example.com");
-
-    // Then
-    expect(attachment?.subject).toBe("Project update");
   });
 
   test("returns empty when the listbox has no PDF options", async () => {

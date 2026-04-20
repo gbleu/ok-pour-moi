@@ -43,10 +43,7 @@ function makeItem(idx: number): Parameters<typeof prepareDrafts>[0][number] {
   return {
     conversationId: `conv-${idx}`,
     filename: `attachment-${idx}.pdf`,
-    senderEmail: `sender${idx}@example.com`,
-    senderLastname: `LASTNAME${idx}`,
     signedPdf: new Uint8Array([idx]),
-    subject: `Subject ${idx}`,
   };
 }
 
@@ -103,7 +100,7 @@ describe("prepareDrafts", () => {
 
     // Then
     expect(result).toEqual({
-      errors: ["[1] compose unavailable"],
+      errors: [{ index: 1, message: "compose unavailable" }],
       successCount: 1,
     });
   });
