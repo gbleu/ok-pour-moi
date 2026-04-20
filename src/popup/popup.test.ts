@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 
+import { type WorkflowResult } from "#shared/messages.js";
+
 /* eslint-disable unicorn/no-null -- Chrome mock setup */
 
 const tabsQueryMock = vi.fn(() => Promise.resolve([] as chrome.tabs.Tab[]));
-const tabsSendMessageMock = vi.fn(() =>
-  Promise.resolve({ message: "Processed 1/1 emails", success: true }),
+
+const tabsSendMessageMock = vi.fn<() => Promise<WorkflowResult>>(() =>
+  Promise.resolve({ kind: "processed", success: true, successCount: 1, totalCount: 1 }),
 );
 
 function setupChromeMock(): void {
@@ -72,7 +75,12 @@ describe("popup dispatchWorkflow", () => {
   test("sends correct message and shows success", async () => {
     // Given: valid config and active Outlook tab
     tabsQueryMock.mockResolvedValue([activeTab]);
-    tabsSendMessageMock.mockResolvedValue({ message: "Processed 1/1 emails", success: true });
+    tabsSendMessageMock.mockResolvedValue({
+      kind: "processed",
+      success: true,
+      successCount: 1,
+      totalCount: 1,
+    });
     const { dispatchWorkflow } = await import("./popup.js");
 
     // When
@@ -94,7 +102,11 @@ describe("popup dispatchWorkflow", () => {
   test("shows error when workflow fails", async () => {
     // Given: workflow returns failure
     tabsQueryMock.mockResolvedValue([activeTab]);
-    tabsSendMessageMock.mockResolvedValue({ message: "Signing failed", success: false });
+    tabsSendMessageMock.mockResolvedValue({
+      error: "Signing failed",
+      kind: "workflow-error",
+      success: false,
+    });
     const { dispatchWorkflow } = await import("./popup.js");
 
     // When

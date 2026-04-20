@@ -20,7 +20,7 @@ test.describe("Origin Validation", () => {
       async () => {
         try {
           const response = await chrome.runtime.sendMessage({
-            payload: { originalFilename: "test.pdf", pdfBytes: [], senderLastname: "Test" },
+            payload: { pdfBytes: [], senderLastname: "Test" },
             type: "SIGN_PDF",
           });
           return { response, status: "responded" };

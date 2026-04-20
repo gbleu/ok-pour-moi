@@ -48,8 +48,9 @@ src/
     ├── errors.ts      # Error message extraction
     ├── messages.ts    # Message types
     ├── origins.ts     # Outlook origin constants
-    ├── pdf.ts         # PDF signing, name extraction, attachment naming
+    ├── pdf.ts         # Target month/year extraction, attachment naming, signature format detection
     ├── sender.ts      # Email/lastname extraction from sender strings
+    ├── signer.ts      # PDF signing via pdf-lib (signPdf)
     └── storage.ts     # Chrome storage API wrappers
 ```
 
@@ -57,7 +58,7 @@ src/
 
 The extension uses two content scripts injected into Outlook pages:
 
-- **MAIN world** (`main-world.ts`): Runs in the page's JS context to intercept `blob:` URLs via `XMLHttpRequest` monkey-patching. Communicates PDF data to the content script via `window.postMessage`.
+- **MAIN world** (`main-world.ts`): Runs in the page's JS context to intercept `blob:` URLs by overriding `URL.createObjectURL` and capturing `application/pdf` Blobs. Communicates PDF data to the content script via `window.postMessage`.
 - **ISOLATED world** (`content.ts`): Standard content script that orchestrates the workflow, manipulates DOM, and communicates with the service worker via `chrome.runtime`.
 
 The blob protocol (`blob-protocol.ts`) defines the message types exchanged between worlds.

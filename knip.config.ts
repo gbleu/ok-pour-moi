@@ -4,7 +4,7 @@ export default {
   entry: [
     "src/background/service-worker.ts",
     "src/content/content.ts",
-    "src/content/main-world.ts",
+    "src/content/main-world-entry.ts",
     "src/options/options.ts",
     "src/popup/popup.ts",
     "scripts/*.ts",
