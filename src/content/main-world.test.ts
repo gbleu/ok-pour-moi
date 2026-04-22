@@ -1,12 +1,13 @@
 /// <reference lib="dom" />
 /* eslint-disable unicorn/no-null, unicorn/prefer-global-this, promise/avoid-new -- DOM test fixtures with window API */
-import { afterEach, beforeAll, describe, expect, test } from "vite-plus/test";
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plus/test";
 
 import {
   type BlobCapturedMessage,
   type BlobRequestMessage,
   type BlobResultMessage,
 } from "./blob-protocol.js";
+import { installMainWorld } from "./main-world.js";
 
 type PostedMessage = BlobCapturedMessage | BlobResultMessage;
 
@@ -40,7 +41,9 @@ function collectMessages(): { messages: PostedMessage[]; cleanup: () => void } {
 
 function sendBlobRequest(id: string, url: string): void {
   const data: BlobRequestMessage = { id, type: "OPM_GET_BLOB", url };
-  window.dispatchEvent(new MessageEvent("message", { data, source: window }));
+  window.dispatchEvent(
+    new MessageEvent("message", { data, origin: window.location.origin, source: window }),
+  );
 }
 
 function waitForBlobResult(): Promise<BlobResultMessage> {
@@ -63,9 +66,14 @@ async function flush(): Promise<void> {
 
 describe("main-world", () => {
   let cleanupMessages: (() => void) | undefined;
+  let uninstall: (() => void) | undefined;
 
-  beforeAll(async () => {
-    await import("./main-world.js");
+  beforeAll(() => {
+    uninstall = installMainWorld();
+  });
+
+  afterAll(() => {
+    uninstall?.();
   });
 
   afterEach(() => {

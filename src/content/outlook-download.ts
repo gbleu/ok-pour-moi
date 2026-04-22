@@ -9,20 +9,24 @@ import {
 } from "./outlook-automation.js";
 
 function isBlobCaptured(data: unknown): data is BlobCapturedMessage {
-  return (
-    typeof data === "object" && data !== null && "type" in data && data.type === "OPM_BLOB_CAPTURED"
-  );
+  if (typeof data !== "object" || data === null || !("type" in data)) {
+    return false;
+  }
+  const record = data as Readonly<Record<string, unknown>>;
+  return record.type === "OPM_BLOB_CAPTURED" && typeof record.url === "string";
 }
 
 function isBlobResult(data: unknown, id: string): data is BlobResultMessage {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "type" in data &&
-    data.type === "OPM_BLOB_RESULT" &&
-    "id" in data &&
-    data.id === id
-  );
+  if (typeof data !== "object" || data === null || !("type" in data)) {
+    return false;
+  }
+  const record = data as Readonly<Record<string, unknown>>;
+  if (record.type !== "OPM_BLOB_RESULT" || record.id !== id) {
+    return false;
+  }
+  const hasData = "data" in record && record.data instanceof Uint8Array;
+  const hasError = "error" in record && typeof record.error === "string";
+  return hasData || hasError;
 }
 
 function waitForWindowMessage<TMessage>(
@@ -80,25 +84,29 @@ async function waitUntilAttachmentReady(maxAttempts = 20): Promise<void> {
   throw new Error("Attachment ID not found in URL");
 }
 
+async function captureAndFetchPdf(trigger: () => void | Promise<void>): Promise<Uint8Array> {
+  // Subscribe before triggering so the OPM_BLOB_CAPTURED message cannot race past us
+  const capturePromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
+  await trigger();
+  const { url } = await capturePromise;
+  return getBlobFromMainWorld(url);
+}
+
 export async function downloadAttachment(option: Element): Promise<Uint8Array> {
   simulateClick(option);
   await waitUntilAttachmentReady();
 
-  // Subscribe before triggering download to avoid missing the OPM_BLOB_CAPTURED message
-  const blobPromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
-
-  await sleep(TIMING.UI_SETTLE);
-  const downloadBtn = await waitForElement('[role="menuitem"]', {
-    match: (el) => {
-      const text = (el.textContent ?? "").toLowerCase();
-      return text.includes("download") || text.includes("télécharger");
-    },
-    timeout: 3000,
+  const pdfBytes = await captureAndFetchPdf(async () => {
+    await sleep(TIMING.UI_SETTLE);
+    const downloadBtn = await waitForElement('[role="menuitem"]', {
+      match: (el) => {
+        const text = (el.textContent ?? "").toLowerCase();
+        return text.includes("download") || text.includes("télécharger");
+      },
+      timeout: 3000,
+    });
+    simulateClick(downloadBtn);
   });
-  simulateClick(downloadBtn);
-
-  const { url } = await blobPromise;
-  const pdfBytes = await getBlobFromMainWorld(url);
 
   simulateKeyPress("Escape");
   await sleep(TIMING.MENU_ANIMATION);

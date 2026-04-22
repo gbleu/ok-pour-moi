@@ -32,7 +32,7 @@
         "https://outlook.office.com/mail/*",
         "https://outlook.live.com/mail/*"
       ],
-      "js": ["content/main-world.js"],
+      "js": ["content/main-world-entry.js"],
       "run_at": "document_start",
       "world": "MAIN"
     },

@@ -12,13 +12,9 @@ import { getSyncStorage } from "#shared/storage.js";
 import { type SignedPdfItem, prepareDrafts } from "./outlook-compose.js";
 import { collectPdfAttachments } from "./outlook-dom.js";
 
-function signPdf(
-  pdfBytes: Uint8Array,
-  originalFilename: string,
-  senderLastname: string,
-): Promise<SignPdfResponse> {
+function requestSignPdf(pdfBytes: Uint8Array, senderLastname: string): Promise<SignPdfResponse> {
   return chrome.runtime.sendMessage<ContentToBackgroundMessage, SignPdfResponse>({
-    payload: { originalFilename, pdfBytes: [...pdfBytes], senderLastname },
+    payload: { pdfBytes: [...pdfBytes], senderLastname },
     type: "SIGN_PDF",
   });
 }
@@ -28,16 +24,12 @@ async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
     const attachments = await collectPdfAttachments(config.myEmail);
 
     if (attachments.length === 0) {
-      return { message: "No PDFs found in current conversation", success: true };
+      return { kind: "processed", success: true, successCount: 0, totalCount: 0 };
     }
 
     const items: SignedPdfItem[] = await Promise.all(
       attachments.map(async (attachment) => {
-        const response = await signPdf(
-          attachment.pdfBytes,
-          attachment.originalFilename,
-          attachment.senderLastname,
-        );
+        const response = await requestSignPdf(attachment.pdfBytes, attachment.senderLastname);
 
         if (!response.success) {
           throw new Error(`Signing failed: ${response.error}`);
@@ -46,10 +38,7 @@ async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
         return {
           conversationId: attachment.conversationId,
           filename: response.filename,
-          senderEmail: attachment.senderEmail,
-          senderLastname: attachment.senderLastname,
           signedPdf: new Uint8Array(response.signedPdf),
-          subject: attachment.subject,
         };
       }),
     );
@@ -58,18 +47,23 @@ async function signAndDraft(config: WorkflowConfig): Promise<WorkflowResult> {
 
     if (errors.length > 0) {
       return {
-        message: `${successCount}/${items.length} drafts. Failures: ${errors.join("; ")}`,
+        draftErrors: errors,
+        kind: "partial-failure",
         success: false,
+        successCount,
+        totalCount: items.length,
       };
     }
 
     return {
-      message: `Processed ${successCount}/${items.length} emails`,
+      kind: "processed",
       success: true,
+      successCount,
+      totalCount: items.length,
     };
   } catch (error) {
     console.error("[OPM] Workflow error:", error);
-    return { message: getErrorMessage(error), success: false };
+    return { error: getErrorMessage(error), kind: "workflow-error", success: false };
   }
 }
 
@@ -107,7 +101,7 @@ chrome.runtime.onMessage.addListener(
     signAndDraft(message.config)
       .then(sendResponse)
       .catch((error: unknown) => {
-        sendResponse({ message: getErrorMessage(error), success: false });
+        sendResponse({ error: getErrorMessage(error), kind: "workflow-error", success: false });
       });
     return true;
   },
