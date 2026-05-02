@@ -117,7 +117,7 @@ afterAll(() => {
 
 describe("service-worker onMessage handler", () => {
   const validMessage: ContentToBackgroundMessage = {
-    payload: { originalFilename: "doc.pdf", pdfBytes: [1, 2, 3], senderLastname: "DUPONT" },
+    payload: { pdfBytes: [1, 2, 3], senderLastname: "DUPONT" },
     type: "SIGN_PDF",
   };
 
@@ -221,8 +221,10 @@ describe("content.ts onMessage handler", () => {
     expect(keepOpen).toBe(true);
 
     expect(await promise).toEqual({
-      message: "No PDFs found in current conversation",
+      kind: "processed",
       success: true,
+      successCount: 0,
+      totalCount: 0,
     });
   });
 });

@@ -11,7 +11,7 @@ const ENTRIES = [
   "popup/popup",
   "options/options",
   "content/content",
-  "content/main-world",
+  "content/main-world-entry",
   "background/service-worker",
 ] as const;
 

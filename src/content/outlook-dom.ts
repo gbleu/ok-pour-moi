@@ -9,45 +9,30 @@ import { downloadAttachment } from "./outlook-download.js";
 
 export interface PdfAttachment {
   readonly conversationId: string;
-  readonly originalFilename: string;
   readonly pdfBytes: Uint8Array;
-  readonly senderEmail: string;
   readonly senderLastname: string;
-  readonly subject: string;
 }
 
-function findConversationContext(): { conversationId: string; subject: string } | undefined {
+function findConversationId(): string | undefined {
   const readingPane = document.querySelector('[role="main"]');
   if (!readingPane) {
     return undefined;
   }
 
-  const subjectEl = readingPane.querySelector('[role="heading"][aria-level="2"]');
-  const subject = (subjectEl?.textContent ?? "Unknown")
-    .trim()
-    .replace(/Summarize$/, "")
-    .trim();
-
   const selectedEmail = document.querySelector<HTMLElement>(
     '[data-convid][aria-selected="true"], [data-convid]:focus',
   );
   const conversationId = selectedEmail?.dataset.convid ?? "";
-  if (conversationId === "") {
-    return undefined;
-  }
-
-  return { conversationId, subject };
+  return conversationId === "" ? undefined : conversationId;
 }
 
 // Returns [] when no PDF is found (missing DOM state). Throws on expand or download failure.
 // Currently returns at most one attachment but the array contract allows future extension.
 export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachment[]> {
-  const context = findConversationContext();
-  if (!context) {
+  const conversationId = findConversationId();
+  if (conversationId === undefined) {
     return [];
   }
-
-  const { subject, conversationId } = context;
 
   await expandThread();
 
@@ -68,18 +53,13 @@ export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachm
     return [];
   }
 
-  const originalFilename = /^(.+\.pdf)/i.exec(firstPdf.textContent ?? "")?.[1] ?? "attachment.pdf";
-
   const pdfBytes = await downloadAttachment(firstPdf);
 
   return [
     {
       conversationId,
-      originalFilename,
       pdfBytes,
-      senderEmail: message.senderEmail,
       senderLastname: message.senderLastname,
-      subject,
     },
   ];
 }

@@ -15,6 +15,22 @@ function showStatus(type: "error" | "info" | "ready" | "warning", message: strin
   status.className = `status ${type}`;
 }
 
+function formatWorkflowResult(result: WorkflowResult): string {
+  if (result.kind === "workflow-error") {
+    return result.error;
+  }
+  if (result.totalCount === 0) {
+    return "No PDFs found in current conversation";
+  }
+  if (result.kind === "partial-failure") {
+    const failures = result.draftErrors
+      .map(({ index, message }) => `[${index}] ${message}`)
+      .join("; ");
+    return `${result.successCount}/${result.totalCount} drafts. Failures: ${failures}`;
+  }
+  return `Processed ${result.successCount}/${result.totalCount} emails`;
+}
+
 function setProgress(show: boolean, value = 0, text = ""): void {
   const progress = getElement<HTMLDivElement>("progress");
   progress.classList.toggle("hidden", !show);
@@ -115,11 +131,8 @@ export async function dispatchWorkflow(): Promise<void> {
 
     setProgress(false);
 
-    if (result.success) {
-      showStatus("ready", result.message);
-    } else {
-      showStatus("error", result.message);
-    }
+    const message = formatWorkflowResult(result);
+    showStatus(result.success ? "ready" : "error", message);
   } catch (error) {
     setProgress(false);
     const message = getErrorMessage(error);
