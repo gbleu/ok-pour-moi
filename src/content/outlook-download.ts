@@ -87,7 +87,15 @@ async function waitUntilAttachmentReady(maxAttempts = 20): Promise<void> {
 async function captureAndFetchPdf(trigger: () => void | Promise<void>): Promise<Uint8Array> {
   // Subscribe before triggering so the OPM_BLOB_CAPTURED message cannot race past us
   const capturePromise = waitForWindowMessage<BlobCapturedMessage>(isBlobCaptured, 10_000);
-  await trigger();
+  try {
+    await trigger();
+  } catch (error) {
+    capturePromise.catch(() => {
+      // Swallow potential timeout/unhandled rejection if trigger fails early.
+    });
+    throw error;
+  }
+
   const { url } = await capturePromise;
   return getBlobFromMainWorld(url);
 }
