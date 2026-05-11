@@ -35,11 +35,11 @@ importers:
         specifier: 4.0.9
         version: 4.0.9
       knip:
-        specifier: 6.11.0
-        version: 6.11.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+        specifier: 6.12.1
+        version: 6.12.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
       vite-plus:
         specifier: 0.1.20
-        version: 0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.6.1)(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))(yaml@2.8.4)
+        version: 0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.7.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
 
 packages:
 
@@ -1258,8 +1258,8 @@ packages:
     resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
     engines: {node: '>=8'}
 
-  jiti@2.6.1:
-    resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
+  jiti@2.7.0:
+    resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
 
   js-stringify@1.0.2:
@@ -1281,8 +1281,8 @@ packages:
   jstransformer@1.0.0:
     resolution: {integrity: sha512-C9YK3Rf8q6VAPDCCU9fnqo3mAfOH6vUGnMcP4AQAYIEpWtfGLpwOTmZ+igtdK5y+VvI2n3CyYSzy4Qh34eq24A==}
 
-  knip@6.11.0:
-    resolution: {integrity: sha512-84PTlN8Q5smLpTbzs8smTVh8PMbTDXtw0tFksXq/m6auGFC/KSzJykKFmnYh3As38kiWDkoDBvdTTyKk5M1TAQ==}
+  knip@6.12.1:
+    resolution: {integrity: sha512-9JRZB1mENe8xNMpP4jJRiFXkRVBHTWzD7YtiLywkO7aKXCefbvI+hA0YDl7H7dPvJt7gcVolgxKgABJQ31NL3w==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -1818,8 +1818,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  yaml@2.8.4:
-    resolution: {integrity: sha512-ml/JPOj9fOQK8RNnWojA67GbZ0ApXAUlN2UQclwv2eVgTgn7O9gg9o7paZWKMp4g0H3nTLtS9LVzhkpOFIKzog==}
+  yaml@2.9.0:
+    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
     engines: {node: '>= 14.6'}
     hasBin: true
 
@@ -2330,7 +2330,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.1.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.5(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))
+      vitest: 4.1.5(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))
 
   '@vitest/expect@4.1.5':
     dependencies:
@@ -2341,13 +2341,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.5(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))':
+  '@vitest/mocker@4.1.5(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.5
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)
+      vite: 8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.5':
     dependencies:
@@ -2373,7 +2373,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@voidzero-dev/vite-plus-core@0.1.20(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)':
+  '@voidzero-dev/vite-plus-core@0.1.20(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)':
     dependencies:
       '@oxc-project/runtime': 0.127.0
       '@oxc-project/types': 0.127.0
@@ -2382,8 +2382,8 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.6.2
       fsevents: 2.3.3
-      jiti: 2.6.1
-      yaml: 2.8.4
+      jiti: 2.7.0
+      yaml: 2.9.0
 
   '@voidzero-dev/vite-plus-darwin-arm64@0.1.20':
     optional: true
@@ -2403,11 +2403,11 @@ snapshots:
   '@voidzero-dev/vite-plus-linux-x64-musl@0.1.20':
     optional: true
 
-  '@voidzero-dev/vite-plus-test@0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.6.1)(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))(yaml@2.8.4)':
+  '@voidzero-dev/vite-plus-test@0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.7.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@types/chai': 5.2.3
-      '@voidzero-dev/vite-plus-core': 0.1.20(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)
+      '@voidzero-dev/vite-plus-core': 0.1.20(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)
       es-module-lexer: 1.7.0
       obug: 2.1.1
       pixelmatch: 7.2.0
@@ -2417,7 +2417,7 @@ snapshots:
       tinybench: 2.9.0
       tinyexec: 1.1.2
       tinyglobby: 0.2.16
-      vite: 8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)
+      vite: 8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)
       ws: 8.20.0
     optionalDependencies:
       '@types/node': 25.6.2
@@ -2721,7 +2721,7 @@ snapshots:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
 
-  jiti@2.6.1: {}
+  jiti@2.7.0: {}
 
   js-stringify@1.0.2: {}
 
@@ -2756,12 +2756,12 @@ snapshots:
       is-promise: 2.2.2
       promise: 7.3.1
 
-  knip@6.11.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0):
+  knip@6.12.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0):
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
       formatly: 0.3.0
       get-tsconfig: 4.14.0
-      jiti: 2.6.1
+      jiti: 2.7.0
       minimist: 1.2.8
       oxc-parser: 0.128.0
       oxc-resolver: 11.19.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
@@ -2770,7 +2770,7 @@ snapshots:
       strip-json-comments: 5.0.3
       tinyglobby: 0.2.16
       unbash: 3.0.0
-      yaml: 2.8.4
+      yaml: 2.9.0
       zod: 4.4.3
     transitivePeerDependencies:
       - '@emnapi/core'
@@ -3235,11 +3235,11 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  vite-plus@0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.6.1)(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))(yaml@2.8.4):
+  vite-plus@0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.7.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0):
     dependencies:
       '@oxc-project/types': 0.127.0
-      '@voidzero-dev/vite-plus-core': 0.1.20(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)
-      '@voidzero-dev/vite-plus-test': 0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.6.1)(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))(yaml@2.8.4)
+      '@voidzero-dev/vite-plus-core': 0.1.20(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)
+      '@voidzero-dev/vite-plus-test': 0.1.20(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(jiti@2.7.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))(yaml@2.9.0)
       oxfmt: 0.46.0
       oxlint: 1.61.0(oxlint-tsgolint@0.22.0)
       oxlint-tsgolint: 0.22.0
@@ -3282,7 +3282,7 @@ snapshots:
       - vite
       - yaml
 
-  vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4):
+  vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -3292,13 +3292,13 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.6.2
       fsevents: 2.3.3
-      jiti: 2.6.1
-      yaml: 2.8.4
+      jiti: 2.7.0
+      yaml: 2.9.0
 
-  vitest@4.1.5(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)):
+  vitest@4.1.5(@types/node@25.6.2)(@vitest/coverage-v8@4.1.5)(happy-dom@20.9.0)(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.5
-      '@vitest/mocker': 4.1.5(vite@8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4))
+      '@vitest/mocker': 4.1.5(vite@8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.5
       '@vitest/runner': 4.1.5
       '@vitest/snapshot': 4.1.5
@@ -3315,7 +3315,7 @@ snapshots:
       tinyexec: 1.1.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
-      vite: 8.0.8(@types/node@25.6.2)(jiti@2.6.1)(yaml@2.8.4)
+      vite: 8.0.8(@types/node@25.6.2)(jiti@2.7.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.6.2
@@ -3350,6 +3350,6 @@ snapshots:
 
   ws@8.20.0: {}
 
-  yaml@2.8.4: {}
+  yaml@2.9.0: {}
 
   zod@4.4.3: {}
