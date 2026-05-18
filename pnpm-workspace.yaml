@@ -1,11 +1,4 @@
-# pnpm v11 settings — https://pnpm.io/settings
-# (pnpm v11 ignores the `pnpm.*` field in package.json.)
-
-overrides:
-  vite: npm:@voidzero-dev/vite-plus-core@0.1.20
-  vitest: npm:@voidzero-dev/vite-plus-test@0.1.20
-
-# Supply chain security — https://pnpm.io/supply-chain-security
+# pnpm supply chain security — https://pnpm.io/supply-chain-security
 # Aligned with .github/dependabot.yml `cooldown.default-days: 3`.
 
 # Refuse to install package versions younger than 3 days (4320 minutes).
