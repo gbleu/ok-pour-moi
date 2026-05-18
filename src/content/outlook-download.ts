@@ -72,7 +72,7 @@ async function getBlobFromMainWorld(blobUrl: string): Promise<Uint8Array> {
 
 async function waitUntilAttachmentReady(maxAttempts = 20): Promise<void> {
   for (let idx = 0; idx < maxAttempts; idx += 1) {
-    if (/\/sxs\/[^/]+$/.test(window.location.pathname)) {
+    if (/\/sxs\/[^/]+$/u.test(window.location.pathname)) {
       return;
     }
     await sleep(100);

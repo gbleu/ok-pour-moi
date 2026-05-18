@@ -14,7 +14,7 @@ test.describe("Extension Loading", () => {
       .serviceWorkers()
       .find((sw: Readonly<{ url: () => string }>) => sw.url().includes("service-worker"));
     expect(worker).toBeDefined();
-    expect(worker?.url()).toMatch(/chrome-extension:\/\/[^/]+\/background\/service-worker\.js/);
+    expect(worker?.url()).toMatch(/chrome-extension:\/\/[^/]+\/background\/service-worker\.js/u);
   });
 
   test("popup renders initial state", async ({

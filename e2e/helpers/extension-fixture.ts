@@ -45,7 +45,7 @@ export default base.extend<ExtensionTestFixtures, ExtensionWorkerFixtures>({
         .serviceWorkers()
         .find((sw: Readonly<{ url: () => string }>) => sw.url().includes("service-worker"));
       const url = worker?.url() ?? "";
-      const [, id = ""] = /chrome-extension:\/\/([^/]+)/.exec(url) ?? [];
+      const [, id = ""] = /chrome-extension:\/\/([^/]+)/u.exec(url) ?? [];
       await use(id);
     },
     { scope: "worker" },

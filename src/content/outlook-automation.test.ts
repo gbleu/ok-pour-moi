@@ -27,7 +27,7 @@ describe("findByRole", () => {
       <button role="tab" aria-label="Home Tab">Home</button>
       <button role="tab" aria-label="Settings Tab">Settings</button>`;
 
-    expect(findByRole("tab", { name: /settings/i })?.textContent).toBe("Settings");
+    expect(findByRole("tab", { name: /settings/iu })?.textContent).toBe("Settings");
   });
 
   test("returns undefined when no match", () => {
@@ -66,7 +66,7 @@ describe("findButtonByName", () => {
 
   test("finds button by regex", () => {
     document.body.innerHTML = `<button>Reply All</button>`;
-    expect(findButtonByName(/reply/i)).toBeDefined();
+    expect(findButtonByName(/reply/iu)).toBeDefined();
   });
 
   test("returns undefined when no match", () => {

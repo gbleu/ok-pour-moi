@@ -150,7 +150,7 @@ describe("main-world", () => {
       const url = URL.createObjectURL(pdfBlob);
 
       // Then
-      expect(url).toMatch(/^blob:/);
+      expect(url).toMatch(/^blob:/u);
     });
   });
 
