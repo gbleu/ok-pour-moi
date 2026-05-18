@@ -61,7 +61,7 @@ const EXTENSION_FORMAT_MAP: Record<string, SignatureFormat> = {
 };
 
 export function getSignatureFormat(filename: string): SignatureFormat {
-  const ext = /\.\w+$/.exec(filename.toLowerCase())?.[0] ?? "";
+  const ext = /\.\w+$/u.exec(filename.toLowerCase())?.[0] ?? "";
   const format = EXTENSION_FORMAT_MAP[ext];
   if (format === undefined) {
     throw new Error(

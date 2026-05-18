@@ -18,7 +18,7 @@ describe("source HTML", () => {
     for (const { html, ts } of pages) {
       const htmlContent = await readFile(`${SRC_DIR}/${html}`, "utf8");
       const tsContent = await readFile(`${SRC_DIR}/${ts}`, "utf8");
-      const hasExport = /^export /m.test(tsContent);
+      const hasExport = /^export /mu.test(tsContent);
 
       if (hasExport) {
         expect(htmlContent).toContain('type="module"');

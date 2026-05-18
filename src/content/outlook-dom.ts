@@ -25,7 +25,7 @@ function findConversationContext(): { conversationId: string; subject: string } 
   const subjectEl = readingPane.querySelector('[role="heading"][aria-level="2"]');
   const subject = (subjectEl?.textContent ?? "Unknown")
     .trim()
-    .replace(/Summarize$/, "")
+    .replace(/Summarize$/u, "")
     .trim();
 
   const selectedEmail = document.querySelector<HTMLElement>(
@@ -68,7 +68,7 @@ export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachm
     return [];
   }
 
-  const originalFilename = /^(.+\.pdf)/i.exec(firstPdf.textContent ?? "")?.[1] ?? "attachment.pdf";
+  const originalFilename = /^(.+\.pdf)/iu.exec(firstPdf.textContent ?? "")?.[1] ?? "attachment.pdf";
 
   const pdfBytes = await downloadAttachment(firstPdf);
 

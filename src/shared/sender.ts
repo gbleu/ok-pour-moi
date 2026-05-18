@@ -1,9 +1,9 @@
 export function extractLastname(fromText: string): string {
   const name = fromText
-    .replace(/^From:\s*/i, "")
-    .replace(/<[^>]+>\s*$/, "")
+    .replace(/^From:\s*/iu, "")
+    .replace(/<[^>]+>\s*$/u, "")
     .trim();
-  const parts = name.split(/\s+/).filter(Boolean);
+  const parts = name.split(/\s+/u).filter(Boolean);
 
   if (parts.length === 0) {
     return "";
@@ -28,10 +28,10 @@ export function extractLastname(fromText: string): string {
 }
 
 export function extractEmail(fromText: string): string {
-  const angleMatch = /<([^>]+@[^>]+)>/.exec(fromText);
+  const angleMatch = /<([^>]+@[^>]+)>/u.exec(fromText);
   if (angleMatch?.[1] !== undefined) {
     return angleMatch[1];
   }
-  const emailMatch = /[\w.+-]+@[\w.-]+\.\w+/.exec(fromText);
+  const emailMatch = /[\w.+-]+@[\w.-]+\.\w+/u.exec(fromText);
   return emailMatch?.[0] ?? "";
 }
