@@ -1,4 +1,11 @@
-# pnpm supply chain security settings — https://pnpm.io/supply-chain-security
+# pnpm v11 settings — https://pnpm.io/settings
+# (pnpm v11 ignores the `pnpm.*` field in package.json.)
+
+overrides:
+  vite: npm:@voidzero-dev/vite-plus-core@0.1.18
+  vitest: npm:@voidzero-dev/vite-plus-test@0.1.18
+
+# Supply chain security — https://pnpm.io/supply-chain-security
 # Aligned with .github/dependabot.yml `cooldown.default-days: 3`.
 
 # Refuse to install package versions younger than 3 days (4320 minutes).
@@ -13,3 +20,7 @@ blockExoticSubdeps: true
 # Refuse packages whose npm trust level (provenance, 2FA, etc.) has been
 # downgraded compared to a previously installed version.
 trustPolicy: no-downgrade
+
+# v11+: fail resolution when a package's registry metadata is missing the
+# `time` field, instead of silently bypassing the minimumReleaseAge check.
+minimumReleaseAgeIgnoreMissingTime: false
