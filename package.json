@@ -15,7 +15,7 @@
     "pdf-lib": "1.17.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.59.1",
+    "@playwright/test": "1.60.0",
     "@types/chrome": "0.1.42",
     "@types/node": "^25.8.0",
     "@vitest/coverage-v8": "4.1.5",
