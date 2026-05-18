@@ -39,6 +39,8 @@ export default defineConfig({
         env: { browser: true, node: true },
         rules: {
           "import/no-nodejs-modules": "off",
+          // Off because tsgolint's `allow` matcher does not honor any form for Playwright types (declared in playwright-core, re-exported via `export *`); disabling here beats carrying broken allow entries.
+          "typescript/prefer-readonly-parameter-types": "off",
         },
       },
       {
@@ -116,11 +118,6 @@ export default defineConfig({
             { from: "lib", name: "Date" },
             { from: "lib", name: "Uint8Array" },
             { from: "lib", name: "Record" },
-            { from: "package", name: "Page", package: "@playwright/test" },
-            { from: "package", name: "BrowserContext", package: "@playwright/test" },
-            { from: "package", name: "Worker", package: "@playwright/test" },
-            { from: "package", name: "Route", package: "@playwright/test" },
-            { from: "package", name: "ConsoleMessage", package: "@playwright/test" },
             { from: "package", name: "MessageSender", package: "@types/chrome" },
           ],
           ignoreInferredTypes: true,
