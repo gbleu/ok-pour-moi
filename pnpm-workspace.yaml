@@ -1,0 +1,19 @@
+# pnpm supply chain security — https://pnpm.io/supply-chain-security
+# Aligned with .github/dependabot.yml `cooldown.default-days: 3`.
+
+# Refuse to install package versions younger than 3 days (4320 minutes).
+# Matches Dependabot's 3-day cooldown so local `vp install` is gated the same way.
+minimumReleaseAge: 4320
+
+# Block transitive deps from resolving to git repos or arbitrary tarball URLs.
+# Default became `true` in pnpm 10.26; set explicitly so the guarantee survives
+# any future default change.
+blockExoticSubdeps: true
+
+# Refuse packages whose npm trust level (provenance, 2FA, etc.) has been
+# downgraded compared to a previously installed version.
+trustPolicy: no-downgrade
+
+# v11+: fail resolution when a package's registry metadata is missing the
+# `time` field, instead of silently bypassing the minimumReleaseAge check.
+minimumReleaseAgeIgnoreMissingTime: false
