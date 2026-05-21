@@ -49,7 +49,7 @@ jobs:
       - run: vp install
       - run: vp test run --coverage --reporter=junit --outputFile=./junit.xml
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
@@ -57,7 +57,7 @@ jobs:
           report_type: coverage
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./junit.xml
@@ -84,7 +84,7 @@ jobs:
       - run: vp run test:e2e
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./playwright-results.xml
