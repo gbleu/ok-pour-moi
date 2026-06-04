@@ -1,9 +1,9 @@
-import { join } from "node:path";
+import path from "node:path";
 
 import { type Page, expect, test } from "@playwright/test";
 
-const FIXTURES_DIR = join(import.meta.dirname, "../fixtures");
-const FIXTURE_PATH = join(FIXTURES_DIR, "outlook-message.html");
+const FIXTURES_DIR = path.join(import.meta.dirname, "../fixtures");
+const FIXTURE_PATH = path.join(FIXTURES_DIR, "outlook-message.html");
 
 // DOM query smoke tests against HTML fixtures. Algorithm logic is tested in outlook-actions.test.ts.
 test.describe("Content Script DOM Queries", () => {
@@ -105,7 +105,7 @@ test.describe("Content Script DOM Queries", () => {
     page,
   }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with only own messages
-    await page.goto(`file://${join(FIXTURES_DIR, "outlook-only-own-messages.html")}`);
+    await page.goto(`file://${path.join(FIXTURES_DIR, "outlook-only-own-messages.html")}`);
 
     // When: searching for last message from others
     const result = await page.evaluate(() => {
@@ -139,7 +139,7 @@ test.describe("Content Script DOM Queries", () => {
     page,
   }: Readonly<{ page: Readonly<Page> }>) => {
     // Given: page with no heading element
-    await page.goto(`file://${join(FIXTURES_DIR, "outlook-no-subject.html")}`);
+    await page.goto(`file://${path.join(FIXTURES_DIR, "outlook-no-subject.html")}`);
 
     // When
     const heading = await page.locator('[role="main"] [role="heading"][aria-level="2"]').count();

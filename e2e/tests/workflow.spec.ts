@@ -1,10 +1,10 @@
-import { join } from "node:path";
+import path from "node:path";
 
 import { type Page, expect, test } from "@playwright/test";
 
-const FIXTURES = join(import.meta.dirname, "../fixtures");
-const INBOX_FIXTURE = join(FIXTURES, "outlook-inbox.html");
-const MESSAGE_FIXTURE = join(FIXTURES, "outlook-message.html");
+const FIXTURES = path.join(import.meta.dirname, "../fixtures");
+const INBOX_FIXTURE = path.join(FIXTURES, "outlook-inbox.html");
+const MESSAGE_FIXTURE = path.join(FIXTURES, "outlook-message.html");
 
 test.describe("Workflow DOM Interactions", () => {
   test("inbox fixture has conversations with subject", async ({
