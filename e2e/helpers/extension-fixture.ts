@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 
 import { type BrowserContext, type Page, test as base } from "@playwright/test";
 
 import { createExtensionContext } from "./extension-context.js";
 
-const FIXTURES_DIR = join(import.meta.dirname, "../fixtures");
+const FIXTURES_DIR = path.join(import.meta.dirname, "../fixtures");
 
 interface ExtensionWorkerFixtures {
   extensionContext: BrowserContext;
@@ -85,7 +85,7 @@ export default base.extend<ExtensionTestFixtures, ExtensionWorkerFixtures>({
     use,
   ) => {
     await use(async (fixtureName: string) => {
-      const fixturePath = join(FIXTURES_DIR, fixtureName);
+      const fixturePath = path.join(FIXTURES_DIR, fixtureName);
       const html = await readFile(fixturePath, "utf8");
       const page = await extensionContext.newPage();
 

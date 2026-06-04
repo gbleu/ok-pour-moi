@@ -8,6 +8,7 @@ import {
   removeAllAttachments,
   saveDraft,
 } from "./outlook-compose-actions.js";
+
 export interface SignedPdfItem {
   readonly conversationId: string;
   readonly filename: string;
