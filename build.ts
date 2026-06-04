@@ -1,6 +1,6 @@
 import { cpSync, existsSync } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
-import { join } from "node:path";
+import path from "node:path";
 
 import { build } from "vite-plus";
 
@@ -27,7 +27,7 @@ async function buildEntry(entry: string): Promise<void> {
       target: "esnext",
       modulePreload: false,
       lib: {
-        entry: join(SRC_DIR, `${entry}.ts`),
+        entry: path.join(SRC_DIR, `${entry}.ts`),
         formats: ["es"],
         fileName: () => `${entry}.js`,
       },
@@ -42,11 +42,11 @@ async function buildEntry(entry: string): Promise<void> {
 }
 
 async function copyStatic(): Promise<void> {
-  cpSync("manifest.json", join(DIST_DIR, "manifest.json"));
-  cpSync(join(SRC_DIR, "popup/popup.html"), join(DIST_DIR, "popup/popup.html"));
-  cpSync(join(SRC_DIR, "options/options.html"), join(DIST_DIR, "options/options.html"));
+  cpSync("manifest.json", path.join(DIST_DIR, "manifest.json"));
+  cpSync(path.join(SRC_DIR, "popup/popup.html"), path.join(DIST_DIR, "popup/popup.html"));
+  cpSync(path.join(SRC_DIR, "options/options.html"), path.join(DIST_DIR, "options/options.html"));
   if (existsSync("icons")) {
-    cpSync("icons", join(DIST_DIR, "icons"), { recursive: true });
+    cpSync("icons", path.join(DIST_DIR, "icons"), { recursive: true });
   }
 }
 

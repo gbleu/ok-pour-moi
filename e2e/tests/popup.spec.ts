@@ -1,8 +1,8 @@
-import { join } from "node:path";
+import path from "node:path";
 
 import { type Page, expect, test } from "@playwright/test";
 
-const POPUP_PATH = join(import.meta.dirname, "../../dist/popup/popup.html");
+const POPUP_PATH = path.join(import.meta.dirname, "../../dist/popup/popup.html");
 
 test("popup initial state", async ({ page }: Readonly<{ page: Readonly<Page> }>) => {
   // Given

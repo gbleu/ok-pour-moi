@@ -1,12 +1,12 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 
 import { type BrowserContext, type Page, chromium } from "@playwright/test";
 
 import { type MockConfig, createChromeMock } from "#mocks/chrome-api.js";
 
-const PATH_TO_EXTENSION = join(import.meta.dirname, "../../dist");
+const PATH_TO_EXTENSION = path.join(import.meta.dirname, "../../dist");
 
 export async function createExtensionContext(): Promise<{
   close: () => Promise<void>;
@@ -14,7 +14,7 @@ export async function createExtensionContext(): Promise<{
   extensionId: string;
   getPopupPage: () => Promise<Page>;
 }> {
-  const userDataDir = await mkdtemp(join(tmpdir(), "opm-test-"));
+  const userDataDir = await mkdtemp(path.join(tmpdir(), "opm-test-"));
   const context = await chromium.launchPersistentContext(userDataDir, {
     args: [
       `--disable-extensions-except=${PATH_TO_EXTENSION}`,
