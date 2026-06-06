@@ -22,7 +22,7 @@
     "happy-dom": "20.9.0",
     "jscpd": "4.2.4",
     "knip": "6.15.0",
-    "vite-plus": "0.1.23"
+    "vite-plus": "0.1.24"
   },
   "packageManager": "pnpm@11.5.1"
 }
