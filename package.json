@@ -17,7 +17,7 @@
   "devDependencies": {
     "@playwright/test": "1.60.0",
     "@types/chrome": "0.1.43",
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "@vitest/coverage-v8": "4.1.8",
     "happy-dom": "20.10.2",
     "jscpd": "5.0.5",
