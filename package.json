@@ -18,7 +18,7 @@
     "@playwright/test": "1.60.0",
     "@types/chrome": "0.1.43",
     "@types/node": "^25.9.3",
-    "@vitest/coverage-v8": "4.1.8",
+    "@vitest/coverage-v8": "4.1.9",
     "happy-dom": "20.10.3",
     "jscpd": "5.0.9",
     "knip": "6.16.1",
