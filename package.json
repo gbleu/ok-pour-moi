@@ -19,7 +19,7 @@
     "@types/chrome": "0.1.43",
     "@types/node": "^26.0.1",
     "@vitest/coverage-v8": "4.1.9",
-    "happy-dom": "20.10.4",
+    "happy-dom": "20.10.6",
     "jscpd": "5.0.11",
     "knip": "6.21.0",
     "vite-plus": "0.1.24"
