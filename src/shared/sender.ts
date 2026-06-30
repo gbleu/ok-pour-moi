@@ -28,9 +28,9 @@ export function extractLastname(fromText: string): string {
 }
 
 export function extractEmail(fromText: string): string {
-  const angleMatch = /<([^>]+@[^>]+)>/u.exec(fromText);
-  if (angleMatch?.[1] !== undefined) {
-    return angleMatch[1];
+  const angleMatch = /<(?<email>[^>]+@[^>]+)>/u.exec(fromText);
+  if (angleMatch?.groups?.email !== undefined) {
+    return angleMatch.groups.email;
   }
   const emailMatch = /[\w.+-]+@[\w.-]+\.\w+/u.exec(fromText);
   return emailMatch?.[0] ?? "";
