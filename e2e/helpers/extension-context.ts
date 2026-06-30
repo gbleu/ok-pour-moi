@@ -41,7 +41,8 @@ export async function createExtensionContext(): Promise<{
     timeout: 10_000,
   });
 
-  const [, extensionId = ""] = /chrome-extension:\/\/([^/]+)/u.exec(serviceWorker.url()) ?? [];
+  const extensionId =
+    /chrome-extension:\/\/(?<id>[^/]+)/u.exec(serviceWorker.url())?.groups?.id ?? "";
 
   return {
     close: async () => {

@@ -68,7 +68,8 @@ export async function collectPdfAttachments(myEmail: string): Promise<PdfAttachm
     return [];
   }
 
-  const originalFilename = /^(.+\.pdf)/iu.exec(firstPdf.textContent ?? "")?.[1] ?? "attachment.pdf";
+  const originalFilename =
+    /^(?<name>.+\.pdf)/iu.exec(firstPdf.textContent ?? "")?.groups?.name ?? "attachment.pdf";
 
   const pdfBytes = await downloadAttachment(firstPdf);
 
