@@ -21,7 +21,7 @@
     "@vitest/coverage-v8": "4.1.9",
     "happy-dom": "20.10.6",
     "jscpd": "5.0.11",
-    "knip": "6.21.0",
+    "knip": "6.23.0",
     "vite-plus": "0.2.1"
   },
   "packageManager": "pnpm@11.5.2"
